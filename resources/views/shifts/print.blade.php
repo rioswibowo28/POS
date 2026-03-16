@@ -106,8 +106,11 @@
             <div class="value">{{ $shift->shift_date->format('d M Y') }}</div>
         </div>
         <div class="row">
-            <div class="label">Shift Number</div>
-            <div class="value">Shift {{ $shift->shift_number }} ({{ $shift->shift_number == 1 ? '05:00-17:00' : '17:00-05:00' }})</div>
+            <div class="label">Shift</div>
+            <div class="value">
+                {{ $shift->masterShift ? $shift->masterShift->name : 'Shift ' . $shift->shift_number }} 
+                ({{ $shift->masterShift ? substr($shift->masterShift->start_time, 0, 5) . '-' . substr($shift->masterShift->end_time, 0, 5) : ($shift->shift_number == 1 ? '05:00-17:00' : '17:00-05:00') }})
+            </div>
         </div>
         <div class="row">
             <div class="label">Opened By</div>

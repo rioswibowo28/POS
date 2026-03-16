@@ -8,7 +8,7 @@
     <div>
         <div class="flex items-center space-x-3 mb-2">
             <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-semibold">
-                Shift {{ $shift->shift_number }}
+                {{ $shift->masterShift ? $shift->masterShift->name : 'Shift ' . $shift->shift_number }}
             </span>
             @if($shift->status === 'open')
             <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full font-semibold">
@@ -20,7 +20,13 @@
             </span>
             @endif
         </div>
-        <p class="text-gray-600">{{ $shift->shift_number == 1 ? '05:00 - 17:00' : '17:00 - 05:00' }}</p>
+        <p class="text-gray-600">
+            @if($shift->masterShift)
+                {{ substr($shift->masterShift->start_time, 0, 5) }} - {{ substr($shift->masterShift->end_time, 0, 5) }}
+            @else
+                {{ $shift->shift_number == 1 ? '05:00 - 17:00' : '17:00 - 05:00' }}
+            @endif
+        </p>
     </div>
     <div class="flex space-x-3">
         <a href="{{ route('shifts.index') }}" class="group relative inline-flex items-center px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-semibold rounded-xl shadow-lg hover:shadow-gray-300 hover:border-gray-400 transition-all duration-300">

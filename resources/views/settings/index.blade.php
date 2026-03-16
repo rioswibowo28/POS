@@ -125,6 +125,58 @@
                 <!-- Pricing Section -->
                 <div class="border-b border-gray-200 pb-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-sliders-h text-primary-600 mr-2"></i>
+                        Operational Settings
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Shift Management</label>
+                            <label class="flex items-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-primary-300 cursor-pointer transition mb-3">
+                                <input type="checkbox" 
+                                       name="use_shifts" 
+                                       value="1" 
+                                       {{ old('use_shifts', $settings['use_shifts'] ?? '1') == '1' ? 'checked' : '' }} 
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5">
+                                <div class="ml-3">
+                                    <span class="text-sm font-semibold text-gray-900">Use Shift System</span>
+                                    <p class="text-xs text-gray-600 mt-1">If enabled, users must open a shift before making transactions.</p>
+                                </div>
+                            </label>
+
+                            <label class="flex items-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-primary-300 cursor-pointer transition">
+                                <input type="checkbox" 
+                                       name="include_temp_orders_in_shift_close" 
+                                       value="1" 
+                                       {{ old('include_temp_orders_in_shift_close', $settings['include_temp_orders_in_shift_close'] ?? '0') == '1' ? 'checked' : '' }} 
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5">
+                                <div class="ml-3">
+                                    <span class="text-sm font-semibold text-gray-900">Include Temp Orders in Shift Closing</span>
+                                    <p class="text-xs text-gray-600 mt-1">If enabled, shift totals will include flag=1 orders (Temp Orders) paid during the shift.</p>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Access Control</label>
+                            
+                            <label class="flex items-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-primary-300 cursor-pointer transition">
+                                <input type="checkbox" 
+                                       name="cashier_can_access_reports" 
+                                       value="1"
+                                       {{ old('cashier_can_access_reports', $settings['cashier_can_access_reports'] ?? '0') == '1' ? 'checked' : '' }}
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5">
+                                <div class="ml-3">
+                                    <span class="text-sm font-semibold text-gray-900">Cashier Report Access</span>
+                                    <p class="text-xs text-gray-600 mt-1">If enabled, cashiers can access and view reports module.</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing Section -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-percentage text-primary-600 mr-2"></i>
                         Pricing Settings
                     </h3>

@@ -21,8 +21,18 @@ class AdminOrCashierMiddleware
 
         $user = auth()->user();
 
-        if (!$user->isAdmin() && !$user->isCashier()) {
-            abort(403, 'Unauthorized. Admin or Cashier access only.');
+        if (!$user->isAdmin()) {
+            if (!$user->isCashier()) {
+                abort(403, 'Unauthorized. Admin or Cashier access only.');
+            }
+            
+            // Check if route is related to reports
+            if ($request->is('reports') || $request->is('reports/*') || $request->is('dynamic-reports') || $request->is('dynamic-reports/*')) {
+                // If user is cashier but setting is disabled, abort
+                if (!$user->canAccessReports()) {
+                    abort(403, 'Unauthorized. Report access is disabled for cashiers. Please contact administrator.');
+                }
+            }
         }
 
         return $next($request);

@@ -13,6 +13,7 @@ use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\TableController;
 use App\Http\Controllers\Web\SettingController;
 use App\Http\Controllers\Web\ReportController;
+use App\Http\Controllers\Web\DynamicReportController;
 use App\Http\Controllers\Web\MidtransController;
 use App\Http\Controllers\Web\PackageController;
 use App\Http\Controllers\LicenseController;
@@ -85,6 +86,13 @@ Route::middleware(['auth', 'check.license'])->group(function () {
     
     // Categories (Admin Only)
     Route::middleware('admin')->group(function () {
+        Route::get('/master-shifts', [\App\Http\Controllers\Web\MasterShiftController::class, 'index'])->name('master-shifts.index');
+        Route::get('/master-shifts/create', [\App\Http\Controllers\Web\MasterShiftController::class, 'create'])->name('master-shifts.create');
+        Route::post('/master-shifts', [\App\Http\Controllers\Web\MasterShiftController::class, 'store'])->name('master-shifts.store');
+        Route::get('/master-shifts/{masterShift}/edit', [\App\Http\Controllers\Web\MasterShiftController::class, 'edit'])->name('master-shifts.edit');
+        Route::put('/master-shifts/{masterShift}', [\App\Http\Controllers\Web\MasterShiftController::class, 'update'])->name('master-shifts.update');
+        Route::delete('/master-shifts/{masterShift}', [\App\Http\Controllers\Web\MasterShiftController::class, 'destroy'])->name('master-shifts.destroy');
+
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
         Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
         Route::put('/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
@@ -139,6 +147,10 @@ Route::middleware(['auth', 'check.license'])->group(function () {
         Route::get('/reports/tax-sales/export-excel', [ReportController::class, 'taxSalesExportExcel'])->name('reports.tax-sales.export-excel');
         Route::get('/reports/tax-sales/export-pdf', [ReportController::class, 'taxSalesExportPdf'])->name('reports.tax-sales.export-pdf');
         Route::get('/reports/tax-sales/recap-export-pdf', [ReportController::class, 'taxSalesRecapExportPdf'])->name('reports.tax-sales.recap-export-pdf');
+
+        // User Defined Reports (User Defined) - Access controlled in Controller
+        Route::resource('dynamic-reports', DynamicReportController::class);
+        Route::get('dynamic-reports/{dynamic_report}/export/{type}', [DynamicReportController::class, 'export'])->name('dynamic-reports.export');
     });
 
     // Reports Internal Revenue (Admin Only)
@@ -148,11 +160,12 @@ Route::middleware(['auth', 'check.license'])->group(function () {
         Route::get('/reports/internal-revenue/export-excel', [ReportController::class, 'internalRevenueExportExcel'])->name('reports.internal-revenue.export-excel');
         Route::get('/reports/internal-revenue/export-pdf', [ReportController::class, 'internalRevenueExportPdf'])->name('reports.internal-revenue.export-pdf');
     });
-    
+
     // Settings (Admin Only)
     Route::middleware('admin')->group(function () {
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
+
         Route::post('/admin/test-license-connection', [SettingController::class, 'testLicenseConnection'])->name('settings.testLicense');
         Route::post('/admin/settings/remove-logo', [SettingController::class, 'removeLogo'])->name('settings.removeLogo');
         Route::post('/admin/settings/remove-poster', [SettingController::class, 'removePoster'])->name('settings.removePoster');

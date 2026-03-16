@@ -63,18 +63,17 @@
                     
                     <!-- Desktop Toggle Button (when expanded) -->
                     <button @click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('sidebarCollapsed', sidebarCollapsed)" 
-                            class="text-gray-400 hover:text-white transition-colors duration-200 lg:block ml-4"
-                            :class="sidebarCollapsed ? 'hidden' : 'block'"
+                            class="text-gray-400 hover:text-white transition-colors duration-200 ml-4 hidden lg:block"
+                            x-show="!sidebarCollapsed"
                             title="Collapse Sidebar">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
-                
+
                 <!-- Collapsed Toggle Button (when collapsed) -->
-                <button @click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('sidebarCollapsed', sidebarCollapsed)" 
-                        class="w-full justify-center py-3 text-gray-400 hover:text-white hover:bg-gray-700 transition-all duration-200 lg:flex"
-                        :class="sidebarCollapsed ? 'flex' : 'hidden'"
-                        title="Expand Sidebar">
+                <button @click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('sidebarCollapsed', sidebarCollapsed)"
+                        class="w-full justify-center py-3 text-gray-400 hover:text-white hover:bg-gray-700 transition-all duration-200 hidden lg:flex"
+                        x-show="sidebarCollapsed">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
             </div>
@@ -105,17 +104,19 @@
                     <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Orders</span>
                 </a>
                 
+                @if(\App\Models\Setting::get('use_shifts', true))
                 <a href="{{ route('shifts.index') }}" 
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('shifts.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-clock" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
                     <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Shifts</span>
                 </a>
+                @endif
 
-                @if(auth()->user()->isAdmin() || auth()->user()->isCashier())
-                <div x-data="{ reportOpen: {{ request()->routeIs('reports.*') ? 'true' : 'false' }} }">
+                @if(auth()->user()->canAccessReports())
+                <div x-data="{ reportOpen: {{ request()->routeIs('reports.*') || request()->routeIs('dynamic-reports.*') ? 'true' : 'false' }} }">
                     <div @click="reportOpen = !reportOpen"
-                       class="sidebar-item relative flex items-center mb-1 cursor-pointer select-none text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('reports.*') ? 'bg-gray-700 !text-white' : '' }}"
+                       class="sidebar-item relative flex items-center mb-1 cursor-pointer select-none text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('reports.*') || request()->routeIs('dynamic-reports.*') ? 'bg-gray-700 !text-white' : '' }}"
                        :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                         <i class="fas fa-chart-bar" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
                         <span class="ml-3 flex-1 text-left" x-show="!sidebarCollapsed" x-transition>Reports</span>
@@ -138,11 +139,16 @@
                             <i class="fas fa-file-invoice w-4 text-xs mr-2"></i> Penjualan Detail & Rekap
                         </a>
                         @if(auth()->user()->isAdmin())
-                        <a href="{{ route('reports.internal-revenue') }}" 
+                        <a href="{{ route('reports.internal-revenue') }}"
                            class="flex items-center py-2 px-3 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('reports.internal-revenue*') ? 'bg-primary-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white' }}">
                             <i class="fas fa-money-bill-wave w-4 text-xs mr-2"></i> Penjualan ALL
                         </a>
                         @endif
+                        
+                        <a href="{{ route('dynamic-reports.index') }}"
+                           class="flex items-center py-2 px-3 text-sm rounded-lg transition-all duration-200 {{ request()->routeIs('dynamic-reports.*') ? 'bg-primary-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white' }}">
+                            <i class="fas fa-list-alt w-4 text-xs mr-2"></i> User Defined Reports
+                        </a>
                     </div>
                 </div>
                 @endif
@@ -173,12 +179,13 @@
                     <i class="fas fa-table" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
                     <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Tables</span>
                 </a>
-                
-                <a href="{{ route('packages.index') }}" 
-                   class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('packages.*') ? 'bg-primary-600 text-white' : '' }}"
+
+                <a href="{{ route('master-shifts.index') }}"
+                   class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('master-shifts.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
-                    <i class="fas fa-cubes" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Packages</span>
+                    <i class="fas fa-clock" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Master Shifts</span>
+                </a>
                 </a>
                 
                 <div class="my-3" x-show="!sidebarCollapsed" x-transition>

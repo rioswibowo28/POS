@@ -13,15 +13,8 @@
                     <h3 class="font-semibold text-blue-900 mb-2">Membuka Shift Baru</h3>
                     <ul class="text-sm text-blue-800 space-y-1">
                         <li>• Hitung kas di kasir Anda sebelum memulai</li>
-                        <li>• Shift saat ini akan otomatis ditetapkan: <strong>Shift {{ \App\Models\Shift::getShiftNumber() }}</strong></li>
-                        <li>• Jam shift: 
-                            @if(\App\Models\Shift::getShiftNumber() == 1)
-                                05:00 - 17:00
-                            @else
-                                17:00 - 05:00
-                            @endif
-                        </li>
-                        <li>• Semua pesanan tertunda akan dipindahkan ke shift ini</li>
+                        <li>• Pilih sesi Shift berdasarkan jadwal aktual Anda</li>
+                        <li>• Semua pesanan tertunda sebelumnya akan dipindahkan ke shift ini otomatis</li>
                     </ul>
                 </div>
             </div>
@@ -29,7 +22,24 @@
         
         <form action="{{ route('shifts.store') }}" method="POST">
             @csrf
-            
+
+            <div class="mb-6">
+                <label for="master_shift_id" class="block text-sm font-medium text-gray-700 mb-2">
+                    Pilih Shift <span class="text-red-500">*</span>
+                </label>
+                <select name="master_shift_id" id="master_shift_id" class="input @error('master_shift_id') border-red-500 @enderror" required>
+                    <option value="">-- Pilih Shift --</option>
+                    @foreach($masterShifts as $ms)
+                        <option value="{{ $ms->id }}" {{ old('master_shift_id') == $ms->id ? 'selected' : '' }}>
+                            {{ $ms->name }} ({{ substr($ms->start_time, 0, 5) }} - {{ substr($ms->end_time, 0, 5) }})
+                        </option>
+                    @endforeach
+                </select>
+                @error('master_shift_id')
+                <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                @enderror
+            </div>
+
             <div class="mb-6">
                 <label for="opening_cash" class="block text-sm font-medium text-gray-700 mb-2">
                     Kas Awal <span class="text-red-500">*</span>
@@ -81,8 +91,8 @@
                         <span class="font-semibold text-gray-900 ml-2">{{ now()->format('H:i') }}</span>
                     </div>
                     <div>
-                        <span class="text-gray-600">Nomor Shift:</span>
-                        <span class="font-semibold text-gray-900 ml-2">{{ \App\Models\Shift::getShiftNumber() }}</span>
+                        <span class="text-gray-600">Terbuka Saat Ini:</span>
+                        <span class="font-semibold text-gray-900 ml-2">Dipilih Sesuai Input</span>
                     </div>
                 </div>
             </div>

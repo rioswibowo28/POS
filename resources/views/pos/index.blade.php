@@ -29,12 +29,12 @@
             </div>
             
             <div class="w-full">
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-3 max-w-full">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-4 max-w-full">
                     @foreach($tables as $table)
                     <div @click="handleTableClick({{ $table->id }}, '{{ $table->number }}', '{{ $table->status->value }}', {{ $table->currentOrder ? $table->currentOrder->id : 'null' }})"
                          class="relative w-full border-2 overflow-hidden {{ $table->status->value === 'available' ? 'border-green-500 bg-white' : 'border-red-500 bg-white' }} rounded-xl transition-all duration-200 cursor-pointer shadow-md hover:shadow-xl hover:scale-105"
-                         style="aspect-ratio: 1 / 1; min-height: 100px; max-height: 140px;">
-                        
+                         style="aspect-ratio: 4 / 3; max-height: 18vh;">
+
                         <!-- Status Bar -->
                         <div class="absolute top-0 left-0 right-0 {{ $table->status->value === 'available' ? 'bg-green-500' : 'bg-red-500' }} text-white text-xs font-bold py-1 px-2 text-center">
                             @if($table->status->value === 'available')
@@ -603,9 +603,45 @@ function posApp() {
             }
         },
         
-        openCustomerDisplay() {
+        async openCustomerDisplay() {
             const url = '{{ route('pos.customerDisplay') }}';
-            window.open(url, 'CustomerDisplay', 'width=1920,height=1080,fullscreen=yes,toolbar=no,menubar=no,location=no');
+            
+            try {
+                // Fitur canggih jika menggunakan HTTPS
+                if ('getScreenDetails' in window) {
+                    const screenDetails = await window.getScreenDetails();
+                    const externalScreen = screenDetails.screens.find(s => s !== screenDetails.currentScreen);
+                    
+                    if (externalScreen) {
+                        window.open(url, 'CustomerDisplayWin', `left=${externalScreen.availLeft},top=${externalScreen.availTop},width=${externalScreen.availWidth},height=${externalScreen.availHeight},menubar=no,toolbar=no,location=no,status=no`);
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.log("Window API ditolak / HTTP biasa:", err);
+            }
+
+            // Fallback Ekstrem untuk HTTP Laragon / Localhost biasa
+            // Asumsi: Layar kedua berada di EXTEND sebelah KANAN layar utama
+            const monitorLebar = window.screen.width || screen.availWidth;
+            
+            // Buka jendela kecil dulu agar bypass proteksi popup koordinat
+            let popup = window.open('', 'CustomerDisplayWin', 'width=1000,height=700,menubar=no,toolbar=no,location=no,status=no,resizable=yes');
+            
+            if(popup) {
+                // Tutup url lama jika merefresh, set url baru
+                popup.location.href = url;
+                
+                // Paksa geser ke layar sebelah kanan setelah jendela terinisiasi
+                setTimeout(() => {
+                    popup.moveTo(monitorLebar, 0); 
+                    // Maksimalkan ukuran
+                    popup.resizeTo(1920, 1080);
+                    popup.focus();
+                }, 500);
+            } else {
+                alert("Gagal membuka layar kedua. Mohon matikan POP-UP BLOCKER di ujung kanan atas URL bar browser Anda.");
+            }
         },
         
         async processCheckout() {
@@ -797,12 +833,7 @@ function posApp() {
         },
         
         cancelOrder() {
-            if (this.cartItems.length > 0) {
-                if (!confirm('Are you sure you want to cancel this order?')) {
-                    return;
-                }
-            }
-            
+            // Langsung batalkan pesanan tanpa memunculkan Confirm/Alert pop-up yang mengganggu mode Fullscreen layar kedua
             this.resetCart();
             this.step = 'table';
             this.tableId = '';

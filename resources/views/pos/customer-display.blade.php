@@ -77,7 +77,20 @@
         }
     </style>
 </head>
-<body x-data="customerDisplay()" x-init="init()">
+    <body x-data="customerDisplay()" x-init="init()" class="relative">
+    
+    <!-- Fullscreen Overlay Request -->
+    <div id="fullscreen-overlay" class="absolute inset-0 z-50 bg-black/80 flex flex-col items-center justify-center text-white cursor-pointer transition-opacity duration-300 backdrop-blur-sm" @click="requestFullscreen()">
+        <svg class="w-24 h-24 mb-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+        </svg>
+        <h2 class="text-4xl font-bold mb-4 tracking-wide">Customer Display</h2>
+        <p class="text-xl text-gray-200 bg-gray-900/60 px-6 py-4 rounded-xl border border-gray-600 shadow-xl leading-relaxed text-center">
+            Posisikan Jendela Ini Di Layar Utama / Layar 2<br/>
+            Lalu <span class="text-blue-400 font-bold">Klik Disini</span> Untuk Mode Fullscreen (Layar Penuh)
+        </p>
+    </div>
+
     <!-- Poster/Ad Area (Left Side) -->
     <div class="poster-container">
         <template x-if="posterImage">
@@ -223,24 +236,9 @@
             posterImage: '{{ $posterImage ?? '' }}',
             displayMode: '{{ $displayMode ?? 'local' }}',
             broadcastChannel: null,
-            
+            isFullscreen: false,
+
             init() {
-                // Load initial data from localStorage
-                this.loadDataFromLocalStorage();
-                
-                // BroadcastChannel for instant same-browser updates (local mode primary)
-                if (typeof BroadcastChannel !== 'undefined') {
-                    try {
-                        this.broadcastChannel = new BroadcastChannel('pos_customer_display');
-                        this.broadcastChannel.onmessage = (e) => {
-                            this.updateDisplayData(e.data);
-                        };
-                    } catch(e) {
-                        console.warn('BroadcastChannel not available:', e);
-                    }
-                }
-                
-                // Listen for localStorage changes (fallback for same device)
                 window.addEventListener('storage', (e) => {
                     if (e.key === 'pos_customer_display') {
                         if (e.newValue === null) {
@@ -265,6 +263,18 @@
                 }
             },
             
+            requestFullscreen() {
+                // Hapus elemen overlay selamanya dari DOM, sehingga mustahil muncul lagi meskipun AlpineJS re-render atau window exit fullscreen
+                const overlay = document.getElementById('fullscreen-overlay');
+                if (overlay) overlay.remove();
+
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log(`Peringatan Fullscreen: ${err.message}`);
+                    });
+                }
+            },
+
             loadDataFromLocalStorage() {
                 try {
                     const data = localStorage.getItem('pos_customer_display');
@@ -314,6 +324,20 @@
             }
         }
     }
+
+    // Quick tap to full screen
+    document.addEventListener('click', function() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch((err) => {
+                console.log(`Peringatan: Gagal memicu fullscreen: ${err.message}`);
+            });
+        }
+    });
+
+    // Coba tekan f11 di keyboard otomatis jika diizinkan browser
+    setTimeout(() => {
+        try { window.focus(); } catch(e){}
+    }, 1000);
     </script>
 </body>
 </html>

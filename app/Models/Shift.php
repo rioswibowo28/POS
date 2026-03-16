@@ -10,6 +10,7 @@ class Shift extends Model
     use HasFactory;
 
     protected $fillable = [
+        'master_shift_id',
         'shift_number',
         'shift_date',
         'opened_by',
@@ -38,6 +39,10 @@ class Shift extends Model
     ];
 
     // Relationships
+    public function masterShift()
+    {
+        return $this->belongsTo(MasterShift::class);
+    }
     public function openedBy()
     {
         return $this->belongsTo(User::class, 'opened_by');

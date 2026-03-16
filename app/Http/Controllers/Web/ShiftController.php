@@ -15,7 +15,7 @@ class ShiftController extends Controller
 {
     public function index()
     {
-        $shifts = Shift::with(['openedBy', 'closedBy'])
+        $shifts = Shift::with(['openedBy', 'closedBy', 'masterShift'])
             ->orderBy('shift_date', 'desc')
             ->orderBy('shift_number', 'desc')
             ->paginate(20);
@@ -39,6 +39,41 @@ class ShiftController extends Controller
             ->where('status', PaymentStatus::PAID)
             ->get();
 
+        $includeTempOrders = \App\Models\Setting::get('include_temp_orders_in_shift_close', '0') == '1';
+
+        if ($includeTempOrders) {
+            $tempOrdersCash = \App\Models\TempOrder::where('shift_id', $shift->id)
+                ->where('payment_method', 'cash')
+                ->get()
+                ->map(function ($order) use ($shift) {
+                    $payment = new \App\Models\Payment();
+                    $payment->amount = $order->payment_amount ?: $order->total;
+                    $payment->method = 'cash';
+                    $payment->status = PaymentStatus::PAID;
+                    $payment->shift_id = $shift->id;
+                    $payment->created_at = $order->created_at;
+                    return $payment;
+                });
+
+            $cashPayments = $cashPayments->concat($tempOrdersCash);
+
+            $tempOrdersNonCash = \App\Models\TempOrder::where('shift_id', $shift->id)
+                ->where('payment_method', '!=', 'cash')
+                ->whereNotNull('payment_method')
+                ->get()
+                ->map(function ($order) use ($shift) {
+                    $payment = new \App\Models\Payment();
+                    $payment->amount = $order->payment_amount ?: $order->total;
+                    $payment->method = $order->payment_method;
+                    $payment->status = PaymentStatus::PAID;
+                    $payment->shift_id = $shift->id;
+                    $payment->created_at = $order->created_at;
+                    return $payment;
+                });
+
+            $nonCashPayments = $nonCashPayments->concat($tempOrdersNonCash);
+        }
+
         $pendingOrders = $shift->orders()
             ->where('status', 'pending')
             ->with('items')
@@ -54,6 +89,12 @@ class ShiftController extends Controller
 
     public function create()
     {
+        // Check if shift system is disabled
+        if (\App\Models\Setting::get('use_shifts', '1') != '1') {
+            return redirect()->route('shifts.index')
+                ->with('error', 'Shift management is currently disabled in settings.');
+        }
+
         // Check if there's already an open shift
         $currentShift = Shift::getCurrentShift();
 
@@ -62,12 +103,21 @@ class ShiftController extends Controller
                 ->with('error', 'There is already an open shift. Please close it before opening a new one.');
         }
 
-        return view('shifts.create');
+        $masterShifts = \App\Models\MasterShift::where('is_active', true)->get();
+
+        return view('shifts.create', compact('masterShifts'));
     }
 
     public function store(Request $request)
     {
+        // Check if shift system is disabled
+        if (\App\Models\Setting::get('use_shifts', '1') != '1') {
+            return redirect()->route('shifts.index')
+                ->with('error', 'Shift management is currently disabled in settings.');
+        }
+
         $request->validate([
+            'master_shift_id' => 'required|exists:master_shifts,id',
             'opening_cash' => 'required|numeric|min:0',
             'notes' => 'nullable|string',
         ]);
@@ -79,9 +129,12 @@ class ShiftController extends Controller
             return back()->with('error', 'There is already an open shift.');
         }
 
+        $masterShift = \App\Models\MasterShift::find($request->master_shift_id);
+
         $shift = Shift::create([
-            'shift_number' => Shift::getShiftNumber(),
-            'shift_date' => Shift::getShiftDate(),
+            'master_shift_id' => $masterShift->id,
+            'shift_number' => $masterShift->id, // fallback logic
+            'shift_date' => Shift::getShiftDate(), // might need adjusting depending on if we want to change this logic too
             'opened_by' => Auth::id(),
             'opened_at' => now(),
             'opening_cash' => $request->opening_cash,
@@ -105,11 +158,46 @@ class ShiftController extends Controller
                 ->with('error', 'This shift is already closed.');
         }
 
+        // Check if we should include temp orders in calculation
+        $includeTempOrders = \App\Models\Setting::get('include_temp_orders_in_shift_close', '0') == '1';
+
         // Calculate expected cash
         $cashPayments = $shift->payments()
             ->where('method', 'cash')
             ->where('status', PaymentStatus::PAID)
             ->sum('amount');
+
+        $qrisPayments = $shift->payments()
+            ->where('method', '!=', 'cash')
+            ->whereNotNull('method')
+            ->where('status', PaymentStatus::PAID)
+            ->sum('amount');
+
+        $totalSales = $shift->payments()
+            ->where('status', PaymentStatus::PAID)
+            ->sum('amount');
+            
+        $totalOrders = $shift->orders()->count();
+
+        if ($includeTempOrders) {
+            $tempCashPayments = \App\Models\TempOrder::where('shift_id', $shift->id)
+                ->where('payment_method', 'cash')
+                ->sum(\Illuminate\Support\Facades\DB::raw('CASE WHEN payment_amount > 0 THEN payment_amount ELSE total END'));
+            $cashPayments += $tempCashPayments;
+
+            $tempQrisPayments = \App\Models\TempOrder::where('shift_id', $shift->id)
+                ->where('payment_method', '!=', 'cash')
+                ->whereNotNull('payment_method')
+                ->sum(\Illuminate\Support\Facades\DB::raw('CASE WHEN payment_amount > 0 THEN payment_amount ELSE total END'));
+            $qrisPayments += $tempQrisPayments;
+
+            $tempSales = \App\Models\TempOrder::where('shift_id', $shift->id)
+                ->sum(\Illuminate\Support\Facades\DB::raw('CASE WHEN payment_amount > 0 THEN payment_amount ELSE total END'));
+            $totalSales += $tempSales;
+            
+            $tempOrdersCount = \App\Models\TempOrder::where('shift_id', $shift->id)->count();
+            $totalOrders += $tempOrdersCount;
+        }
 
         $expectedCash = $shift->opening_cash + $cashPayments;
 
@@ -119,7 +207,15 @@ class ShiftController extends Controller
             ->with('items')
             ->get();
 
-        return view('shifts.close', compact('shift', 'expectedCash', 'pendingOrders'));
+        return view('shifts.close', compact(
+            'shift', 
+            'expectedCash', 
+            'pendingOrders', 
+            'cashPayments', 
+            'qrisPayments', 
+            'totalSales', 
+            'totalOrders'
+        ));
     }
 
     public function close(Request $request, Shift $shift)
@@ -135,6 +231,9 @@ class ShiftController extends Controller
 
         DB::beginTransaction();
         try {
+            // Check if we should include temp orders in calculation
+            $includeTempOrders = \App\Models\Setting::get('include_temp_orders_in_shift_close', '0') == '1';
+
             // Calculate totals
             $totalSales = $shift->payments()
                 ->where('status', PaymentStatus::PAID)
@@ -146,6 +245,21 @@ class ShiftController extends Controller
                 ->where('method', 'cash')
                 ->where('status', PaymentStatus::PAID)
                 ->sum('amount');
+
+            if ($includeTempOrders) {
+                $tempSales = \App\Models\TempOrder::where('shift_id', $shift->id)
+                    ->sum(\Illuminate\Support\Facades\DB::raw('CASE WHEN payment_amount > 0 THEN payment_amount ELSE total END'));
+                
+                $tempCashPayments = \App\Models\TempOrder::where('shift_id', $shift->id)
+                    ->where('payment_method', 'cash')
+                    ->sum(\Illuminate\Support\Facades\DB::raw('CASE WHEN payment_amount > 0 THEN payment_amount ELSE total END'));
+                
+                $tempOrdersCount = \App\Models\TempOrder::where('shift_id', $shift->id)->count();
+                
+                $totalSales += $tempSales;
+                $cashPayments += $tempCashPayments;
+                $totalOrders += $tempOrdersCount;
+            }
 
             $expectedCash = $shift->opening_cash + $cashPayments;
             $cashDifference = $request->closing_cash - $expectedCash;
@@ -199,10 +313,48 @@ class ShiftController extends Controller
             ->where('status', PaymentStatus::PAID)
             ->get();
 
-        $paymentsByMethod = $shift->payments()
+        $paymentsByMethodInfo = $shift->payments()
             ->where('status', PaymentStatus::PAID)
-            ->get()
-            ->groupBy('method');
+            ->get();
+
+        $includeTempOrders = \App\Models\Setting::get('include_temp_orders_in_shift_close', '0') == '1';
+
+        if ($includeTempOrders) {
+            $tempOrdersCash = \App\Models\TempOrder::where('shift_id', $shift->id)
+                ->where('payment_method', 'cash')
+                ->get()
+                ->map(function ($order) use ($shift) {
+                    $payment = new \App\Models\Payment();
+                    $payment->amount = $order->payment_amount ?: $order->total;
+                    $payment->method = 'cash';
+                    $payment->status = PaymentStatus::PAID;
+                    $payment->shift_id = $shift->id;
+                    $payment->created_at = $order->created_at;
+                    return $payment;
+                });
+
+            $cashPayments = $cashPayments->concat($tempOrdersCash);
+            $paymentsByMethodInfo = $paymentsByMethodInfo->concat($tempOrdersCash);
+
+            $tempOrdersNonCash = \App\Models\TempOrder::where('shift_id', $shift->id)
+                ->where('payment_method', '!=', 'cash')
+                ->whereNotNull('payment_method')
+                ->get()
+                ->map(function ($order) use ($shift) {
+                    $payment = new \App\Models\Payment();
+                    $payment->amount = $order->payment_amount ?: $order->total;
+                    $payment->method = $order->payment_method;
+                    $payment->status = PaymentStatus::PAID;
+                    $payment->shift_id = $shift->id;
+                    $payment->created_at = $order->created_at;
+                    return $payment;
+                });
+
+            $nonCashPayments = $nonCashPayments->concat($tempOrdersNonCash);
+            $paymentsByMethodInfo = $paymentsByMethodInfo->concat($tempOrdersNonCash);
+        }
+
+        $paymentsByMethod = $paymentsByMethodInfo->groupBy('method');
 
         return view('shifts.print', compact(
             'shift',

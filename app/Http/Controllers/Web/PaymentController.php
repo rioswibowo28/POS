@@ -51,14 +51,18 @@ class PaymentController extends Controller
         ]);
 
         try {
-            // Check if there's an open shift
-            $currentShift = \App\Models\Shift::getCurrentShift();
-            if (!$currentShift) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No shift is currently open. Please open a shift before processing payments.',
-                    'error' => 'No open shift'
-                ], 422);
+            // Check if there's an open shift based on settings
+            $useShifts = \App\Models\Setting::get('use_shifts', true) == '1';
+            
+            if ($useShifts) {
+                $currentShift = \App\Models\Shift::getCurrentShift();
+                if (!$currentShift) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No shift is currently open. Please open a shift before processing payments.',
+                        'error' => 'No open shift'
+                    ], 422);
+                }
             }
             
             $order = $this->orderRepository->find($orderId);

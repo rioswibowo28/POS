@@ -33,11 +33,11 @@
         <div class="grid grid-cols-2 gap-4 mb-4">
             <div class="border rounded-lg p-4">
                 <p class="text-gray-600 text-sm mb-1">Total Penjualan</p>
-                <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($shift->payments()->where('status', 'paid')->sum('amount'), 0, ',', '.') }}</p>
+                <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($totalSales, 0, ',', '.') }}</p>
             </div>
             <div class="border rounded-lg p-4">
                 <p class="text-gray-600 text-sm mb-1">Total Pesanan</p>
-                <p class="text-2xl font-bold text-gray-900">{{ $shift->orders()->count() }}</p>
+                <p class="text-2xl font-bold text-gray-900">{{ $totalOrders }}</p>
             </div>
             <div class="border rounded-lg p-4">
                 <p class="text-gray-600 text-sm mb-1">Kas Awal</p>
@@ -45,7 +45,11 @@
             </div>
             <div class="border rounded-lg p-4">
                 <p class="text-gray-600 text-sm mb-1">Penjualan Tunai</p>
-                <p class="text-xl font-bold text-gray-900">Rp {{ number_format($shift->payments()->where('method', 'cash')->where('status', 'paid')->sum('amount'), 0, ',', '.') }}</p>
+                <p class="text-xl font-bold text-gray-900">Rp {{ number_format($cashPayments, 0, ',', '.') }}</p>
+            </div>
+            <div class="border rounded-lg p-4 lg:col-span-2">
+                <p class="text-gray-600 text-sm mb-1">Penjualan Non-Tunai / QRIS</p>
+                <p class="text-xl font-bold text-gray-900">Rp {{ number_format($qrisPayments, 0, ',', '.') }}</p>
             </div>
         </div>
         <div class="border-t pt-4">

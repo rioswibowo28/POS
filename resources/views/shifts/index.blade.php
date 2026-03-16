@@ -12,7 +12,7 @@
             <div class="mt-3 flex items-center space-x-3">
                 <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
                     <i class="fas fa-clock mr-1"></i>
-                    Shift {{ $currentShift->shift_number }} Active
+                    {{ $currentShift->masterShift ? $currentShift->masterShift->name : 'Shift ' . $currentShift->shift_number }} Active
                 </span>
                 <span class="text-gray-600 text-sm">
                     Opened by {{ $currentShift->openedBy->name }} at {{ $currentShift->opened_at->format('H:i') }}
@@ -73,10 +73,14 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                     <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-semibold">
-                        Shift {{ $shift->shift_number }}
+                        {{ $shift->masterShift ? $shift->masterShift->name : 'Shift ' . $shift->shift_number }}
                     </span>
                     <div class="text-xs text-gray-500 mt-1">
-                        {{ $shift->shift_number == 1 ? '05:00 - 17:00' : '17:00 - 05:00' }}
+                        @if($shift->masterShift)
+                            {{ substr($shift->masterShift->start_time, 0, 5) }} - {{ substr($shift->masterShift->end_time, 0, 5) }}
+                        @else
+                            {{ $shift->shift_number == 1 ? '05:00 - 17:00' : '17:00 - 05:00' }}
+                        @endif
                     </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm">

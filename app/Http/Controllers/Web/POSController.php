@@ -80,14 +80,17 @@ class POSController extends Controller
         try {
             \Log::info('Creating order with data:', $validated);
             
-            // Check if there's an open shift
-            $currentShift = \App\Models\Shift::getCurrentShift();
-            if (!$currentShift) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'No shift is currently open. Please open a shift before creating orders.',
-                    'error' => 'No open shift'
-                ], 422);
+            // Conditionally check for an open shift based on settings
+            $useShifts = \App\Models\Setting::get('use_shifts', '1') == '1';
+            if ($useShifts) {
+                $currentShift = \App\Models\Shift::getCurrentShift();
+                if (!$currentShift) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No shift is currently open. Please open a shift before creating orders.',
+                        'error' => 'No open shift'
+                    ], 422);
+                }
             }
             
             $order = $this->orderService->createOrder($validated);

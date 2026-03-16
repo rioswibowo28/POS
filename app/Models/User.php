@@ -97,4 +97,17 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->role === 'tax_device';
     }
+
+    public function canAccessReports()
+    {
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        if ($this->isCashier()) {
+            return setting('cashier_can_access_reports', '0') == '1';
+        }
+
+        return false;
+    }
 }
