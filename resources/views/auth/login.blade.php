@@ -124,7 +124,7 @@
 
         <!-- Footer -->
         <p class="mt-8 text-center text-sm text-primary-100">
-            &copy; 2026 AU Soft. All rights reserved.
+            &copy; 2026 UwaisTech. All rights reserved.
         </p>
     </div>
 </div>

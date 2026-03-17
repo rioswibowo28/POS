@@ -37,17 +37,15 @@ class AutoBackupMiddleware
 
     private function checkAndRunBackup(): void
     {
-        // Cache setting selama 5 menit agar tidak terus-terusan memanggil database on every request
-        $settings = Cache::remember("backup_settings_cache", 300, function() {
-            return [
-                "s1_enabled" => Setting::get("backup_schedule_1_enabled", "1"),
-                "s1_time"    => Setting::get("backup_schedule_1", "12:00"),
-                "s2_enabled" => Setting::get("backup_schedule_2_enabled", "1"),
-                "s2_time"    => Setting::get("backup_schedule_2", "23:55"),
-                "keep_days"  => Setting::get("backup_keep_days", "30"),
-                "path"       => Setting::get("backup_path", ""),
-            ];
-        });
+        // Fetch setting directly to avoid 5-minute cache lag during testing
+        $settings = [
+            "s1_enabled" => Setting::get("backup_schedule_1_enabled", "1"),
+            "s1_time"    => Setting::get("backup_schedule_1", "12:00"),
+            "s2_enabled" => Setting::get("backup_schedule_2_enabled", "1"),
+            "s2_time"    => Setting::get("backup_schedule_2", "23:55"),
+            "keep_days"  => Setting::get("backup_keep_days", "30"),
+            "path"       => Setting::get("backup_path", ""),
+        ];
 
         // Time checks
         $now = Carbon::now();

@@ -625,20 +625,15 @@ function posApp() {
             // Asumsi: Layar kedua berada di EXTEND sebelah KANAN layar utama
             const monitorLebar = window.screen.width || screen.availWidth;
             
-            // Buka jendela kecil dulu agar bypass proteksi popup koordinat
-            let popup = window.open('', 'CustomerDisplayWin', 'width=1000,height=700,menubar=no,toolbar=no,location=no,status=no,resizable=yes');
+            // Buka langsung jendela dengan titik koordinat X (left) di luar layar pertama
+            let popup = window.open(url, 'CustomerDisplayWin', `left=${monitorLebar},top=0,width=1000,height=700,menubar=no,toolbar=no,location=no,status=no,resizable=yes`);
             
             if(popup) {
-                // Tutup url lama jika merefresh, set url baru
-                popup.location.href = url;
-                
-                // Paksa geser ke layar sebelah kanan setelah jendela terinisiasi
                 setTimeout(() => {
-                    popup.moveTo(monitorLebar, 0); 
-                    // Maksimalkan ukuran
-                    popup.resizeTo(1920, 1080);
+                    // Maksimalkan ukuran setelah dipindah ke layar 2
+                    popup.resizeTo(window.screen.availWidth, window.screen.availHeight);
                     popup.focus();
-                }, 500);
+                }, 300);
             } else {
                 alert("Gagal membuka layar kedua. Mohon matikan POP-UP BLOCKER di ujung kanan atas URL bar browser Anda.");
             }
