@@ -206,10 +206,10 @@ function paymentApp() {
                 customerName: '{{ $order->customer_name ?? "" }}',
                 cartItems: @json($cartItems),
                 subtotal: {{ $order->subtotal }},
-                tax: {{ $order->tax }},
+                tax: {{ $order->tax_amount }},
                 discount: {{ $order->discount }},
                 total: {{ $order->total }},
-                taxRate: {{ $order->tax / ($order->subtotal ?: 1) }}
+                taxRate: {{ $order->tax / 100 }}
             };
             localStorage.setItem('pos_customer_display', JSON.stringify(displayData));
             if (this.broadcastChannel) {

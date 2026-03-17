@@ -96,7 +96,7 @@
                         @endif</li>
                     <li>Backup lama dihapus otomatis setelah <strong>{{ $keepDays }} hari</strong></li>
                     <li>Download backup secara berkala ke flashdisk/cloud untuk keamanan</li>
-                    <li>Ubah pengaturan di menu <a href="{{ route('settings.index') }}" class="underline font-semibold">Settings</a></li>
+                    <li>Ubah pengaturan di menu <a href="{{ route('settings.index') }}?tab=system" class="underline font-semibold">Settings</a></li>
                 </ul>
             </div>
         </div>

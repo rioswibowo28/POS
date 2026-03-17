@@ -22,11 +22,11 @@ class MidtransService
         $isProduction = (bool) Setting::get('midtrans_is_production', '0');
         
         if (empty($serverKey) || empty($clientKey)) {
-            \Log::error('Midtrans Configuration Missing', [
+            \Log::warning('Midtrans Configuration Missing', [
                 'server_key_exists' => !empty($serverKey),
                 'client_key_exists' => !empty($clientKey)
             ]);
-            throw new \Exception('Midtrans configuration is incomplete. Please check your settings.');
+            return; // Don't throw immediately, only fail when actually creating tokens
         }
         
         Config::$serverKey = $serverKey;
@@ -49,6 +49,10 @@ class MidtransService
      */
     public function createSnapToken($orderData)
     {
+        if (empty(Config::$serverKey)) {
+            throw new \Exception('Midtrans configuration is incomplete. Please check your system settings.');
+        }
+
         // Add timestamp to order_id to make it unique for each payment attempt
         $uniqueOrderId = $orderData['order_number'] . '-' . time();
         

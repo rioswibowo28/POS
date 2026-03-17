@@ -37,19 +37,27 @@
         }
         .receipt-container {
             background: white;
-            width: 50%;
+            width: 40%;
             flex-shrink: 0;
             box-shadow: -10px 0 30px rgba(0,0,0,0.2);
             font-family: 'Courier New', monospace;
-            line-height: 1.8;
+            line-height: 1.6;
             overflow-y: auto;
+            transform-origin: top right;
+            font-size: 1em;
         }
+        .receipt-container .text-sm { font-size: 0.875rem !important; }
+        .receipt-container .text-base { font-size: 1rem !important; }
+        .receipt-container .text-lg { font-size: 1.125rem !important; }
+        .receipt-container .text-xl { font-size: 1.25rem !important; }
+        .receipt-container .text-2xl { font-size: 1.5rem !important; }
+        .receipt-container .text-3xl { font-size: 1.75rem !important; }
         .item-price {
             padding-right: 1rem;
         }
         .dashed-line {
             border-top: 4px dashed #ccc;
-            margin: 40px 0;
+            margin: 20px 0;
         }
         .item-enter {
             animation: slideIn 0.3s ease-out;
@@ -111,16 +119,16 @@
     <div class="receipt-container flex flex-col">
         
         <!-- Receipt Header -->
-        <div class="text-center py-14 px-20 border-b-4 border-gray-800 bg-gradient-to-b from-gray-50 to-white" style="margin: 40px; margin-bottom: 0;">
+        <div class="text-center py-8 px-8 border-b-4 border-gray-800 bg-gradient-to-b from-gray-50 to-white" style="margin: 20px; margin-bottom: 0;">
             @if($restaurantLogo)
             <img src="{{ asset('storage/' . $restaurantLogo) }}" alt="{{ $restaurantName }}" class="h-28 w-28 object-contain mx-auto mb-8">
             @endif
-            <h1 class="text-3xl font-bold text-gray-900 uppercase tracking-wide mb-4">{{ $restaurantName }}</h1>
+            <h1 class="text-xl font-bold text-gray-900 uppercase tracking-wide mb-4">{{ $restaurantName }}</h1>
             <p class="text-base text-gray-600 font-medium">Customer Display</p>
             
             <!-- Payment Mode Badge -->
             <template x-if="mode === 'payment'">
-                <div class="mt-6 inline-block bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-3 text-base font-bold uppercase tracking-wider rounded-xl shadow-lg">
+                <div class="mt-4 inline-block bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2 text-sm font-bold uppercase tracking-wide rounded-lg shadow-md">
                     Processing Payment
                 </div>
             </template>
@@ -147,7 +155,7 @@
         </div>
         
         <!-- Receipt Body -->
-        <div class="flex-1 overflow-y-auto px-20 py-12" style="margin: 0 40px;" x-ref="cartContainer">
+        <div class="flex-1 overflow-y-auto px-8 py-6" style="margin: 0 20px;" x-ref="cartContainer">
             <template x-if="cartItems.length === 0">
                 <div class="flex flex-col items-center justify-center h-full text-gray-400">
                     <div class="pulse mb-6">
@@ -164,15 +172,15 @@
                 <div>
                     <div class="text-center text-lg font-bold text-gray-500 uppercase tracking-wide mb-6 pb-3 border-b-2 border-gray-300">ORDER ITEMS</div>
                     <template x-for="(item, index) in cartItems" :key="index">
-                        <div class="item-enter mb-6 pb-5 border-b-2 border-gray-300">
-                            <div class="flex justify-between items-start gap-8">
+                        <div class="item-enter mb-3 pb-3 border-b border-gray-300">
+                            <div class="flex justify-between items-start gap-4">
                                 <div class="flex-1 min-w-0">
-                                    <div class="font-bold text-gray-900 text-xl mb-3 leading-relaxed" x-text="item.name"></div>
-                                    <div class="text-sm text-gray-600 mt-2">
+                                    <div class="font-bold text-gray-900 text-lg mb-1 leading-snug" x-text="item.name"></div>
+                                    <div class="text-xs text-gray-600 mt-1 leading-tight">
                                         <span x-text="item.quantity"></span> x Rp <span x-text="formatMoney(item.price)"></span>
                                     </div>
                                 </div>
-                                <div class="font-bold text-gray-900 text-right text-xl flex-shrink-0 ml-6">
+                                <div class="font-bold text-gray-900 text-right text-lg flex-shrink-0 ml-3">
                                     Rp <span x-text="formatMoney(item.price * item.quantity)"></span>
                                 </div>
                             </div>
@@ -184,7 +192,7 @@
         
         <!-- Receipt Footer / Totals -->
         <template x-if="cartItems.length > 0">
-            <div class="border-t-4 border-gray-800 px-20 py-12 bg-gradient-to-b from-white to-gray-50" style="margin: 0 40px 40px 40px;">
+            <div class="border-t-4 border-gray-800 px-8 py-6 bg-gradient-to-b from-white to-gray-50" style="margin: 0 20px 40px 40px;">
                 <div class="space-y-4 text-base mb-6 px-4">
                     <div class="flex justify-between">
                         <span class="text-gray-700">Subtotal</span>
@@ -192,7 +200,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-700">
-                            Tax (<span x-text="(taxRate * 100)"></span>%)
+                            Tax (<span x-text="formatTaxRate()"></span>%)
                             <span x-show="taxType === 'include'" class="text-sm">(incl)</span>
                         </span>
                         <span class="font-mono">Rp <span x-text="formatMoney(tax)"></span></span>
@@ -207,7 +215,7 @@
                 <div class="dashed-line"></div>
                 <div class="flex justify-between items-center text-2xl font-bold my-4 p-5 bg-yellow-50 rounded-xl border-2 border-yellow-300">
                     <span class="text-gray-900 uppercase">TOTAL</span>
-                    <span class="font-mono text-3xl text-green-700">Rp <span x-text="formatMoney(total)"></span></span>
+                    <span class="font-mono text-xl text-green-700">Rp <span x-text="formatMoney(total)"></span></span>
                 </div>
                 <div class="dashed-line"></div>
                 <div class="text-center text-lg text-gray-500 mt-6 font-semibold">
@@ -226,7 +234,7 @@
             tax: 0,
             discount: 0,
             total: 0,
-            taxRate: 0.10,
+            taxRate: {{ (float) \App\Models\Setting::get('tax_percentage', '10') / 100 }},
             taxType: 'exclude',
             orderType: '',
             tableNumber: '',
@@ -303,10 +311,27 @@
                 const prevCount = this.cartItems.length;
                 this.cartItems = data.cartItems || [];
                 this.subtotal = data.subtotal || 0;
-                this.tax = data.tax || 0;
                 this.discount = data.discount || 0;
                 this.total = data.total || 0;
-                this.taxRate = data.taxRate || 0.10;
+
+                const defaultTaxRate = {{ (float) \App\Models\Setting::get('tax_percentage', '10') / 100 }};
+                const incomingTaxRate = Number(data.taxRate);
+                let normalizedTaxRate = Number.isFinite(incomingTaxRate) ? incomingTaxRate : defaultTaxRate;
+
+                if (normalizedTaxRate > 1) {
+                    normalizedTaxRate = normalizedTaxRate / 100;
+                }
+                if (normalizedTaxRate <= 0 || !Number.isFinite(normalizedTaxRate)) {
+                    normalizedTaxRate = defaultTaxRate;
+                }
+                this.taxRate = normalizedTaxRate;
+
+                const incomingTax = Number(data.tax);
+                const computedTax = Math.max(0, Math.round((this.total + this.discount) - this.subtotal));
+                this.tax = Number.isFinite(incomingTax) && Math.abs(incomingTax - computedTax) <= 1
+                    ? incomingTax
+                    : computedTax;
+
                 this.taxType = data.taxType || 'exclude';
                 this.orderType = data.orderType || '';
                 this.tableNumber = data.tableNumber || '';
@@ -321,6 +346,12 @@
             
             formatMoney(amount) {
                 return new Intl.NumberFormat('id-ID').format(amount);
+            },
+
+            formatTaxRate() {
+                const percent = this.taxRate * 100;
+                if (!Number.isFinite(percent)) return '0';
+                return Number(percent.toFixed(2)).toString();
             }
         }
     }

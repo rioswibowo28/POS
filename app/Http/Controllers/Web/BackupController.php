@@ -65,7 +65,9 @@ class BackupController extends Controller
     public function download($filename)
     {
         $filename = basename($filename);
-        $filePath = storage_path('app/backups/' . $filename);
+        $settingPath = \App\Models\Setting::get('backup_path');
+        $backupPath = $settingPath ?: storage_path('app/backups');
+        $filePath = rtrim($backupPath, '/\\') . DIRECTORY_SEPARATOR . $filename;
 
         if (!File::exists($filePath)) {
             return redirect()->route('backups.index')
@@ -78,7 +80,9 @@ class BackupController extends Controller
     public function destroy($filename)
     {
         $filename = basename($filename);
-        $filePath = storage_path('app/backups/' . $filename);
+        $settingPath = \App\Models\Setting::get('backup_path');
+        $backupPath = $settingPath ?: storage_path('app/backups');
+        $filePath = rtrim($backupPath, '/\\') . DIRECTORY_SEPARATOR . $filename;
 
         if (File::exists($filePath)) {
             File::delete($filePath);

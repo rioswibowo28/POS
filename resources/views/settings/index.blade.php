@@ -4,20 +4,11 @@
 @section('header', 'Restaurant Settings')
 
 @section('content')
-<div class="max-w-4xl mx-auto">
-    
-    @if(session('success'))
-    <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6">
-        <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
-    </div>
-    @endif
-    
-    @if(session('error'))
-    <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
-        <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
-    </div>
-    @endif
-    
+<style>
+    [x-cloak] { display: none !important; }
+</style>
+<div class="max-w-7xl mx-auto w-full">
+
     @if ($errors->any())
     <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
         <div class="font-medium mb-2"><i class="fas fa-exclamation-triangle mr-2"></i>Validation Errors:</div>
@@ -29,18 +20,56 @@
     </div>
     @endif
 
-    <div class="card">
-        <div class="mb-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-2">Restaurant Information</h2>
-            <p class="text-gray-600 text-sm">Configure your restaurant details and preferences</p>
+        <div class="mb-4 flex flex-col md:flex-row md:items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-1">System Settings</h2>
+            <p class="text-gray-500 text-sm">Manage preferences and configurations</p>
         </div>
+        <div class="mt-4 md:mt-0">
+            <button type="submit" form="settings-form" class="btn-primary px-6 py-2 shadow-sm rounded-lg flex items-center gap-2">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+        </div>
+    </div>
 
-        <form action="{{ route('settings.update') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            
-            <div class="space-y-6">
-                <!-- Restaurant Info Section -->
-                <div class="border-b border-gray-200 pb-6">
+    <form id="settings-form" action="{{ route('settings.update') }}" method="POST" enctype="multipart/form-data" x-data="{ tab: new URLSearchParams(window.location.search).get('tab') || 'general' }" >
+    <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6 items-start">
+        @csrf
+
+        <!-- Sidebar Navigation -->
+        <div class="md:col-span-1 lg:col-span-1 md:sticky md:top-4 w-full">
+            <div class="bg-white border border-gray-200 rounded-xl flex flex-col overflow-hidden shadow-sm">
+                <button type="button" @click="tab = 'general'" :class="{'bg-primary-50 text-primary-700 font-semibold border-l-4 border-primary-600': tab === 'general', 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent': tab !== 'general'}" class="px-5 py-4 text-left text-sm transition-all flex items-center border-b border-gray-100">
+                    <i class="fas fa-store w-5 mr-3"></i> General Info
+                </button>
+                <button type="button" @click="tab = 'operational'" :class="{'bg-primary-50 text-primary-700 font-semibold border-l-4 border-primary-600': tab === 'operational', 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent': tab !== 'operational'}" class="px-5 py-4 text-left text-sm transition-all flex items-center border-b border-gray-100">
+                    <i class="fas fa-sliders-h w-5 mr-3"></i> Operational
+                </button>
+                <button type="button" @click="tab = 'pricing'" :class="{'bg-primary-50 text-primary-700 font-semibold border-l-4 border-primary-600': tab === 'pricing', 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent': tab !== 'pricing'}" class="px-5 py-4 text-left text-sm transition-all flex items-center border-b border-gray-100">
+                    <i class="fas fa-percentage w-5 mr-3"></i> Pricing & Tax
+                </button>
+                <button type="button" @click="tab = 'midtrans'" :class="{'bg-primary-50 text-primary-700 font-semibold border-l-4 border-primary-600': tab === 'midtrans', 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent': tab !== 'midtrans'}" class="px-5 py-4 text-left text-sm transition-all flex items-center border-b border-gray-100">
+                    <i class="fas fa-credit-card w-5 mr-3"></i> Midtrans
+                </button>
+                <button type="button" @click="tab = 'receipt'" :class="{'bg-primary-50 text-primary-700 font-semibold border-l-4 border-primary-600': tab === 'receipt', 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent': tab !== 'receipt'}" class="px-5 py-4 text-left text-sm transition-all flex items-center border-b border-gray-100">
+                    <i class="fas fa-receipt w-5 mr-3"></i> Receipt Format
+                </button>
+                <button type="button" @click="tab = 'display'" :class="{'bg-primary-50 text-primary-700 font-semibold border-l-4 border-primary-600': tab === 'display', 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent': tab !== 'display'}" class="px-5 py-4 text-left text-sm transition-all flex items-center border-b border-gray-100">
+                    <i class="fas fa-tv w-5 mr-3"></i> Customer Screen
+                </button>
+                <button type="button" @click="tab = 'limits'" :class="{'bg-primary-50 text-primary-700 font-semibold border-l-4 border-primary-600': tab === 'limits', 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent': tab !== 'limits'}" class="px-5 py-4 text-left text-sm transition-all flex items-center border-b border-gray-100">
+                    <i class="fas fa-stopwatch w-5 mr-3"></i> Limits & Qty
+                </button>
+                <button type="button" @click="tab = 'system'" :class="{'bg-primary-50 text-primary-700 font-semibold border-l-4 border-primary-600': tab === 'system', 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent': tab !== 'system'}" class="px-5 py-4 text-left text-sm transition-all flex items-center">
+                    <i class="fas fa-database w-5 mr-3"></i> System & Backup
+                </button>
+            </div>
+        </div>
+        
+        <!-- Content Pane -->
+        <div class="md:col-span-3 lg:col-span-4 bg-white border border-gray-200 rounded-xl p-4 md:p-6 shadow-sm min-h-[500px] w-full">
+                <div x-show="tab === 'general'" x-cloak>
+                <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-store text-primary-600 mr-2"></i>
                         Restaurant Details
@@ -122,8 +151,8 @@
                     </div>
                 </div>
                 
-                <!-- Pricing Section -->
-                <div class="border-b border-gray-200 pb-6">
+                </div><div x-show="tab === 'operational'" x-cloak>
+                <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-sliders-h text-primary-600 mr-2"></i>
                         Operational Settings
@@ -136,7 +165,7 @@
                                        name="use_shifts" 
                                        value="1" 
                                        {{ old('use_shifts', $settings['use_shifts'] ?? '1') == '1' ? 'checked' : '' }} 
-                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5">
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5 flex-shrink-0">
                                 <div class="ml-3">
                                     <span class="text-sm font-semibold text-gray-900">Use Shift System</span>
                                     <p class="text-xs text-gray-600 mt-1">If enabled, users must open a shift before making transactions.</p>
@@ -148,7 +177,7 @@
                                        name="include_temp_orders_in_shift_close" 
                                        value="1" 
                                        {{ old('include_temp_orders_in_shift_close', $settings['include_temp_orders_in_shift_close'] ?? '0') == '1' ? 'checked' : '' }} 
-                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5">
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5 flex-shrink-0">
                                 <div class="ml-3">
                                     <span class="text-sm font-semibold text-gray-900">Include Temp Orders in Shift Closing</span>
                                     <p class="text-xs text-gray-600 mt-1">If enabled, shift totals will include flag=1 orders (Temp Orders) paid during the shift.</p>
@@ -162,7 +191,7 @@
                                        name="pos_show_tax_flag"
                                        value="1"
                                        {{ old('pos_show_tax_flag', $settings['pos_show_tax_flag'] ?? '1') == '1' ? 'checked' : '' }}
-                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5">
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5 flex-shrink-0">
                                 <div class="ml-3">
                                     <span class="text-sm font-semibold text-gray-900">Tampilkan Checkbox No-Tax di Kasir</span>
                                     <p class="text-xs text-gray-600 mt-1">Jika aktif, kasir bisa mencentang kotak kosong pembebasan pajak/pembuatan bill sementara saat memesan.</p>
@@ -178,7 +207,7 @@
                                        name="cashier_can_access_reports" 
                                        value="1"
                                        {{ old('cashier_can_access_reports', $settings['cashier_can_access_reports'] ?? '0') == '1' ? 'checked' : '' }}
-                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5">
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5 flex-shrink-0">
                                 <div class="ml-3">
                                     <span class="text-sm font-semibold text-gray-900">Cashier Report Access</span>
                                     <p class="text-xs text-gray-600 mt-1">If enabled, cashiers can access and view reports module.</p>
@@ -188,8 +217,8 @@
                     </div>
                 </div>
 
-                <!-- Pricing Section -->
-                <div class="border-b border-gray-200 pb-6">
+                </div><div x-show="tab === 'pricing'" x-cloak>
+                <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-percentage text-primary-600 mr-2"></i>
                         Pricing Settings
@@ -245,8 +274,8 @@
                     </div>
                 </div>
                 
-                <!-- Midtrans Payment Gateway Section -->
-                <div class="border-b border-gray-200 pb-6">
+                </div><div x-show="tab === 'midtrans'" x-cloak>
+                <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-credit-card text-primary-600 mr-2"></i>
                         Midtrans Payment Gateway
@@ -270,7 +299,7 @@
                                        id="midtrans_enabled"
                                        value="1" 
                                        {{ old('midtrans_enabled', $settings['midtrans_enabled'] ?? '0') == '1' ? 'checked' : '' }} 
-                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5"
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5 flex-shrink-0"
                                        onchange="toggleMidtransFields(this.checked)">
                                 <div class="ml-3">
                                     <span class="text-sm font-semibold text-gray-900">Enable Midtrans Payment Gateway</span>
@@ -325,8 +354,9 @@
                     </div>
                 </div>
                 
-                <!-- License API Section -->
-                <div class="border-b border-gray-200 pb-6">
+                </div><div x-show="tab === 'system'" x-cloak class="space-y-6">
+<!-- License API Section -->
+                <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-key text-primary-600 mr-2"></i>
                         License Manager API Settings
@@ -448,8 +478,9 @@
                     </div>
                 </div>
                 
-                <!-- Customer Display Section -->
-                <div class="border-b border-gray-200 pb-6">
+                </div><div x-show="tab === 'display'" x-cloak class="space-y-6">
+<!-- Customer Display Section -->
+                <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-tv text-primary-600 mr-2"></i>
                         Customer Display Settings
@@ -535,7 +566,8 @@
                     </div>
                 </div>
                 
-                <!-- Order Limit Section -->
+                </div><div x-show="tab === 'limits'" x-cloak class="space-y-6">
+<!-- Order Limit Section -->
                 <div class="border-b border-gray-200 pb-6 mb-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-exclamation-triangle text-primary-600 mr-2"></i>
@@ -556,7 +588,7 @@
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="hidden" name="order_limit_enabled" value="0">
                                 <input type="checkbox" name="order_limit_enabled" value="1" id="order_limit_enabled"
-                                    class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer"
+                                    class="w-5 h-5 flex-shrink-0 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer"
                                     {{ old('order_limit_enabled', $settings['order_limit_enabled'] ?? '0') == '1' ? 'checked' : '' }}>
                                 <label for="order_limit_enabled" class="text-sm font-medium text-gray-700 cursor-pointer">Aktifkan Limit Penjualan Harian</label>
                             </div>
@@ -596,7 +628,8 @@
                     </div>
                 </div>
                 
-                <!-- Backup Settings Section -->
+                </div><div x-show="tab === 'system'" x-cloak class="space-y-6">
+<!-- Backup Settings Section -->
                 <div class="border-b border-gray-200 pb-6 mb-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-database text-primary-600 mr-2"></i>
@@ -619,7 +652,7 @@
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="hidden" name="backup_schedule_1_enabled" value="0">
                                 <input type="checkbox" name="backup_schedule_1_enabled" value="1" id="backup_schedule_1_enabled"
-                                    class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer"
+                                    class="w-5 h-5 flex-shrink-0 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer"
                                     {{ old('backup_schedule_1_enabled', $settings['backup_schedule_1_enabled'] ?? '1') == '1' ? 'checked' : '' }}>
                                 <label for="backup_schedule_1_enabled" class="text-sm font-medium text-gray-700 cursor-pointer">Jadwal Backup 1</label>
                             </div>
@@ -635,7 +668,7 @@
                             <div class="flex items-center gap-2 mb-2">
                                 <input type="hidden" name="backup_schedule_2_enabled" value="0">
                                 <input type="checkbox" name="backup_schedule_2_enabled" value="1" id="backup_schedule_2_enabled"
-                                    class="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer"
+                                    class="w-5 h-5 flex-shrink-0 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 cursor-pointer"
                                     {{ old('backup_schedule_2_enabled', $settings['backup_schedule_2_enabled'] ?? '1') == '1' ? 'checked' : '' }}>
                                 <label for="backup_schedule_2_enabled" class="text-sm font-medium text-gray-700 cursor-pointer">Jadwal Backup 2</label>
                             </div>
@@ -659,7 +692,8 @@
                     </div>
                 </div>
 
-                <!-- Receipt Section -->
+                </div><div x-show="tab === 'receipt'" x-cloak class="space-y-6">
+<!-- Receipt Section -->
                 <div class="pb-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-receipt text-primary-600 mr-2"></i>
@@ -675,19 +709,10 @@
                         @enderror
                     </div>
                 </div>
-            </div>
-            
-            <!-- Action Buttons -->
-            <div class="flex gap-3 mt-6 pt-6 border-t border-gray-200">
-                <button type="submit" class="btn-primary">
-                    <i class="fas fa-save mr-2"></i> Save Settings
-                </button>
-                <button type="reset" class="btn-secondary">
-                    <i class="fas fa-undo mr-2"></i> Reset
-                </button>
-            </div>
-        </form>
-    </div>
+                    </div> <!-- End Current Tab Wrapper -->
+        </div> <!-- End Content Pane -->
+        </div>
+    </form>
     
     <!-- Preview Card -->
     <div class="card mt-6">
