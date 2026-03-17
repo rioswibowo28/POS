@@ -154,6 +154,20 @@
                                     <p class="text-xs text-gray-600 mt-1">If enabled, shift totals will include flag=1 orders (Temp Orders) paid during the shift.</p>
                                 </div>
                             </label>
+
+                            <!-- Checkbox No Tax Flag -->
+                            <label class="flex items-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-primary-300 cursor-pointer transition mt-3">
+                                <input type="hidden" name="pos_show_tax_flag" value="0">
+                                <input type="checkbox"
+                                       name="pos_show_tax_flag"
+                                       value="1"
+                                       {{ old('pos_show_tax_flag', $settings['pos_show_tax_flag'] ?? '1') == '1' ? 'checked' : '' }}
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5">
+                                <div class="ml-3">
+                                    <span class="text-sm font-semibold text-gray-900">Tampilkan Checkbox No-Tax di Kasir</span>
+                                    <p class="text-xs text-gray-600 mt-1">Jika aktif, kasir bisa mencentang kotak kosong pembebasan pajak/pembuatan bill sementara saat memesan.</p>
+                                </div>
+                            </label>
                         </div>
                         
                         <div>

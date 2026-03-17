@@ -199,15 +199,17 @@
                     </div>
                     
                     <!-- No Tax Mode Checkbox -->
+                    @if (\App\Models\Setting::get('pos_show_tax_flag', '1') == '1')
                     <div class="mb-3">
                         <label class="flex items-center cursor-pointer">
-                            <input type="checkbox" 
-                                   x-model="flag" 
-                                   @change="calculateTotals()" 
+                            <input type="checkbox"
+                                   x-model="flag"
+                                   @change="calculateTotals()"
                                    class="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 focus:ring-2">
+                            <span class="ml-2 text-sm font-medium text-gray-700">Bill Sementara (Tanpa Pajak)</span>
                         </label>
                     </div>
-                    
+                    @endif
                     <template x-if="orderType === 'dine_in'">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-chair text-primary-600"></i>

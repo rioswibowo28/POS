@@ -35,6 +35,7 @@ class SettingController extends Controller
                 'use_shifts' => 'nullable|boolean',
                 'include_temp_orders_in_shift_close' => 'nullable|boolean',
                 'cashier_can_access_reports' => 'nullable|boolean',
+                'pos_show_tax_flag' => 'nullable|boolean',
                 'customer_display_poster' => 'nullable|image|mimes:png,jpg,jpeg|max:10240',
                 'customer_display_mode' => 'nullable|in:local,network',
                 'midtrans_enabled' => 'nullable|boolean',
@@ -128,7 +129,7 @@ class SettingController extends Controller
             }
             
             // Handle unchecked booleans
-            $booleanSettings = ['midtrans_enabled', 'midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports'];
+            $booleanSettings = ['midtrans_enabled', 'midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports', 'pos_show_tax_flag'];
             foreach ($booleanSettings as $boolKey) {
                 if (!array_key_exists($boolKey, $validated) && !$request->hasFile($boolKey)) {
                      $this->settingRepository->setByKey($boolKey, '0', 'boolean');
