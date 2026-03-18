@@ -36,10 +36,11 @@
             }
             
             #receipt {
-                width: 58mm;
-                max-width: 58mm;
-                margin: 0;
-                padding: 2mm;
+                width: 100%;
+                max-width: 48mm; /* Area print efektif dlm kertas 58mm biasanya hanya 48mm */
+                margin: 0 auto;
+                padding: 0 2mm; 
+                box-sizing: border-box;
                 box-shadow: none !important;
                 border-radius: 0 !important;
             }
