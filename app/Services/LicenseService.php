@@ -83,7 +83,7 @@ class LicenseService
         $apiUrl = \license_config('server_url', 'http://localhost:8000') . '/api/license/activate';
         
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(10)->post($apiUrl, [
+            $response = \Illuminate\Support\Facades\Http::timeout(60)->post($apiUrl, [
                 'license_key' => $licenseKey,
                 'customer_name' => $customerName,
                 'ip_address' => $ip,
@@ -223,7 +223,7 @@ class LicenseService
         $lookupUrl = rtrim($serverUrl, '/') . '/api/license/lookup';
 
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(10)->post($lookupUrl, [
+            $response = \Illuminate\Support\Facades\Http::timeout(60)->post($lookupUrl, [
                 'license_key' => $licenseKey,
             ]);
 
@@ -258,7 +258,7 @@ class LicenseService
             $activateUrl = rtrim($serverUrl, '/') . '/api/license/activate';
             $customerName = $data['customer_name'] ?? $data['business_name'] ?? '';
 
-            $activateResponse = \Illuminate\Support\Facades\Http::timeout(10)->post($activateUrl, [
+            $activateResponse = \Illuminate\Support\Facades\Http::timeout(60)->post($activateUrl, [
                 'license_key' => $licenseKey,
                 'customer_name' => $customerName,
                 'ip_address' => $ip,
@@ -425,7 +425,7 @@ class LicenseService
         $apiUrl = \license_config('server_url', 'http://localhost:8000') . '/api/license/verify';
         
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(10)->post($apiUrl, [
+            $response = \Illuminate\Support\Facades\Http::timeout(60)->post($apiUrl, [
                 'license_key' => $licenseKey,
             ]);
 

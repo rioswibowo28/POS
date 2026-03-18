@@ -73,7 +73,7 @@ class LicenseController extends Controller
         $apiUrl = rtrim($serverUrl, '/') . '/api/license/lookup';
 
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(5)->post($apiUrl, [
+            $response = \Illuminate\Support\Facades\Http::timeout(60)->post($apiUrl, [
                 'license_key' => $request->license_key,
             ]);
 

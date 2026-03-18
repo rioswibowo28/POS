@@ -151,9 +151,9 @@ Agar kasir tidak perlu repot membuka Laragon dan menekan tombol *Start* setiap k
    - Klik kanan di area kosong pada folder tersebut > pilih **New** > **Shortcut**.
    - Pada kolom *location/URL*, masukkan:
      ```
-     "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk http://pos-resto.test
+     "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk --kiosk-printing http://pos-resto.test
      ```
-     *(Catatan: Sesuaikan arah folder Chrome jika berbeda. Tambahan `--kiosk` opsional jika Bapak/Ibu ingin Chrome langsung terbuka dalam mode Layar Penuh/Fullscreen persis seperti mesin POS ATM asli. Hapus `--kiosk` jika ingin jendela biasa).*
+     *(Catatan: Sesuaikan arah folder Chrome jika berbeda. Tambahan `--kiosk` opsional jika Bapak/Ibu ingin Chrome langsung terbuka dalam mode Layar Penuh/Fullscreen persis seperti mesin POS ATM asli. Tambahan `--kiosk-printing` berfungsi agar bisa langsung mencetak struk tanpa muncul dialog print dari Windows. Hapus flag tersebut jika ingin jendela dan proses print biasa).*
    - Klik **Next**, beri nama shortcut (misalnya "Mulai Kasir POS"), lalu klik **Finish**.
 
 Mulai sekarang, ketika tombol *Power* PC dinyalakan, server akan aktif sendiri, dan Chrome akan langsung terbuka menampilkan halaman Login POS tanpa perlu di-_klik_ satupun oleh kasir.

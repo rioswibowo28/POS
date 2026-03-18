@@ -10,9 +10,24 @@
             body {
                 background-color: #f3f4f6;
                 padding: 20px;
+                display: flex;
+                justify-content: center;
+            }
+            .max-w-2xl {
+                width: 58mm;
+            }
+            #receipt {
+                width: 58mm;
+                max-width: 58mm;
+                margin: 0 auto;
             }
         }
         
+        @page {
+            margin: 0;
+            size: 58mm auto;
+        }
+
         @media print {
             body {
                 margin: 0;
@@ -21,10 +36,10 @@
             }
             
             #receipt {
-                width: 80mm;
-                max-width: 80mm;
+                width: 58mm;
+                max-width: 58mm;
                 margin: 0;
-                padding: 5mm;
+                padding: 2mm;
                 box-shadow: none !important;
                 border-radius: 0 !important;
             }
@@ -34,56 +49,62 @@
             }
             
             #receipt {
-                font-size: 10px;
-                line-height: 1.3;
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 8pt;
+                line-height: 1.2;
+                color: #000;
             }
             
             #receipt h1 {
-                font-size: 14px !important;
-                margin-bottom: 3px;
+                font-size: 11pt !important;
+                margin-bottom: 2px;
             }
             
             #receipt h3 {
-                font-size: 11px !important;
-                margin-bottom: 3px;
+                font-size: 9pt !important;
+                margin-bottom: 2px;
             }
             
             #receipt img {
-                max-height: 40px !important;
-                margin-bottom: 3px;
+                max-height: 30px !important;
+                margin-bottom: 2px;
             }
             
             #receipt table {
-                font-size: 9px !important;
+                font-size: 8pt !important;
+                width: 100%;
+            }
+            
+            #receipt table th, #receipt table td {
+                padding: 1px 0 !important;
             }
             
             #receipt .text-2xl {
-                font-size: 14px !important;
+                font-size: 11pt !important;
             }
             
             #receipt .text-lg {
-                font-size: 11px !important;
+                font-size: 10pt !important;
             }
             
             #receipt .text-sm {
-                font-size: 9px !important;
+                font-size: 8pt !important;
             }
             
             #receipt .mb-4 {
-                margin-bottom: 8px !important;
-            }
-            
-            #receipt .pb-4 {
-                padding-bottom: 8px !important;
-            }
-            
-            #receipt .mb-2 {
                 margin-bottom: 4px !important;
             }
             
-            #receipt .py-1 {
-                padding-top: 2px !important;
-                padding-bottom: 2px !important;
+            #receipt .pb-4 {
+                padding-bottom: 4px !important;
+            }
+            
+            #receipt .mb-2 {
+                margin-bottom: 2px !important;
+            }
+            
+            #receipt * {
+                color: #000 !important;
             }
         }
     </style>
@@ -221,16 +242,18 @@
     </div>
     
     <!-- Actions -->
-    <div class="mt-6 flex gap-4 no-print">
-        <button onclick="window.print()" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition flex-1">
+    <div class="mt-6 flex flex-col gap-3 no-print">
+        <button onclick="window.print()" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition text-center w-full">
             <i class="fas fa-print mr-2"></i> Print Receipt
         </button>
-        <a href="{{ route('pos.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition flex-1 text-center">
-            <i class="fas fa-plus mr-2"></i> New Order
-        </a>
-        <a href="{{ route('orders.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 px-6 rounded-lg transition flex-1 text-center">
-            <i class="fas fa-list mr-2"></i> All Orders
-        </a>
+        <div class="flex gap-2">
+            <a href="{{ route('pos.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg transition flex-1 text-center text-sm">
+                <i class="fas fa-plus mr-1"></i> New
+            </a>
+            <a href="{{ route('orders.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg transition flex-1 text-center text-sm">
+                <i class="fas fa-list mr-1"></i> Orders
+            </a>
+        </div>
     </div>
 </div>
 

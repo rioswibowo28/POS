@@ -13,16 +13,50 @@
             <!-- Search & Categories -->
             <div class="border-b pb-4 mb-4">
                 <!-- Search -->
-                <div class="relative mb-4">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <i class="fas fa-search text-gray-400"></i>
-                    </div>
-                    <input type="text" 
-                           x-model="searchQuery"
-                           @input="filterProducts()"
-                           class="input pl-10" 
-                           placeholder="Search products...">
-                </div>
+                  <div class="relative mb-4" @click.outside="if(!event.target.closest('.keyboard-container')) showKeyboard = false">
+                      <!-- Wrap input and icon together so inset-y-0 only measures the input height -->
+                        <div class="relative mb-3">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text"
+                                   x-model="searchQuery"
+                                   @input="filterProducts()"
+                                   @focus="showKeyboard = true"
+                                   inputmode="none"
+                                   class="input w-full"
+                                   style="padding-left: 2.5rem;"
+                                     placeholder="Search products...">
+                          </div>
+                      <!-- On-Screen Keyboard -->
+                      <div x-show="showKeyboard" x-transition class="keyboard-container absolute z-50 bg-gray-100 border border-gray-300 rounded-xl shadow-2xl p-3" style="top: 100%; left: 0; right: 0; margin-top: 5px;">
+                          <!-- Row 1 -->
+                          <div class="flex justify-center gap-1 mb-2">
+                              <template x-for="key in ['q','w','e','r','t','y','u','i','o','p']">
+                                  <button @click.prevent="typeChar(key)" class="w-10 h-12 bg-white rounded shadow text-lg font-medium hover:bg-gray-200 uppercase" x-text="key"></button>
+                              </template>
+                          </div>
+                          <!-- Row 2 -->
+                          <div class="flex justify-center gap-1 mb-2">
+                              <template x-for="key in ['a','s','d','f','g','h','j','k','l']">
+                                  <button @click.prevent="typeChar(key)" class="w-10 h-12 bg-white rounded shadow text-lg font-medium hover:bg-gray-200 uppercase" x-text="key"></button>
+                              </template>
+                          </div>
+                          <!-- Row 3 -->
+                          <div class="flex justify-center gap-1 mb-2">
+                              <template x-for="key in ['z','x','c','v','b','n','m']">
+                                  <button @click.prevent="typeChar(key)" class="w-10 h-12 bg-white rounded shadow text-lg font-medium hover:bg-gray-200 uppercase" x-text="key"></button>
+                              </template>
+                          </div>
+                          <!-- Row 4 -->
+                          <div class="flex justify-center gap-2">
+                              <button @click.prevent="clearSearch()" class="px-4 h-12 bg-red-100 text-red-600 rounded shadow font-medium hover:bg-red-200">Clear</button>
+                              <button @click.prevent="typeChar(' ')" class="flex-1 h-12 bg-white rounded shadow hover:bg-gray-200"></button>
+                              <button @click.prevent="deleteChar()" class="px-4 h-12 bg-gray-200 rounded shadow hover:bg-gray-300"><i class="fas fa-backspace"></i></button>
+                              <button @click.prevent="showKeyboard = false" class="px-4 h-12 bg-primary-600 text-white rounded shadow font-medium hover:bg-primary-700">Done</button>
+                          </div>
+                      </div>
+                  </div>
                 
                 <!-- Categories -->
                 <div class="flex gap-2 overflow-x-auto pb-2">
@@ -189,8 +223,22 @@ function editOrderApp() {
         })) !!},
         filteredProducts: [],
         searchQuery: '',
+        showKeyboard: false,
         selectedCategory: 'favorit',
-        
+
+        typeChar(char) {
+            this.searchQuery += char;
+            this.filterProducts();
+        },
+        deleteChar() {
+            this.searchQuery = this.searchQuery.slice(0, -1);
+            this.filterProducts();
+        },
+        clearSearch() {
+            this.searchQuery = '';
+            this.filterProducts();
+        },
+
         // Cart & Order
         cart: {!! json_encode($order->items->map(function($item) {
             return [
