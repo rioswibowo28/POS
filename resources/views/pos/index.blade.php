@@ -623,11 +623,11 @@ function posApp() {
             }
 
             // Fallback Ekstrem untuk HTTP Laragon / Localhost biasa
-            // Asumsi: Layar kedua berada di EXTEND sebelah KANAN layar utama
-            const monitorLebar = window.screen.width || screen.availWidth;
+            // Memaksa window ke sebelah kanan layar utama (menggunakan innerWidth + margin aman)
+            const monitorLebar = window.screen.availWidth || 1920; 
             
             // Buka langsung jendela dengan titik koordinat X (left) di luar layar pertama
-            let popup = window.open(url, 'CustomerDisplayWin', `left=${monitorLebar},top=0,width=1000,height=700,menubar=no,toolbar=no,location=no,status=no,resizable=yes`);
+            let popup = window.open(url, 'CustomerDisplayWin', `left=${monitorLebar + 50},top=0,width=1024,height=768,menubar=no,toolbar=no,location=no,status=no,resizable=yes`);
             
             if(popup) {
                 setTimeout(() => {
