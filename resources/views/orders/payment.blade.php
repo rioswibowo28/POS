@@ -108,22 +108,46 @@
                 </div>
                 
                 <!-- Amount Paid -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Amount Paid</label>
-                    <input type="text" 
-                           x-model="amountPaidFormatted"
-                           @input="handleAmountInput($event.target.value)"
-                           class="input" 
-                           placeholder="0"
-                           required>
-                    
-                    <!-- Quick Amount Buttons -->
-                    <div class="grid grid-cols-4 gap-2 mt-3">
-                        <button type="button" @click="setAmount({{ $order->total }})" class="btn-secondary text-xs py-2">Exact</button>
-                        <button type="button" @click="setAmount(50000)" class="btn-secondary text-xs py-2">50k</button>
-                        <button type="button" @click="setAmount(100000)" class="btn-secondary text-xs py-2">100k</button>
-                        <button type="button" @click="setAmount(200000)" class="btn-secondary text-xs py-2">200k</button>
-                    </div>
+                  <div class="mb-6 relative" @click.outside="if(!event.target.closest('.keypad-container')) showKeypad = false">
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Amount Paid</label>
+                      <div class="relative">
+                          <input type="text"
+                                 inputmode="none"
+                                 x-model="amountPaidFormatted"
+                                 @input="handleAmountInput($event.target.value)"
+                                 @focus="showKeypad = true"
+                                 class="input text-lg font-bold w-full"
+                                 placeholder="0"
+                                 required>
+                          <button type="button" @click="showKeypad = !showKeypad" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
+                              <i class="fas fa-keyboard text-xl"></i>
+                          </button>
+                      </div>
+
+                      <!-- Quick Amount Buttons -->
+                      <div class="grid grid-cols-4 gap-2 mt-3">
+                          <button type="button" @click="setAmount({{ $order->total }})" class="btn-secondary text-xs py-2">Exact</button>
+                          <button type="button" @click="setAmount(50000)" class="btn-secondary text-xs py-2">50k</button>
+                          <button type="button" @click="setAmount(100000)" class="btn-secondary text-xs py-2">100k</button>
+                          <button type="button" @click="setAmount(200000)" class="btn-secondary text-xs py-2">200k</button>
+                      </div>
+
+                      <!-- On-Screen Keypad -->
+                      <div x-show="showKeypad" 
+                           x-transition
+                           class="keypad-container mt-3 bg-gray-50 border border-gray-200 rounded-xl p-3 grid grid-cols-3 gap-2">
+                           
+                           <template x-for="n in [1,2,3,4,5,6,7,8,9]" :key="n">
+                               <button type="button" @click="appendNumber(n)" class="bg-white hover:bg-gray-100 text-gray-800 font-bold text-xl py-3 rounded-lg shadow-sm border border-gray-200" x-text="n"></button>
+                           </template>
+                           
+                           <button type="button" @click="appendNumber('00')" class="bg-white hover:bg-gray-100 text-gray-800 font-bold text-xl py-3 rounded-lg shadow-sm border border-gray-200">00</button>
+                           <button type="button" @click="appendNumber(0)" class="bg-white hover:bg-gray-100 text-gray-800 font-bold text-xl py-3 rounded-lg shadow-sm border border-gray-200">0</button>
+                           <button type="button" @click="deleteNumber()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xl py-3 rounded-lg shadow-sm border border-red-200">
+                              <i class="fas fa-backspace"></i>
+                           </button>
+                           <button type="button" @click="clearNumber()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-lg py-2 rounded-lg shadow-sm border border-gray-300 col-span-1">Clear</button>
+                           <button type="button" @click="showKeypad = false" class="bg-primary-600 hover:bg-primary-700 text-white font-bold text-lg py-2 rounded-lg shadow-sm col-span-2">Done</button>
                 </div>
                 
                 <!-- Change -->
@@ -181,6 +205,7 @@ function paymentApp() {
         amountPaid: {{ $order->total }},
         amountPaidFormatted: '{{ number_format($order->total, 0, ',', '.') }}',
         change: 0,
+        showKeypad: false,
         processing: false,
         paymentCompleted: false,
         midtransConfigured: {{ $midtransConfigured ? 'true' : 'false' }},
@@ -276,7 +301,32 @@ function paymentApp() {
             if (!amount || amount === 0) return '';
             return new Intl.NumberFormat('id-ID').format(amount);
         },
-        
+
+        appendNumber(num) {
+            let currentStr = this.amountPaid.toString();
+            if (currentStr === '0') currentStr = '';
+            
+            // Limit max digits
+            if (currentStr.length < 12) {
+                let newStr = currentStr + num;
+                this.handleAmountInput(newStr);
+            }
+        },
+
+        deleteNumber() {
+            let currentStr = this.amountPaid.toString();
+            if (currentStr.length > 1) {
+                let newStr = currentStr.slice(0, -1);
+                this.handleAmountInput(newStr);
+            } else {
+                this.handleAmountInput('0');
+            }
+        },
+
+        clearNumber() {
+            this.handleAmountInput('0');
+        },
+
         async processPayment() {
             // If QRIS is selected and Midtrans is configured, use Midtrans Snap
             if (this.paymentMethod === 'qris' && this.midtransConfigured) {
