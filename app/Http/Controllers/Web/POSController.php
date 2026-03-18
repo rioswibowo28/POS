@@ -139,9 +139,9 @@ class POSController extends Controller
         $posterImage = \App\Models\Setting::get('customer_display_poster');
         $displayMode = \App\Models\Setting::get('customer_display_mode', 'local');
         
-        // Convert to full URL if exists
+        // Use relative URL to avoid APP_URL mismatch on network/customer display access
         if ($posterImage) {
-            $posterImage = asset('storage/' . $posterImage);
+            $posterImage = '/storage/' . ltrim($posterImage, '/');
         }
         
         return view('pos.customer-display', compact('restaurantName', 'restaurantLogo', 'posterImage', 'displayMode'));

@@ -71,15 +71,57 @@ Panduan ini berisi langkah-langkah *step-by-step* untuk memindahkan dan menjalan
 ---
 
 ### TAHAP 5: Performa Server (Wajib di Production)
-Jika aplikasi di server baru ini ditujukan untuk kasir harian, maka sangat **disarankan** untuk menyalakan mode *cache* (kecepatan maksimal) dari Laravel. 
-Di dalam terminal (folder POS-RESTO), jalankan perintah-perintah *caching* ini secara bertahap:
+Jika aplikasi di server baru ini dipakai untuk kasir harian, mode *cache* Laravel sangat **disarankan** agar akses menu, login, dan transaksi lebih cepat serta stabil.
+
+#### 5.1 Kapan dijalankan?
+- Jalankan tahap ini **setelah** konfigurasi `.env` final dan migrasi database selesai.
+- Jalankan di mode production (`APP_ENV=production`, `APP_DEBUG=false`).
+- Lakukan dari terminal pada folder aplikasi:
+   ```bash
+   cd C:\laragon\www\POS-RESTO
+   ```
+
+#### 5.2 Jalankan cache satu per satu (urutan aman)
 ```bash
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 php artisan event:cache
 ```
-> *Peringatan: Jika suatu saat Bapak/Ibu **mengubah kode atau isi .env** di server baru, Bapak/Ibu harus menghapusnya dengan perintah `php artisan optimize:clear`.*
+
+Penjelasan singkat:
+- `config:cache` → Menggabungkan konfigurasi agar pembacaan config lebih cepat.
+- `route:cache` → Menyimpan daftar route ke cache (respon routing lebih cepat).
+- `view:cache` → *Pre-compile* blade view supaya render awal lebih ringan.
+- `event:cache` → Menyimpan pemetaan event-listener agar boot aplikasi lebih cepat.
+
+#### 5.3 Cara cek berhasil atau tidak
+- Jika berhasil, terminal biasanya menampilkan pesan sukses seperti *"Configuration cached successfully"* dan sejenisnya.
+- Jalankan cek ringkas berikut:
+   ```bash
+   php artisan about
+   ```
+   Pastikan bagian cache/status menunjukkan kondisi aktif (tergantung versi Laravel).
+
+#### 5.4 Jika ada perubahan `.env` atau kode
+Jika suatu saat Bapak/Ibu mengubah konfigurasi `.env`, route, event, atau tampilan, **wajib** bersihkan cache dulu lalu bangun ulang.
+
+1. Bersihkan seluruh cache Laravel:
+    ```bash
+    php artisan optimize:clear
+    ```
+2. Bangun kembali cache production:
+    ```bash
+    php artisan config:cache
+    php artisan route:cache
+    php artisan view:cache
+    php artisan event:cache
+    ```
+
+#### 5.5 Catatan penting operasional
+- Setelah `config:cache`, nilai `env()` tidak boleh dipakai langsung di file aplikasi (kecuali di file config).
+- Jika perintah `route:cache` gagal, biasanya ada route yang memakai closure. Solusinya: ubah route closure ke controller.
+- Untuk server kasir yang stabil, lakukan `optimize:clear` hanya saat maintenance/perubahan konfigurasi.
 
 ---
 

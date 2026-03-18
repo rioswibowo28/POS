@@ -84,6 +84,18 @@
             }
         }
     </style>
+    <script>
+        // Auto-scale for 1024x768 screens to simulate 75% zoom
+        function adjustZoom() {
+            if (window.innerWidth <= 1024) {
+                document.body.style.zoom = "75%";
+            } else {
+                document.body.style.zoom = "100%";
+            }
+        }
+        window.addEventListener('resize', adjustZoom);
+        document.addEventListener('DOMContentLoaded', adjustZoom);
+    </script>
 </head>
     <body x-data="customerDisplay()" x-init="init()" class="relative">
     
@@ -121,7 +133,7 @@
         <!-- Receipt Header -->
         <div class="text-center py-8 px-8 border-b-4 border-gray-800 bg-gradient-to-b from-gray-50 to-white" style="margin: 20px; margin-bottom: 0;">
             @if($restaurantLogo)
-            <img src="{{ asset('storage/' . $restaurantLogo) }}" alt="{{ $restaurantName }}" class="h-28 w-28 object-contain mx-auto mb-8">
+            <img src="{{ '/storage/' . ltrim($restaurantLogo, '/') }}" alt="{{ $restaurantName }}" class="h-28 w-28 object-contain mx-auto mb-8">
             @endif
             <h1 class="text-xl font-bold text-gray-900 uppercase tracking-wide mb-4">{{ $restaurantName }}</h1>
             <p class="text-base text-gray-600 font-medium">Customer Display</p>

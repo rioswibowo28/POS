@@ -24,6 +24,18 @@
     <style>
         [x-cloak] { display: none !important; }
     </style>
+    <script>
+        // Auto-scale for 1024x768 screens to simulate 75% zoom
+        function adjustZoom() {
+            if (window.innerWidth <= 1024) {
+                document.body.style.zoom = "75%";
+            } else {
+                document.body.style.zoom = "100%";
+            }
+        }
+        window.addEventListener('resize', adjustZoom);
+        document.addEventListener('DOMContentLoaded', adjustZoom);
+    </script>
 </head>
 <body class="bg-gray-50 font-sans antialiased">
     <div class="flex h-screen overflow-hidden">
