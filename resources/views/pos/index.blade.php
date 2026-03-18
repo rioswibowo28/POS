@@ -623,18 +623,17 @@ function posApp() {
             }
 
             // Fallback Ekstrem untuk HTTP Laragon / Localhost biasa
-            // Memaksa window ke sebelah kanan layar utama (menggunakan innerWidth + margin aman)
-            const monitorLebar = window.screen.availWidth || 1920; 
+            const monitorLebar = window.screen.availWidth || 1024; 
             
-            // Buka langsung jendela dengan titik koordinat X (left) di luar layar pertama
-            let popup = window.open(url, 'CustomerDisplayWin', `left=${monitorLebar + 50},top=0,width=1024,height=768,menubar=no,toolbar=no,location=no,status=no,resizable=yes`);
+            // Buka jendela
+            let popup = window.open(url, 'CustomerDisplayWin', `width=1000,height=700,menubar=no,toolbar=no,location=no,status=no,resizable=yes`);
             
             if(popup) {
                 setTimeout(() => {
-                    // Maksimalkan ukuran setelah dipindah ke layar 2
-                    popup.resizeTo(window.screen.availWidth, window.screen.availHeight);
+                    // Paksa geser jendela ke arah monitor kedua (layar kanan)
+                    popup.moveTo(monitorLebar, 0);
                     popup.focus();
-                }, 300);
+                }, 500);
             } else {
                 alert("Gagal membuka layar kedua. Mohon matikan POP-UP BLOCKER di ujung kanan atas URL bar browser Anda.");
             }
