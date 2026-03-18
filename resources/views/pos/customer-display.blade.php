@@ -85,10 +85,10 @@
         }
     </style>
     <script>
-        // Auto-scale for 1024x768 screens to simulate 75% zoom
+        // Auto-scale for 1024x768 screens to simulate 67% zoom
         function adjustZoom() {
             if (window.innerWidth <= 1024) {
-                document.body.style.zoom = "75%";
+                document.body.style.zoom = "67%";
             } else {
                 document.body.style.zoom = "100%";
             }
