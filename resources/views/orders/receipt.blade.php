@@ -126,8 +126,8 @@
         
         <div id="receipt-content" style="font-size: 6.5pt; font-family: 'Courier New', Courier, monospace; padding-top: 5mm;">
             <div class="text-center" style="margin-bottom: 8px;">
-                <div>{{ strtoupper($restaurantName) }}</div>
-                <div>{{ strtoupper($restaurantAddress) }}</div>
+                <div style="font-size: 8.5pt; font-weight: bold;">{{ strtoupper($restaurantName) }}</div>
+                <div style="font-size: 7.5pt; font-weight: bold;">{{ strtoupper($restaurantAddress) }}</div>
                 @if($restaurantNpwp)
                 <div>NPWP : {{ $restaurantNpwp }}</div>
                 @endif
