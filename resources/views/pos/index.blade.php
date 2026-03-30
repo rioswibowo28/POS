@@ -11,9 +11,9 @@
         <div class="bg-amber-50 border border-amber-300 rounded-lg p-3 mb-3 flex items-center gap-3">
             <i class="fas fa-exclamation-triangle text-amber-500 text-lg"></i>
             <div class="text-sm text-amber-800">
-                <span class="font-semibold">Peringatan Limit Penjualan!</span>
-                Total hari ini: <strong x-text="formatRupiah(todayOrderTotal)"></strong> / <strong x-text="formatRupiah(orderLimitAmount)"></strong>
-                <span class="text-amber-600">(berlaku <span x-text="orderLimitStart"></span> - <span x-text="orderLimitEnd"></span>)</span>
+                <span class="font-semibold">{{ __('pos.sales_limit_warning') }}</span>
+                {{ __('pos.today_total') }}: <strong x-text="formatRupiah(todayOrderTotal)"></strong> / <strong x-text="formatRupiah(orderLimitAmount)"></strong>
+                <span class="text-amber-600">({{ __('pos.valid') }} <span x-text="orderLimitStart"></span> - <span x-text="orderLimitEnd"></span>)</span>
             </div>
         </div>
     </template>
@@ -22,9 +22,9 @@
     <div x-show="step === 'table' && orderType === 'dine_in'" class="space-y-4">
         <div class="bg-white rounded-lg shadow-sm p-4">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-900">Select Table</h3>
+                <h3 class="text-xl font-bold text-gray-900">{{ __('pos.select_table') }}</h3>
                 <button @click="orderType = 'take_away'; step = 'menu'" class="btn-secondary text-sm">
-                    <i class="fas fa-shopping-bag mr-2"></i> Switch to Takeaway
+                    <i class="fas fa-shopping-bag mr-2"></i> {{ __('pos.switch_takeaway') }}
                 </button>
             </div>
             
@@ -85,49 +85,55 @@
                                        inputmode="none"
                                        class="input w-full"
                                        style="padding-left: 2.5rem;"
-                                         placeholder="Search products...">
+                                         placeholder="{{ __('pos.search_products') }}">
                               </div>
-                          <!-- On-Screen Keyboard -->
-                          <div x-show="showKeyboard" x-transition class="keyboard-container absolute z-50 bg-gray-100 border border-gray-300 rounded-xl shadow-2xl p-3" style="top: 100%; left: 0; right: 0; margin-top: 5px;">
-                              <!-- Row 1 -->
-                              <div class="flex justify-center gap-1 mb-2">
-                                  <template x-for="key in ['q','w','e','r','t','y','u','i','o','p']">
-                                      <button @click.prevent="typeChar(key)" class="w-10 h-12 bg-white rounded shadow text-lg font-medium hover:bg-gray-200 uppercase" x-text="key"></button>
-                                  </template>
-                              </div>
-                              <!-- Row 2 -->
-                              <div class="flex justify-center gap-1 mb-2">
-                                  <template x-for="key in ['a','s','d','f','g','h','j','k','l']">
-                                      <button @click.prevent="typeChar(key)" class="w-10 h-12 bg-white rounded shadow text-lg font-medium hover:bg-gray-200 uppercase" x-text="key"></button>
-                                  </template>
-                              </div>
-                              <!-- Row 3 -->
-                              <div class="flex justify-center gap-1 mb-2">
-                                  <template x-for="key in ['z','x','c','v','b','n','m']">
-                                      <button @click.prevent="typeChar(key)" class="w-10 h-12 bg-white rounded shadow text-lg font-medium hover:bg-gray-200 uppercase" x-text="key"></button>
-                                  </template>
-                              </div>
-                              <!-- Row 4 -->
-                              <div class="flex justify-center gap-2">
-                                  <button @click.prevent="clearSearch()" class="px-4 h-12 bg-red-100 text-red-600 rounded shadow font-medium hover:bg-red-200">Clear</button>
-                                  <button @click.prevent="typeChar(' ')" class="flex-1 h-12 bg-white rounded shadow hover:bg-gray-200"></button>
-                                  <button @click.prevent="deleteChar()" class="px-4 h-12 bg-gray-200 rounded shadow hover:bg-gray-300"><i class="fas fa-backspace"></i></button>
-                                  <button @click.prevent="showKeyboard = false" class="px-4 h-12 bg-primary-600 text-white rounded shadow font-medium hover:bg-primary-700">Done</button>
-                              </div>
-                          </div>
-                      </div>
-                    
-                    <!-- Categories -->
+                                                  <!-- On-Screen Keyboard -->
+                        <div x-show="showKeyboard" x-transition class="keyboard-container absolute z-50 bg-gray-100 border border-gray-300 rounded-xl shadow-2xl p-4 w-full" style="top: 100%; left: 0; right: 0; margin-top: 5px; max-width: 100%;">
+                            <!-- Row 1 Numbers -->
+                            <div class="flex gap-1 mb-2">
+                                <template x-for="key in ['1','2','3','4','5','6','7','8','9','0','-','+']">
+                                    <button @click.prevent="typeChar(key)" class="flex-1 h-16 bg-white rounded shadow text-2xl font-medium hover:bg-gray-200" x-text="key"></button>
+                                </template>
+                            </div>
+                            <!-- Row 2 QWERTY -->
+                            <div class="flex gap-1 mb-2">
+                                <template x-for="key in ['q','w','e','r','t','y','u','i','o','p','[',']']">
+                                    <button @click.prevent="typeChar(key)" class="flex-1 h-16 bg-white rounded shadow text-2xl font-medium hover:bg-gray-200 uppercase" x-text="key.toUpperCase()"></button>
+                                </template>
+                            </div>
+                            <!-- Row 3 ASDF -->
+                            <div class="flex gap-1 mb-2 px-6">
+                                <template x-for="key in ['a','s','d','f','g','h','j','k','l',';','\'']">
+                                    <button @click.prevent="typeChar(key)" class="flex-1 h-16 bg-white rounded shadow text-2xl font-medium hover:bg-gray-200 uppercase" x-text="key.toUpperCase()"></button>
+                                </template>
+                            </div>
+                            <!-- Row 4 ZXCV -->
+                            <div class="flex gap-1 mb-2 px-12">
+                                <template x-for="key in ['z','x','c','v','b','n','m',',','.','/']">
+                                    <button @click.prevent="typeChar(key)" class="flex-1 h-16 bg-white rounded shadow text-2xl font-medium hover:bg-gray-200 uppercase" x-text="key.toUpperCase()"></button>
+                                </template>
+                            </div>
+                            <!-- Row 5 Actions -->
+                            <div class="flex gap-2 mt-4">
+                                <button @click.prevent="clearSearch()" class="px-6 py-4 flex-none w-32 text-xl bg-red-100 text-red-600 rounded shadow font-medium hover:bg-red-200">{{ __('pos.clear') }}</button>
+                                <button @click.prevent="typeChar(' ')" class="flex-1 h-16 bg-white rounded shadow hover:bg-gray-200 font-bold text-gray-400">SPACE</button>
+                                <button @click.prevent="deleteChar()" class="px-6 py-4 flex-none w-32 text-xl bg-gray-200 rounded shadow hover:bg-gray-300"><i class="fas fa-backspace"></i></button>
+                                <button @click.prevent="showKeyboard = false" class="px-6 py-4 flex-none w-32 text-xl bg-primary-600 text-white rounded shadow font-medium hover:bg-primary-700">{{ __('pos.done') }}</button>
+                            </div>
+                        </div>
+                    </div>
+
+                  <!-- Categories -->
                     <div class="flex gap-2 overflow-x-auto pb-2">
                         <button @click="selectedCategory = 'favorite'; filterProducts()"
                                 :class="selectedCategory === 'favorite' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700'"
                                 class="px-4 py-2 rounded-lg whitespace-nowrap text-sm font-medium transition">
-                            ⭐ Favorit
+                            ⭐ {{ __('pos.favorite') }}
                         </button>
                         <button @click="selectedCategory = null; filterProducts()"
                                 :class="selectedCategory === null ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700'"
                                 class="px-4 py-2 rounded-lg whitespace-nowrap text-sm font-medium transition">
-                            All
+                            {{ __('pos.all') }}
                         </button>
                         <button @click="selectedCategory = 'package'; filterProducts()"
                                 :class="selectedCategory === 'package' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700'"
@@ -154,7 +160,7 @@
                                 <!-- Savings badge -->
                                 <template x-if="pkg.savings > 0">
                                     <div class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow">
-                                        <span x-text="'Hemat ' + formatMoney(pkg.savings)"></span>
+                                        <span x-text="'{{ __('pos.save_money') }}' + formatMoney(pkg.savings)"></span>
                                     </div>
                                 </template>
 
@@ -184,7 +190,7 @@
                         <template x-if="filteredPackages.length === 0">
                             <div class="col-span-full text-center py-12 text-gray-400">
                                 <i class="fas fa-cubes text-5xl mb-3"></i>
-                                <p>Belum ada paket tersedia</p>
+                                <p>{{ __('pos.no_package') }}</p>
                             </div>
                         </template>
                     </div>
@@ -205,7 +211,7 @@
                                 <h4 class="font-semibold text-gray-900 text-sm mb-1" x-text="product.name"></h4>
                                 <p class="text-primary-600 font-bold" x-text="`Rp ${formatMoney(product.price)}`"></p>
                                 <template x-if="product.inventory && product.inventory.quantity <= product.inventory.min_quantity">
-                                    <span class="text-xs text-red-600">Stock Low</span>
+                                    <span class="text-xs text-red-600">{{ __('pos.stock_low') }}</span>
                                 </template>
                             </div>
                         </template>
@@ -221,7 +227,7 @@
                 <!-- Order Info Header -->
                 <div class="p-4 border-b bg-primary-50 flex-shrink-0">
                     <div class="flex items-center justify-between mb-2">
-                        <h3 class="font-bold text-gray-900">Order Details</h3>
+                        <h3 class="font-bold text-gray-900">{{ __('pos.order_details') }}</h3>
                         <div class="flex gap-2">
                             <button @click="openCustomerDisplay()" class="text-blue-600 hover:text-blue-700 text-sm" title="Open Customer Display">
                                 <i class="fas fa-tv mr-1"></i> Display
@@ -246,7 +252,7 @@
                     <template x-if="orderType === 'dine_in'">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-chair text-primary-600"></i>
-                            <span class="font-medium text-gray-900">Table <span x-text="selectedTableNumber"></span></span>
+                            <span class="font-medium text-gray-900">{{ __('pos.table') }} <span x-text="selectedTableNumber"></span></span>
                         </div>
                     </template>
                     
@@ -275,12 +281,12 @@
                 
                 <!-- Cart Items -->
                 <div class="flex-1 overflow-y-auto p-4 min-h-0 border-b" x-ref="cartContainer">
-                    <h3 class="font-semibold text-gray-900 mb-3">Cart Items (<span x-text="cartItems.length"></span>)</h3>
+                    <h3 class="font-semibold text-gray-900 mb-3">{{ __('pos.cart_items') }} (<span x-text="cartItems.length"></span>)</h3>
                     
                     <template x-if="cartItems.length === 0">
                         <div class="text-center py-12 text-gray-400">
                             <i class="fas fa-shopping-cart text-5xl mb-3"></i>
-                            <p>Cart is empty</p>
+                            <p>{{ __('pos.cart_empty') }}</p>
                         </div>
                     </template>
                     
@@ -314,7 +320,7 @@
                 <div class="border-t p-4 flex-shrink-0">
                     <div class="space-y-2 mb-4">
                         <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Subtotal</span>
+                            <span class="text-gray-600">{{ __('pos.subtotal') }}</span>
                             <span class="font-medium" x-text="`Rp ${formatMoney(subtotal)}`"></span>
                         </div>
                         <div class="flex justify-between text-sm">
@@ -325,7 +331,7 @@
                             <span class="font-medium" x-text="`Rp ${formatMoney(tax)}`"></span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-600">Discount</span>
+                            <span class="text-gray-600">{{ __('pos.discount') }}</span>
                             <input type="number" 
                                    x-model="discount"
                                    @input="calculateTotals()"
@@ -334,7 +340,7 @@
                                    min="0">
                         </div>
                         <div class="flex justify-between text-lg font-bold border-t pt-2">
-                            <span>Total</span>
+                            <span>{{ __('pos.total') }}</span>
                             <span class="text-primary-600" x-text="`Rp ${formatMoney(total)}`"></span>
                         </div>
                     </div>
@@ -345,7 +351,7 @@
                                 :class="cartItems.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'"
                                 class="w-full text-white font-semibold py-3 rounded-lg transition">
                             <i class="fas fa-check-circle mr-2"></i>
-                            Process Order
+                            {{ __('pos.process_order') }}
                         </button>
                         
                         <button @click="processOrderAndPayment()" 
@@ -353,13 +359,13 @@
                                 :class="cartItems.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'"
                                 class="w-full text-white font-semibold py-3 rounded-lg transition shadow-md">
                             <i class="fas fa-check-double mr-2"></i>
-                            Process Order & Payment
+                            {{ __('pos.process_order_payment') }}
                         </button>
                         
                         <button @click="cancelOrder()" 
                                 class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition">
                             <i class="fas fa-times-circle mr-2"></i>
-                            Cancel
+                            {{ __('pos.cancel') }}
                         </button>
                     </div>
                 </div>
@@ -427,9 +433,9 @@ function posApp() {
             
             this.filterProducts();
             
-            // If no favorites found, switch to All
+            // If no favorites found, switch to {{ __('pos.all') }}
             if (this.selectedCategory === 'favorite' && this.filteredProducts.length === 0) {
-                console.log('No favorite products found, switching to All');
+                console.log('No favorite products found, switching to {{ __('pos.all') }}');
                 this.selectedCategory = null;
                 this.filterProducts();
             }
@@ -904,3 +910,6 @@ function posApp() {
 </script>
 @endpush
 @endsection
+
+
+

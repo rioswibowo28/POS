@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Order')
-@section('header', 'Edit Order #' . $order->order_number)
+@section('title', __('edit_order.title'))
+@section('header', __('edit_order.title') . ' #' . $order->order_number)
 
 @section('content')
 <div x-data="editOrderApp()" x-init="init()" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -26,44 +26,50 @@
                                    inputmode="none"
                                    class="input w-full"
                                    style="padding-left: 2.5rem;"
-                                     placeholder="Search products...">
+                                     placeholder="{{ __('edit_order.search_products') }}">
                           </div>
-                      <!-- On-Screen Keyboard -->
-                      <div x-show="showKeyboard" x-transition class="keyboard-container absolute z-50 bg-gray-100 border border-gray-300 rounded-xl shadow-2xl p-3" style="top: 100%; left: 0; right: 0; margin-top: 5px;">
-                          <!-- Row 1 -->
-                          <div class="flex justify-center gap-1 mb-2">
-                              <template x-for="key in ['q','w','e','r','t','y','u','i','o','p']">
-                                  <button @click.prevent="typeChar(key)" class="w-10 h-12 bg-white rounded shadow text-lg font-medium hover:bg-gray-200 uppercase" x-text="key"></button>
-                              </template>
-                          </div>
-                          <!-- Row 2 -->
-                          <div class="flex justify-center gap-1 mb-2">
-                              <template x-for="key in ['a','s','d','f','g','h','j','k','l']">
-                                  <button @click.prevent="typeChar(key)" class="w-10 h-12 bg-white rounded shadow text-lg font-medium hover:bg-gray-200 uppercase" x-text="key"></button>
-                              </template>
-                          </div>
-                          <!-- Row 3 -->
-                          <div class="flex justify-center gap-1 mb-2">
-                              <template x-for="key in ['z','x','c','v','b','n','m']">
-                                  <button @click.prevent="typeChar(key)" class="w-10 h-12 bg-white rounded shadow text-lg font-medium hover:bg-gray-200 uppercase" x-text="key"></button>
-                              </template>
-                          </div>
-                          <!-- Row 4 -->
-                          <div class="flex justify-center gap-2">
-                              <button @click.prevent="clearSearch()" class="px-4 h-12 bg-red-100 text-red-600 rounded shadow font-medium hover:bg-red-200">Clear</button>
-                              <button @click.prevent="typeChar(' ')" class="flex-1 h-12 bg-white rounded shadow hover:bg-gray-200"></button>
-                              <button @click.prevent="deleteChar()" class="px-4 h-12 bg-gray-200 rounded shadow hover:bg-gray-300"><i class="fas fa-backspace"></i></button>
-                              <button @click.prevent="showKeyboard = false" class="px-4 h-12 bg-primary-600 text-white rounded shadow font-medium hover:bg-primary-700">Done</button>
-                          </div>
-                      </div>
-                  </div>
-                
-                <!-- Categories -->
+                                              <!-- On-Screen Keyboard -->
+                        <div x-show="showKeyboard" x-transition class="keyboard-container absolute z-50 bg-gray-100 border border-gray-300 rounded-xl shadow-2xl p-4 w-full" style="top: 100%; left: 0; right: 0; margin-top: 5px; max-width: 100%;">
+                            <!-- Row 1 Numbers -->
+                            <div class="flex gap-1 mb-2">
+                                <template x-for="key in ['1','2','3','4','5','6','7','8','9','0','-','+']">
+                                    <button @click.prevent="typeChar(key)" class="flex-1 h-16 bg-white rounded shadow text-2xl font-medium hover:bg-gray-200" x-text="key"></button>
+                                </template>
+                            </div>
+                            <!-- Row 2 QWERTY -->
+                            <div class="flex gap-1 mb-2">
+                                <template x-for="key in ['q','w','e','r','t','y','u','i','o','p','[',']']">
+                                    <button @click.prevent="typeChar(key)" class="flex-1 h-16 bg-white rounded shadow text-2xl font-medium hover:bg-gray-200 uppercase" x-text="key.toUpperCase()"></button>
+                                </template>
+                            </div>
+                            <!-- Row 3 ASDF -->
+                            <div class="flex gap-1 mb-2 px-6">
+                                <template x-for="key in ['a','s','d','f','g','h','j','k','l',';','\'']">
+                                    <button @click.prevent="typeChar(key)" class="flex-1 h-16 bg-white rounded shadow text-2xl font-medium hover:bg-gray-200 uppercase" x-text="key.toUpperCase()"></button>
+                                </template>
+                            </div>
+                            <!-- Row 4 ZXCV -->
+                            <div class="flex gap-1 mb-2 px-12">
+                                <template x-for="key in ['z','x','c','v','b','n','m',',','.','/']">
+                                    <button @click.prevent="typeChar(key)" class="flex-1 h-16 bg-white rounded shadow text-2xl font-medium hover:bg-gray-200 uppercase" x-text="key.toUpperCase()"></button>
+                                </template>
+                            </div>
+                            <!-- Row 5 Actions -->
+                            <div class="flex gap-2 mt-4">
+                                <button @click.prevent="clearSearch()" class="px-6 py-4 flex-none w-32 text-xl bg-red-100 text-red-600 rounded shadow font-medium hover:bg-red-200">{{ __('edit_order.clear') }}</button>
+                                <button @click.prevent="typeChar(' ')" class="flex-1 h-16 bg-white rounded shadow hover:bg-gray-200 font-bold text-gray-400">SPACE</button>
+                                <button @click.prevent="deleteChar()" class="px-6 py-4 flex-none w-32 text-xl bg-gray-200 rounded shadow hover:bg-gray-300"><i class="fas fa-backspace"></i></button>
+                                <button @click.prevent="showKeyboard = false" class="px-6 py-4 flex-none w-32 text-xl bg-primary-600 text-white rounded shadow font-medium hover:bg-primary-700">{{ __('edit_order.done') }}</button>
+                            </div>
+                        </div>
+                    </div>
+
+                  <!-- Categories -->
                 <div class="flex gap-2 overflow-x-auto pb-2">
                     <button @click="selectedCategory = 'favorit'; filterProducts()"
                             :class="selectedCategory === 'favorit' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700'"
                             class="px-4 py-2 rounded-lg whitespace-nowrap text-sm font-medium transition">
-                        <i class="fas fa-star mr-1"></i> Favorit
+                        <i class="fas fa-star mr-1"></i> {{ __('edit_order.favorite') }}
                     </button>
                     <button @click="selectedCategory = null; filterProducts()"
                             :class="selectedCategory === null ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700'"
@@ -97,7 +103,7 @@
                             <h4 class="font-semibold text-gray-900 text-sm mb-1" x-text="product.name"></h4>
                             <p class="text-primary-600 font-bold" x-text="`Rp ${formatMoney(product.price)}`"></p>
                             <template x-if="product.inventory && product.inventory.quantity <= product.inventory.min_quantity">
-                                <span class="text-xs text-red-600">Stock Low</span>
+                                <span class="text-xs text-red-600">{{ __('edit_order.stock_low') }}</span>
                             </template>
                         </div>
                     </template>
@@ -109,17 +115,17 @@
     <!-- Order Summary -->
     <div class="space-y-6">
         <div class="card">
-            <h3 class="text-lg font-semibold mb-4">Order Details</h3>
+            <h3 class="text-lg font-semibold mb-4">{{ __('edit_order.order_details') }}</h3>
             
             <form @submit.prevent="updateOrder()">
                 <!-- Table Selection (if dine in) -->
                 @if($order->type->value === 'dine_in')
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Table</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('edit_order.table') }}</label>
                     <select x-model="tableId" class="input">
-                        <option value="">Select Table</option>
+                        <option value="">{{ __('edit_order.select_table') }}</option>
                         @foreach($tables as $table)
-                        <option value="{{ $table->id }}">Table {{ $table->number }}</option>
+                        <option value="{{ $table->id }}">{{ __('edit_order.table') }} {{ $table->number }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -127,19 +133,19 @@
                 
                 <!-- Customer Name -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
-                    <input type="text" x-model="customerName" @input="syncToCustomerDisplay()" class="input" placeholder="Optional">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('edit_order.customer_name') }}</label>
+                    <input type="text" x-model="customerName" @input="syncToCustomerDisplay()" class="input" placeholder="{{ __('edit_order.optional') }}">
                 </div>
                 
                 <!-- Notes -->
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                    <textarea x-model="notes" rows="2" class="input" placeholder="Optional"></textarea>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('edit_order.notes') }}</label>
+                    <textarea x-model="notes" rows="2" class="input" placeholder="{{ __('edit_order.optional') }}"></textarea>
                 </div>
                 
                 <!-- Cart Items -->
                 <div class="mb-4">
-                    <h4 class="font-semibold mb-3">Cart Items</h4>
+                    <h4 class="font-semibold mb-3">{{ __('edit_order.cart_items') }}</h4>
                     <div class="space-y-2 max-h-64 overflow-y-auto">
                         <template x-for="(item, index) in cart" :key="index">
                             <div class="flex items-center gap-2 p-2 bg-gray-50 rounded">
@@ -157,7 +163,7 @@
                         </template>
                         
                         <template x-if="cart.length === 0">
-                            <p class="text-center text-gray-400 py-4 text-sm">No items in cart</p>
+                            <p class="text-center text-gray-400 py-4 text-sm">{{ __('edit_order.no_items') }}</p>
                         </template>
                     </div>
                 </div>
@@ -165,7 +171,7 @@
                 <!-- Total -->
                 <div class="border-t pt-4 space-y-2 mb-4">
                     <div class="flex justify-between text-sm">
-                        <span>Subtotal</span>
+                        <span>{{ __('edit_order.subtotal') }}</span>
                         <span x-text="`Rp ${formatMoney(subtotal)}`"></span>
                     </div>
                     <div class="flex justify-between text-sm">
@@ -176,7 +182,7 @@
                         <span x-text="`Rp ${formatMoney(tax)}`"></span>
                     </div>
                     <div class="flex justify-between text-lg font-bold border-t pt-2">
-                        <span>Total</span>
+                        <span>{{ __('edit_order.total') }}</span>
                         <span class="text-primary-600" x-text="`Rp ${formatMoney(total)}`"></span>
                     </div>
                 </div>
@@ -187,16 +193,16 @@
                             :disabled="cart.length === 0"
                             :class="cart.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'"
                             class="w-full text-white font-semibold py-3 rounded-lg transition">
-                        <i class="fas fa-save mr-2"></i> Update Order
+                        <i class="fas fa-save mr-2"></i> {{ __('edit_order.update_order') }}
                     </button>
                     <a href="{{ route('orders.payment', $order->id) }}" 
                        style="background-color: #16a34a; color: white;"
                        class="block w-full hover:bg-green-700 text-white font-semibold text-center py-3 rounded-lg transition shadow-md">
-                        <i class="fas fa-credit-card mr-2"></i> Process Payment
+                        <i class="fas fa-credit-card mr-2"></i> {{ __('edit_order.process_payment') }}
                     </a>
-                    <a href="{{ route('pos.index') }}" class="block w-full btn-secondary text-center py-3">
-                        <i class="fas fa-times mr-2"></i> Cancel
-                    </a>
+                    <button type="button" @click="cancelEdit()" class="block w-full btn-secondary text-center py-3">
+                        <i class="fas fa-times mr-2"></i> {{ __('edit_order.cancel') }}
+                    </button>
                 </div>
             </form>
         </div>
@@ -254,9 +260,14 @@ function editOrderApp() {
         orderType: '{{ $order->type->value }}',
         taxRate: {{ \App\Models\Setting::get('tax_percentage', '10') }} / 100,
         taxType: '{{ \App\Models\Setting::get('tax_type', 'exclude') }}',
-        
+        displayMode: '{{ \App\Models\Setting::get('customer_display_mode', 'local') }}',
+        broadcastChannel: null,
+
         init() {
             this.filterProducts();
+            if (typeof BroadcastChannel !== 'undefined') {
+                this.broadcastChannel = new BroadcastChannel('pos_customer_display');
+            }
             this.syncToCustomerDisplay();
         },
         
@@ -280,7 +291,15 @@ function editOrderApp() {
                 taxRate: this.taxRate
             };
             localStorage.setItem('pos_customer_display', JSON.stringify(displayData));
-            
+
+            if (this.broadcastChannel) {
+                try {
+                    this.broadcastChannel.postMessage(displayData);
+                } catch (e) {
+                    console.error('BroadcastChannel error:', e);
+                }
+            }
+
             // Also sync to server for cross-device support
             fetch('/api/customer-display/data', {
                 method: 'POST',
@@ -299,7 +318,7 @@ function editOrderApp() {
                 
                 let matchesCategory;
                 if (this.selectedCategory === 'favorit') {
-                    matchesCategory = product.is_favorite === true;
+                    matchesCategory = (product.is_favorite === true || product.is_favorite === 1 || product.is_favorite === '1');
                 } else if (this.selectedCategory === null) {
                     matchesCategory = true;
                 } else {
@@ -370,6 +389,31 @@ function editOrderApp() {
             return new Intl.NumberFormat('id-ID').format(amount);
         },
         
+        cancelEdit() {
+            const emptyData = {
+                cartItems: [], subtotal: 0, tax: 0, discount: 0, total: 0,
+                taxRate: this.taxRate, taxType: this.taxType, orderType: '', tableNumber: '',
+                customerName: '', mode: '', orderNumber: ''
+            };
+            localStorage.removeItem('pos_customer_display');
+            
+            if (this.broadcastChannel) {
+                try { this.broadcastChannel.postMessage(emptyData); } catch(e) {}
+            }
+            if (this.displayMode === 'network') {
+                fetch('/api/customer-display/data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify(emptyData)
+                }).catch(err => console.error('Failed to sync empty data', err));
+            }
+
+            window.location.href = '{{ route("pos.index") }}';
+        },
+
         updateOrder() {
             if (this.cart.length === 0) {
                 alert('Please add items to cart');
@@ -436,3 +480,8 @@ function editOrderApp() {
 }
 </script>
 @endsection
+
+
+
+
+
