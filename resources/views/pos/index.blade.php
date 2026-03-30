@@ -135,11 +135,13 @@
                                 class="px-4 py-2 rounded-lg whitespace-nowrap text-sm font-medium transition">
                             {{ __('pos.all') }}
                         </button>
-                        <button @click="selectedCategory = 'package'; filterProducts()"
+                        @if(\App\Models\Setting::get('enable_packages', '1') == '1')
+                        <button @click="selectedCategory = 'package'; filterProducts()" 
                                 :class="selectedCategory === 'package' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700'"
                                 class="px-4 py-2 rounded-lg whitespace-nowrap text-sm font-medium transition">
                             📦 Paket (<span x-text="packages.length"></span>)
                         </button>
+                        @endif
                         @foreach($categories as $category)
                         <button @click="selectedCategory = {{ $category->id }}; filterProducts()"
                                 :class="selectedCategory === {{ $category->id }} ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700'"

@@ -213,7 +213,18 @@
                                     <p class="text-xs text-gray-600 mt-1">If enabled, cashiers can access and view reports module.</p>
                                 </div>
                             </label>
-                        </div>
+                              <label class="block text-sm font-medium text-gray-700 mt-4 mb-2">Features</label>
+                              <label class="flex items-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-primary-300 cursor-pointer transition">
+                                  <input type="checkbox" 
+                                         name="enable_packages"
+                                         value="1"
+                                         {{ old('enable_packages', $settings['enable_packages'] ?? '1') == '1' ? 'checked' : '' }}
+                                         class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5 flex-shrink-0">
+                                  <div class="ml-3">
+                                      <span class="text-sm font-semibold text-gray-900">Enable Master Paket</span>
+                                      <p class="text-xs text-gray-600 mt-1">If enabled, Master Paket menu and order options will be available.</p>
+                                  </div>
+                              </label>                        </div>
                     </div>
                 </div>
 

@@ -35,6 +35,7 @@ class SettingController extends Controller
                 'use_shifts' => 'nullable|boolean',
                 'include_temp_orders_in_shift_close' => 'nullable|boolean',
                 'cashier_can_access_reports' => 'nullable|boolean',
+                'enable_packages' => 'nullable|boolean',
                 'pos_show_tax_flag' => 'nullable|boolean',
                 'customer_display_poster' => 'nullable|image|mimes:png,jpg,jpeg|max:10240',
                 'customer_display_mode' => 'nullable|in:local,network',
@@ -118,7 +119,7 @@ class SettingController extends Controller
                 // Determine type
                 if (in_array($key, ['tax_percentage', 'service_charge', 'license_check_interval', 'license_grace_period', 'backup_keep_days', 'order_limit_amount'])) {
                     $type = 'number';
-                } elseif (in_array($key, ['midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports'])) {
+                } elseif (in_array($key, ['midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports', 'enable_packages'])) {
                     $type = 'boolean';
                     $value = $value ? '1' : '0';
                 } else {
@@ -129,7 +130,7 @@ class SettingController extends Controller
             }
             
             // Handle unchecked booleans
-            $booleanSettings = ['midtrans_enabled', 'midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports', 'pos_show_tax_flag'];
+            $booleanSettings = ['midtrans_enabled', 'midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports', 'enable_packages', 'pos_show_tax_flag'];
             foreach ($booleanSettings as $boolKey) {
                 if (!array_key_exists($boolKey, $validated) && !$request->hasFile($boolKey)) {
                      $this->settingRepository->setByKey($boolKey, '0', 'boolean');

@@ -192,12 +192,14 @@
                     <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.tables") }}</span>
                 </a>
 
+                @if(\App\Models\Setting::get('enable_packages', '1') == '1')
                 <a href="{{ route('packages.index') }}" 
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('packages.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-cubes" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
                     <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Master Paket</span>
                 </a>
+                @endif
 
                 <a href="{{ route('master-shifts.index') }}"
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('master-shifts.*') ? 'bg-primary-600 text-white' : '' }}"
