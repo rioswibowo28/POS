@@ -37,6 +37,7 @@ class SettingController extends Controller
                 'cashier_can_access_reports' => 'nullable|boolean',
                 'enable_packages' => 'nullable|boolean',
                 'pos_show_tax_flag' => 'nullable|boolean',
+                'table_layout_columns' => 'nullable|integer|min:2|max:10',
                 'customer_display_poster' => 'nullable|image|mimes:png,jpg,jpeg|max:10240',
                 'customer_display_mode' => 'nullable|in:local,network',
                 'midtrans_enabled' => 'nullable|boolean',
@@ -117,7 +118,7 @@ class SettingController extends Controller
 
             foreach ($validated as $key => $value) {
                 // Determine type
-                if (in_array($key, ['tax_percentage', 'service_charge', 'license_check_interval', 'license_grace_period', 'backup_keep_days', 'order_limit_amount'])) {
+                if (in_array($key, ['tax_percentage', 'service_charge', 'license_check_interval', 'license_grace_period', 'backup_keep_days', 'order_limit_amount', 'table_layout_columns'])) {
                     $type = 'number';
                 } elseif (in_array($key, ['midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports', 'enable_packages'])) {
                     $type = 'boolean';

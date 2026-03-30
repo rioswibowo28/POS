@@ -213,6 +213,19 @@
                                     <p class="text-xs text-gray-600 mt-1">If enabled, cashiers can access and view reports module.</p>
                                 </div>
                             </label>
+                            
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">POS Display Settings</label>
+                                <div class="bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
+                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Table Grid Columns</label>
+                                    <div class="flex items-center gap-3">
+                                        <input type="number" name="table_layout_columns" value="{{ old('table_layout_columns', $settings['table_layout_columns'] ?? '5') }}" min="2" max="10" class="input w-24">
+                                        <span class="text-sm text-gray-600">columns per row (default is 5)</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-2">Adjust this to fit your screen size better. For 5x4 layout, use 5 columns.</p>
+                                </div>
+                            </div>
+
                               <label class="block text-sm font-medium text-gray-700 mt-4 mb-2">Features</label>
                               <label class="flex items-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-primary-300 cursor-pointer transition">
                                   <input type="checkbox" 
@@ -731,12 +744,12 @@
             <i class="fas fa-eye text-primary-600 mr-2"></i>
             Current Settings Preview
         </h3>
-        
+
         <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
-            <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col gap-y-4">
                 <div>
                     <p class="text-xs text-gray-500 mb-1">Restaurant Name</p>
-                    <p class="font-semibold text-gray-900">{{ $settings['restaurant_name'] ?? '-' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $settings['restaurant_name'] ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 mb-1">Phone</p>
@@ -749,6 +762,10 @@
                 <div>
                     <p class="text-xs text-gray-500 mb-1">Service Charge</p>
                     <p class="font-semibold text-gray-900">{{ $settings['service_charge'] ?? '0' }}%</p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 mb-1">Table Check Column Layout</p>
+                    <p class="font-semibold text-gray-900">{{ $settings['table_layout_columns'] ?? '5' }} Column(s)</p>
                 </div>
             </div>
         </div>

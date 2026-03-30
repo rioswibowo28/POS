@@ -29,12 +29,11 @@
             </div>
             
             <div class="w-full">
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-4 max-w-full">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-{{ $tableLayoutColumns ?? 5 }} lg:grid-cols-{{ $tableLayoutColumns ?? 5 }} xl:grid-cols-{{ $tableLayoutColumns ?? 5 }} gap-4 max-w-full">
                     @foreach($tables as $table)
                     <div @click="handleTableClick({{ $table->id }}, '{{ $table->number }}', '{{ $table->status->value }}', {{ $table->currentOrder ? $table->currentOrder->id : 'null' }})"
                          class="relative w-full border-2 overflow-hidden {{ $table->status->value === 'available' ? 'border-green-500 bg-white' : 'border-red-500 bg-white' }} rounded-xl transition-all duration-200 cursor-pointer shadow-md hover:shadow-xl hover:scale-105"
-                         style="aspect-ratio: 4 / 3; max-height: 18vh;">
-
+                           style="aspect-ratio: 4 / 3; min-height: 100px;">
                         <!-- Status Bar -->
                         <div class="absolute top-0 left-0 right-0 {{ $table->status->value === 'available' ? 'bg-green-500' : 'bg-red-500' }} text-white text-xs font-bold py-1 px-2 text-center">
                             @if($table->status->value === 'available')

@@ -48,8 +48,11 @@ class POSController extends Controller
         // Check if current time is within limit range
         $now = now()->format('H:i');
         $orderLimitActive = $orderLimitEnabled && $now >= $orderLimitStart && $now <= $orderLimitEnd;
-        
-        return view('pos.index', compact('categories', 'products', 'tables', 'packages', 'orderLimitEnabled', 'orderLimitAmount', 'orderLimitStart', 'orderLimitEnd', 'orderLimitActive', 'todayOrderTotal'));
+
+        // Table Layout Settings
+        $tableLayoutColumns = (int) \App\Models\Setting::get('table_layout_columns', '5');
+
+        return view('pos.index', compact('categories', 'products', 'tables', 'packages', 'orderLimitEnabled', 'orderLimitAmount', 'orderLimitStart', 'orderLimitEnd', 'orderLimitActive', 'todayOrderTotal', 'tableLayoutColumns'));
     }
 
     public function createOrder(Request $request)

@@ -240,9 +240,20 @@
                     <i class="fas fa-cog" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
                     <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.settings") }}</span>
                 </a>
+
+                <div class="my-3" x-show="!sidebarCollapsed" x-transition>
+                    <div class="border-t border-gray-700"></div>
+                </div>
+
+                <a href="javascript:void(0)" onclick="toggleFullScreen()"
+                   class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group cursor-pointer"
+                   :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
+                    <i class="fas fa-expand-arrows-alt" id="fullscreen-icon" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
+                    <span class="ml-3" id="fullscreen-text" x-show="!sidebarCollapsed" x-transition>Full Screen</span>
+                </a>
                 @endif
             </nav>
-            
+
             <!-- User Info -->
             <div class="absolute bottom-0 w-full border-t border-gray-700 transition-all duration-300"
                  :class="sidebarCollapsed ? 'p-2' : 'p-4'">
@@ -355,6 +366,50 @@
         }
         updateTime();
         setInterval(updateTime, 1000);
+
+        function toggleFullScreen() {
+            const elem = document.documentElement;
+            const icon = document.getElementById('fullscreen-icon');
+            const text = document.getElementById('fullscreen-text');
+
+            if (!document.fullscreenElement) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) { /* Safari */
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) { /* IE11 */
+                    elem.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Safari */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE11 */
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        // Listen for fullscreen change events to update the UI
+        document.addEventListener('fullscreenchange', updateFullscreenUI);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
+        document.addEventListener('msfullscreenchange', updateFullscreenUI);
+
+        function updateFullscreenUI() {
+            const icon = document.getElementById('fullscreen-icon');
+            const text = document.getElementById('fullscreen-text');
+            
+            if (document.fullscreenElement) {
+                icon.classList.remove('fa-expand-arrows-alt');
+                icon.classList.add('fa-compress-arrows-alt');
+                text.textContent = 'Exit Full Screen';
+            } else {
+                icon.classList.remove('fa-compress-arrows-alt');
+                icon.classList.add('fa-expand-arrows-alt');
+                text.textContent = 'Full Screen';
+            }
+        }
     </script>
     
     @stack('scripts')
