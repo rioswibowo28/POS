@@ -368,10 +368,15 @@
         setInterval(updateTime, 1000);
 
         function toggleFullScreen() {
-            const elem = document.documentElement;
-            const icon = document.getElementById('fullscreen-icon');
-            const text = document.getElementById('fullscreen-text');
+            // Check if user is in browser's native F11 Fullscreen mode
+            const isBrowserF11Fullscreen = window.innerHeight === window.screen.height && !document.fullscreenElement;
 
+            if (isBrowserF11Fullscreen) {
+                alert("Anda sedang berada dalam Mode Full Screen bawaan browser (F11).\n\nSistem website tidak memiliki izin untuk mematikan mode ini secara paksa. Silakan tekan tombol F11 kembali pada keyboard Anda untuk keluar.");
+                return;
+            }
+
+            const elem = document.documentElement;
             if (!document.fullscreenElement) {
                 if (elem.requestFullscreen) {
                     elem.requestFullscreen();
@@ -395,12 +400,14 @@
         document.addEventListener('fullscreenchange', updateFullscreenUI);
         document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
         document.addEventListener('msfullscreenchange', updateFullscreenUI);
+        window.addEventListener('resize', updateFullscreenUI);
 
         function updateFullscreenUI() {
             const icon = document.getElementById('fullscreen-icon');
             const text = document.getElementById('fullscreen-text');
-            
-            if (document.fullscreenElement) {
+            const isBrowserF11Fullscreen = window.innerHeight === window.screen.height;
+
+            if (document.fullscreenElement || isBrowserF11Fullscreen) {
                 icon.classList.remove('fa-expand-arrows-alt');
                 icon.classList.add('fa-compress-arrows-alt');
                 text.textContent = 'Exit Full Screen';
