@@ -174,8 +174,9 @@
                          <button type="button" @click="clearSplitNumber()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold text-2xl py-4 rounded-lg shadow-sm border border-gray-300 col-span-1">{{ __('payment.clear') }}</button>
                          <button type="button" @click="activeSplitIndex = null" class="bg-primary-600 hover:bg-primary-700 text-white font-bold text-2xl py-4 rounded-lg shadow-sm col-span-2">{{ __('payment.done') }}</button>
                     </div>
-                
-                <!-- Change -->
+                  </div>
+
+                  <!-- Change -->
                 <div class="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-100 shadow-inner">
                     <div class="flex justify-between items-center mb-1">
                         <span class="text-gray-600 font-medium text-sm">Total Paid</span>
@@ -588,6 +589,7 @@ syncToCustomerDisplay() {
 @endif
 @endpush
 @endsection
+
 
 
 
