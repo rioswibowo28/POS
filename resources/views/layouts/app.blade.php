@@ -12,15 +12,19 @@
     
     @if($logo)
         <link rel="icon" type="image/png" href="{{ asset('storage/' . $logo) }}">
+        <link rel="shortcut icon" href="{{ asset('storage/' . $logo) }}">
+    @else
+        <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏪</text></svg>">
+        <link rel="shortcut icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏪</text></svg>">
     @endif
-    
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     @stack('styles')
-    
+
     <style>
         [x-cloak] { display: none !important; }
     </style>
@@ -207,8 +211,7 @@
                     <i class="fas fa-clock" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
                     <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.master_shifts") }}</span>
                 </a>
-                </a>
-                
+
                 <div class="my-3" x-show="!sidebarCollapsed" x-transition>
                     <div class="border-t border-gray-700"></div>
                 </div>
@@ -239,17 +242,6 @@
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-cog" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
                     <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.settings") }}</span>
-                </a>
-
-                <div class="my-3" x-show="!sidebarCollapsed" x-transition>
-                    <div class="border-t border-gray-700"></div>
-                </div>
-
-                <a href="javascript:void(0)" onclick="toggleFullScreen()"
-                   class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group cursor-pointer"
-                   :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
-                    <i class="fas fa-expand-arrows-alt" id="fullscreen-icon" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" id="fullscreen-text" x-show="!sidebarCollapsed" x-transition>Full Screen</span>
                 </a>
                 @endif
             </nav>
@@ -366,59 +358,8 @@
         }
         updateTime();
         setInterval(updateTime, 1000);
-
-        function toggleFullScreen() {
-            // Check if user is in browser's native F11 Fullscreen mode
-            const isBrowserF11Fullscreen = window.innerHeight === window.screen.height && !document.fullscreenElement;
-
-            if (isBrowserF11Fullscreen) {
-                alert("Anda sedang berada dalam Mode Full Screen bawaan browser (F11).\n\nSistem website tidak memiliki izin untuk mematikan mode ini secara paksa. Silakan tekan tombol F11 kembali pada keyboard Anda untuk keluar.");
-                return;
-            }
-
-            const elem = document.documentElement;
-            if (!document.fullscreenElement) {
-                if (elem.requestFullscreen) {
-                    elem.requestFullscreen();
-                } else if (elem.webkitRequestFullscreen) { /* Safari */
-                    elem.webkitRequestFullscreen();
-                } else if (elem.msRequestFullscreen) { /* IE11 */
-                    elem.msRequestFullscreen();
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) { /* Safari */
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) { /* IE11 */
-                    document.msExitFullscreen();
-                }
-            }
-        }
-
-        // Listen for fullscreen change events to update the UI
-        document.addEventListener('fullscreenchange', updateFullscreenUI);
-        document.addEventListener('webkitfullscreenchange', updateFullscreenUI);
-        document.addEventListener('msfullscreenchange', updateFullscreenUI);
-        window.addEventListener('resize', updateFullscreenUI);
-
-        function updateFullscreenUI() {
-            const icon = document.getElementById('fullscreen-icon');
-            const text = document.getElementById('fullscreen-text');
-            const isBrowserF11Fullscreen = window.innerHeight === window.screen.height;
-
-            if (document.fullscreenElement || isBrowserF11Fullscreen) {
-                icon.classList.remove('fa-expand-arrows-alt');
-                icon.classList.add('fa-compress-arrows-alt');
-                text.textContent = 'Exit Full Screen';
-            } else {
-                icon.classList.remove('fa-compress-arrows-alt');
-                icon.classList.add('fa-expand-arrows-alt');
-                text.textContent = 'Full Screen';
-            }
-        }
     </script>
-    
+
     @stack('scripts')
 </body>
 </html>
