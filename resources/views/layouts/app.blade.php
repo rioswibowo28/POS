@@ -99,21 +99,21 @@
                     <i class="fas fa-home" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
                     <span class="ml-3 transition-all duration-300" 
                           x-show="!sidebarCollapsed"
-                          x-transition>Dashboard</span>
+                          x-transition >{{ __("messages.dashboard") }}</span>
                 </a>
                 
                 <a href="{{ route('pos.index') }}" 
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('pos.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-cash-register" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>POS / Kasir</span>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.pos") }}</span>
                 </a>
                 
                 <a href="{{ route('orders.index') }}" 
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('orders.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-receipt" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Orders</span>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.orders") }}</span>
                 </a>
                 
                 @if(\App\Models\Setting::get('use_shifts', true))
@@ -121,7 +121,7 @@
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('shifts.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-clock" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Shifts</span>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.shifts") }}</span>
                 </a>
                 @endif
 
@@ -131,7 +131,7 @@
                        class="sidebar-item relative flex items-center mb-1 cursor-pointer select-none text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('reports.*') || request()->routeIs('dynamic-reports.*') ? 'bg-gray-700 !text-white' : '' }}"
                        :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                         <i class="fas fa-chart-bar" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                        <span class="ml-3 flex-1 text-left" x-show="!sidebarCollapsed" x-transition>Reports</span>
+                        <span class="ml-3 flex-1 text-left" x-show="!sidebarCollapsed" x-transition >{{ __("messages.reports") }}</span>
                         <i class="fas fa-chevron-down text-xs transition-transform duration-200" x-show="!sidebarCollapsed" :class="reportOpen ? 'rotate-180' : ''"></i>
                     </div>
                     <div x-show="reportOpen && !sidebarCollapsed" 
@@ -175,28 +175,35 @@
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('products.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-box" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Products</span>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.products") }}</span>
                 </a>
                 
                 <a href="{{ route('categories.index') }}" 
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('categories.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-tags" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Categories</span>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.categories") }}</span>
                 </a>
                 
                 <a href="{{ route('tables.index') }}" 
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('tables.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-table" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Tables</span>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.tables") }}</span>
+                </a>
+
+                <a href="{{ route('packages.index') }}" 
+                   class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('packages.*') ? 'bg-primary-600 text-white' : '' }}"
+                   :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
+                    <i class="fas fa-cubes" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Master Paket</span>
                 </a>
 
                 <a href="{{ route('master-shifts.index') }}"
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('master-shifts.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-clock" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Master Shifts</span>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.master_shifts") }}</span>
                 </a>
                 </a>
                 
@@ -208,28 +215,28 @@
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('users.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-users" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Users</span>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.users") }}</span>
                 </a>
                 
                 <a href="{{ route('license.info') }}" 
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('license.info') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-key" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>License</span>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.license") }}</span>
                 </a>
                 
                 <a href="{{ route('backups.index') }}" 
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('backups.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-database" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Backup</span>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.backup") }}</span>
                 </a>
 
                 <a href="{{ route('settings.index') }}" 
                    class="sidebar-item relative flex items-center mb-1 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-white transition-all duration-200 group {{ request()->routeIs('settings.*') ? 'bg-primary-600 text-white' : '' }}"
                    :class="sidebarCollapsed ? 'px-3 py-3 justify-center' : 'px-4 py-3'">
                     <i class="fas fa-cog" :class="sidebarCollapsed ? 'text-xl' : 'text-base w-5'"></i>
-                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition>Settings</span>
+                    <span class="ml-3" x-show="!sidebarCollapsed" x-transition >{{ __("messages.settings") }}</span>
                 </a>
                 @endif
             </nav>
@@ -278,6 +285,11 @@
                 </div>
                 
                 <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-600 mr-2 border-r pr-4 border-gray-300">
+                        <a href="{{ route('lang.switch', 'id') }}" class="{{ app()->getLocale() == 'id' ? 'font-bold text-primary-600' : 'text-gray-500' }}">ID</a>
+                        <span class="mx-1">|</span>
+                        <a href="{{ route('lang.switch', 'en') }}" class="{{ app()->getLocale() == 'en' ? 'font-bold text-primary-600' : 'text-gray-500' }}">EN</a>
+                    </div>
                     <div class="text-sm text-gray-600">
                         <i class="far fa-clock mr-1"></i>
                         <span id="current-time"></span>
