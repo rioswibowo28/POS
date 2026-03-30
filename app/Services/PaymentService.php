@@ -137,7 +137,11 @@ class PaymentService
         // Reload order with items and payments
         $order->load(['items', 'payments']);
 
-        // Get primary payment info
+        // Aggregate payment info for multiple payments
+        $methods = $order->payments->map(function($p) { return $p->getRawOriginal('method') ?? $p->method; })->unique()->implode(', ');
+        $totalPaymentAmount = $order->payments->sum('amount');
+        $totalReceivedAmount = $order->payments->sum('received_amount');
+        $totalChangeAmount = $order->payments->sum('change_amount');
         $primaryPayment = $order->payments->first();
 
         // Create TempOrder with same data + payment info
@@ -162,10 +166,10 @@ class PaymentService
             'original_order_id' => $order->id,
             'created_by' => $order->created_by,
             'paid_by' => auth()->id(),
-            'payment_method' => $primaryPayment ? $primaryPayment->getRawOriginal('method') : null,
-            'payment_amount' => $primaryPayment ? $primaryPayment->amount : 0,
-            'payment_received' => $primaryPayment ? $primaryPayment->received_amount : 0,
-            'payment_change' => $primaryPayment ? $primaryPayment->change_amount : 0,
+            'payment_method' => $methods ?: null,
+            'payment_amount' => $totalPaymentAmount ?: 0,
+            'payment_received' => $totalReceivedAmount ?: 0,
+            'payment_change' => $totalChangeAmount ?: 0,
             'payment_reference' => $primaryPayment ? $primaryPayment->reference_number : null,
             'payment_at' => $primaryPayment ? $primaryPayment->processed_at : now(),
         ]);

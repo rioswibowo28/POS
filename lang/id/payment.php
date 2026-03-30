@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'Pembayaran',
+    'order_summary' => 'Ringkasan Pesanan',
+    'bill_number' => 'Nomor Tagihan',
+    'order_number' => 'Nomor Pesanan',
+    'type' => 'Tipe',
+    'table' => 'Meja',
+    'customer' => 'Pelanggan',
+    'items' => 'Item',
+    'subtotal' => 'Subtotal',
+    'tax' => 'Pajak',
+    'discount' => 'Diskon',
+    'total' => 'Total',
+    'payment_method' => 'Metode Pembayaran',
+    'amount_paid' => 'Jumlah Dibayar',
+    'exact' => 'Uang Pas',
+    'clear' => 'Hapus',
+    'done' => 'Selesai',
+    'change' => 'Kembalian',
+    'insufficient_amount' => 'Jumlah pembayaran kurang',
+    'complete_payment' => 'Selesaikan Pembayaran',
+    'processing' => 'Memproses...',
+    'payment_successful' => 'Pembayaran Berhasil!',
+    'print_bill' => 'Cetak Struk',
+];

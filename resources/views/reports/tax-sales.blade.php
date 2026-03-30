@@ -102,7 +102,8 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jam</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Bill</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Order</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pembayaran</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tunai</th>
+                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">QRIS</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Item</th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">DPP (Subtotal)</th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Diskon</th>
@@ -118,15 +119,12 @@
                             <td class="px-4 py-3 whitespace-nowrap text-sm">{{ $order->created_at->format('H:i') }}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">{{ $order->bill_number }}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm">{{ $order->order_number }}</td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm">
-                                @if($order->payments->count() > 0)
-                                    @foreach($order->payments as $payment)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $payment->method->value === 'cash' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">{{ $payment->method->label() }}</span>
-                                    @endforeach
-                                @else
-                                    <span class="text-gray-400">-</span>
-                                @endif
-                            </td>
+                            @php
+                                $cashAmount = isset($order->payments) ? $order->payments->where('method.value', 'cash')->sum('amount') : 0;
+                                $qrisAmount = isset($order->payments) ? $order->payments->where('method.value', 'qris')->sum('amount') : 0;
+                            @endphp
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-right">{{ $cashAmount > 0 ? 'Rp ' . number_format($cashAmount, 0, ',', '.') : '-' }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-right">{{ $qrisAmount > 0 ? 'Rp ' . number_format($qrisAmount, 0, ',', '.') : '-' }}</td>
                             <td class="px-4 py-3 text-sm">
                                 <div class="max-w-xs">
                                     @foreach($order->items as $item)
@@ -147,9 +145,21 @@
                         @endforeach
                     </tbody>
                     <tfoot class="bg-gray-100 font-bold">
-                        <tr>
-                            <td colspan="7" class="px-4 py-3 text-right text-sm uppercase">Total</td>
-                            {{-- colspan 7 = No + Tanggal + Jam + Bill + Order + Pembayaran + Item --}}
+                          @php
+                              $cashTotal = 0;
+                              $qrisTotal = 0;
+                              foreach($orders as $order) {
+                                  if(isset($order->payments)) {
+                                      $cashTotal += $order->payments->where('method.value', 'cash')->sum('amount');
+                                      $qrisTotal += $order->payments->where('method.value', 'qris')->sum('amount');
+                                  }
+                              }
+                          @endphp
+                          <tr>
+                              <td colspan="5" class="px-4 py-3 text-right text-sm uppercase">Total</td>
+                              <td class="px-4 py-3 text-right text-sm text-green-600">{{ $cashTotal > 0 ? 'Rp ' . number_format($cashTotal, 0, ',', '.') : '-' }}</td>
+                              <td class="px-4 py-3 text-right text-sm text-blue-600">{{ $qrisTotal > 0 ? 'Rp ' . number_format($qrisTotal, 0, ',', '.') : '-' }}</td>
+                              <td></td>
                             <td class="px-4 py-3 text-right text-sm">Rp {{ number_format($summary['subtotal'], 0, ',', '.') }}</td>
                             <td class="px-4 py-3 text-right text-sm text-red-600">
                                 {{ $summary['discount'] > 0 ? '- Rp ' . number_format($summary['discount'], 0, ',', '.') : '-' }}

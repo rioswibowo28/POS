@@ -136,12 +136,12 @@
             <img src="{{ '/storage/' . ltrim($restaurantLogo, '/') }}" alt="{{ $restaurantName }}" class="h-28 w-28 object-contain mx-auto mb-8">
             @endif
             <h1 class="text-xl font-bold text-gray-900 uppercase tracking-wide mb-4">{{ $restaurantName }}</h1>
-            <p class="text-base text-gray-600 font-medium">Customer Display</p>
+            <p class="text-base text-gray-600 font-medium">{{ __('customer_display.title') }}</p>
             
             <!-- Payment Mode Badge -->
             <template x-if="mode === 'payment'">
                 <div class="mt-4 inline-block bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-2 text-sm font-bold uppercase tracking-wide rounded-lg shadow-md">
-                    Processing Payment
+                    {{ __('customer_display.processing_payment') }}
                 </div>
             </template>
             
@@ -149,14 +149,14 @@
             <template x-if="orderType || orderNumber">
                 <div class="mt-6 text-sm text-gray-700">
                     <template x-if="mode === 'payment' && orderNumber">
-                        <div class="font-bold text-xl mb-4">ORDER #<span x-text="orderNumber"></span></div>
+                        <div class="font-bold text-xl mb-4">{{ __('customer_display.order') }} #<span x-text="orderNumber"></span></div>
                     </template>
                     <div class="flex items-center justify-center gap-6 flex-wrap text-base">
                         <template x-if="orderType">
-                            <span class="font-semibold" x-text="orderType === 'dine_in' ? '🍽️ Dine In' : '🛍️ Take Away'"></span>
+                            <span class="font-semibold" x-text="orderType === 'dine_in' ? '🍽️ {{ __('customer_display.dine_in') }}' : '🛍️ {{ __('customer_display.take_away') }}'"></span>
                         </template>
                         <template x-if="orderType === 'dine_in' && tableNumber">
-                            <span>| Table <span class="font-bold" x-text="tableNumber"></span></span>
+                            <span>| {{ __('customer_display.table') }} <span class="font-bold" x-text="tableNumber"></span></span>
                         </template>
                         <template x-if="customerName">
                             <span>| <span x-text="customerName"></span></span>
@@ -175,14 +175,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
                     </div>
-                    <p class="text-lg font-semibold mb-3">Waiting for Order...</p>
-                    <p class="text-sm">Items will appear here</p>
+                    <p class="text-lg font-semibold mb-3">{{ __('customer_display.waiting_for_order') }}</p>
+                    <p class="text-sm">{{ __('customer_display.items_will_appear_here') }}</p>
                 </div>
             </template>
             
             <template x-if="cartItems.length > 0">
                 <div>
-                    <div class="text-center text-lg font-bold text-gray-500 uppercase tracking-wide mb-6 pb-3 border-b-2 border-gray-300">ORDER ITEMS</div>
+                    <div class="text-center text-lg font-bold text-gray-500 uppercase tracking-wide mb-6 pb-3 border-b-2 border-gray-300">{{ __('customer_display.order_items') }}</div>
                     <template x-for="(item, index) in cartItems" :key="index">
                         <div class="item-enter mb-3 pb-3 border-b border-gray-300">
                             <div class="flex justify-between items-start gap-4">
@@ -207,31 +207,31 @@
             <div class="border-t-4 border-gray-800 px-8 py-6 bg-gradient-to-b from-white to-gray-50" style="margin: 0 20px 40px 40px;">
                 <div class="space-y-4 text-base mb-6 px-4">
                     <div class="flex justify-between">
-                        <span class="text-gray-700">Subtotal</span>
+                        <span class="text-gray-700">{{ __('customer_display.subtotal') }}</span>
                         <span class="font-mono">Rp <span x-text="formatMoney(subtotal)"></span></span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-700">
                             Tax (<span x-text="formatTaxRate()"></span>%)
-                            <span x-show="taxType === 'include'" class="text-sm">(incl)</span>
+                            <span x-show="taxType === 'include'" class="text-sm">({{ __('customer_display.incl') }})</span>
                         </span>
                         <span class="font-mono">Rp <span x-text="formatMoney(tax)"></span></span>
                     </div>
                     <template x-if="discount > 0">
                         <div class="flex justify-between text-green-700">
-                            <span>Discount</span>
+                            <span>{{ __('customer_display.discount') }}</span>
                             <span class="font-mono">- Rp <span x-text="formatMoney(discount)"></span></span>
                         </div>
                     </template>
                 </div>
                 <div class="dashed-line"></div>
                 <div class="flex justify-between items-center text-2xl font-bold my-4 p-5 bg-yellow-50 rounded-xl border-2 border-yellow-300">
-                    <span class="text-gray-900 uppercase">TOTAL</span>
+                    <span class="text-gray-900 uppercase">{{ __('customer_display.total') }}</span>
                     <span class="font-mono text-xl text-green-700">Rp <span x-text="formatMoney(total)"></span></span>
                 </div>
                 <div class="dashed-line"></div>
                 <div class="text-center text-lg text-gray-500 mt-6 font-semibold">
-                    Thank You!
+                    {{ __('customer_display.thank_you') }}
                 </div>
             </div>
         </template>
@@ -259,6 +259,23 @@
             isFullscreen: false,
 
             init() {
+                // Initialize BroadcastChannel
+                if ('BroadcastChannel' in window) {
+                    this.broadcastChannel = new BroadcastChannel('pos_customer_display');
+                    this.broadcastChannel.onmessage = (event) => {
+                        const data = event.data;
+                        if (!data || Object.keys(data).length === 0) {
+                            this.updateDisplayData({
+                                cartItems: [], subtotal: 0, tax: 0, discount: 0, total: 0,
+                                taxRate: 0.10, orderType: '', tableNumber: '',
+                                customerName: '', mode: '', orderNumber: ''
+                            });
+                        } else {
+                            this.updateDisplayData(data);
+                        }
+                    };
+                }
+
                 window.addEventListener('storage', (e) => {
                     if (e.key === 'pos_customer_display') {
                         if (e.newValue === null) {
@@ -273,6 +290,11 @@
                         }
                     }
                 });
+
+                // Load initial data immediately for local mode
+                if (this.displayMode === 'local') {
+                    this.loadDataFromLocalStorage();
+                }
                 
                 // Poll server only in network mode (for cross-device updates)
                 if (this.displayMode === 'network') {

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Orders')
-@section('header', 'Order Management')
+@section('title', __('orders.title'))
+@section('header', __('orders.header'))
 
 @section('content')
 
@@ -21,34 +21,34 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h2 class="text-xl font-bold text-gray-900">All Orders</h2>
-            <p class="text-gray-600 text-sm">Manage and track all orders</p>
+            <h2 class="text-xl font-bold text-gray-900">{{ __('orders.all_orders') }}</h2>
+            <p class="text-gray-600 text-sm">{{ __('orders.manage_info') }}</p>
         </div>
         <a href="{{ route('pos.index') }}" class="btn-primary">
-            <i class="fas fa-plus mr-2"></i> New Order
+            <i class="fas fa-plus mr-2"></i> {{ __('orders.new_order') }}
         </a>
     </div>
     
     <!-- Filters -->
     <form method="GET" class="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6 items-stretch">
-        <input type="text" name="search" value="{{ request('search') }}" class="input h-[42px]" placeholder="Cari no. order / bill...">
+        <input type="text" name="search" value="{{ request('search') }}" class="input h-[42px]" placeholder="{{ __('orders.search_placeholder') }}">
         <select name="type" class="input h-[42px]">
-            <option value="">All Types</option>
-            <option value="dine_in" {{ request('type') === 'dine_in' ? 'selected' : '' }}>Dine In</option>
-            <option value="take_away" {{ request('type') === 'take_away' ? 'selected' : '' }}>Takeaway</option>
-            <option value="delivery" {{ request('type') === 'delivery' ? 'selected' : '' }}>Delivery</option>
+            <option value="">{{ __('orders.all_types') }}</option>
+            <option value="dine_in" {{ request('type') === 'dine_in' ? 'selected' : '' }}>{{ __('orders.dine_in') }}</option>
+            <option value="take_away" {{ request('type') === 'take_away' ? 'selected' : '' }}>{{ __('orders.takeaway') }}</option>
+            <option value="delivery" {{ request('type') === 'delivery' ? 'selected' : '' }}>{{ __('orders.delivery') }}</option>
         </select>
         <select name="status" class="input h-[42px]">
-            <option value="">All Status</option>
-            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-            <option value="processing" {{ request('status') === 'processing' ? 'selected' : '' }}>Processing</option>
-            <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completed</option>
-            <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+            <option value="">{{ __('orders.all_status') }}</option>
+            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>{{ __('orders.pending') }}</option>
+            <option value="processing" {{ request('status') === 'processing' ? 'selected' : '' }}>{{ __('orders.processing') }}</option>
+            <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>{{ __('orders.completed') }}</option>
+            <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>{{ __('orders.cancelled') }}</option>
         </select>
-        <input type="text" name="from_date" value="{{ $fromDate }}" class="input h-[42px] flatpickr-date" placeholder="From Date" readonly>
-        <input type="text" name="to_date" value="{{ $toDate }}" class="input h-[42px] flatpickr-date" placeholder="To Date" readonly>
+        <input type="text" name="from_date" value="{{ $fromDate }}" class="input h-[42px] flatpickr-date" placeholder="{{ __('orders.from_date') }}" readonly>
+        <input type="text" name="to_date" value="{{ $toDate }}" class="input h-[42px] flatpickr-date" placeholder="{{ __('orders.to_date') }}" readonly>
         <button type="submit" class="btn-secondary h-[42px]">
-            <i class="fas fa-filter mr-2"></i> Filter
+            <i class="fas fa-filter mr-2"></i> {{ __('orders.filter') }}
         </button>
     </form>
     
@@ -57,14 +57,14 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Table</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('orders.order_number') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('orders.type') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('orders.table') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('orders.items') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('orders.total') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('orders.status') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('orders.date') }}</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('orders.actions') }}</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -144,7 +144,7 @@
                                 @method('PUT')
                                 <button type="submit"
                                         class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition"
-                                        title="Cancel Order">
+                                        title="{{ __('orders.cancel') }}">
                                     <i class="fas fa-times text-xs"></i>
                                 </button>
                             </form>

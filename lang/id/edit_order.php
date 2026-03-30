@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Ubah Pesanan',
+    'search_products' => 'Cari produk...',
+    'clear' => 'Hapus',
+    'done' => 'Selesai',
+    'favorite' => 'Favorit',
+    'all' => 'Semua',
+    'stock_low' => 'Stok Menipis',
+    'order_details' => 'Detail Pesanan',
+    'table' => 'Meja',
+    'select_table' => 'Pilih Meja',
+    'customer_name' => 'Nama Pelanggan',
+    'optional' => 'Opsional',
+    'notes' => 'Catatan',
+    'cart_items' => 'Item Keranjang',
+    'no_items' => 'Belum ada produk di keranjang',
+    'subtotal' => 'Subtotal',
+    'tax' => 'Pajak',
+    'total' => 'Total',
+    'update_order' => 'Perbarui Pesanan',
+    'process_payment' => 'Proses Pembayaran',
+    'cancel' => 'Batal',
+];

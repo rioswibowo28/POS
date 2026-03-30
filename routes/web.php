@@ -236,3 +236,5 @@ Route::middleware(['auth', 'check.license'])->group(function () {
 
 // Midtrans Notification (no auth required)
 Route::post('/midtrans/notification', [MidtransController::class, 'notification'])->name('midtrans.notification');
+
+Route::get('lang/{lang}', [\App\Http\Controllers\LanguageController::class, 'switchLang'])->name('lang.switch');

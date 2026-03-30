@@ -46,14 +46,15 @@ class PaymentController extends Controller
     public function process(Request $request, $orderId)
     {
         $validated = $request->validate([
-            'payment_method' => 'required|in:cash,qris,midtrans',
-            'amount_paid' => 'required|numeric|min:0',
+            'payments' => 'required|array|min:1',
+            'payments.*.method' => 'required|in:cash,qris,midtrans',
+            'payments.*.amount' => 'required|numeric|min:0',
         ]);
 
         try {
             // Check if there's an open shift based on settings
             $useShifts = \App\Models\Setting::get('use_shifts', true) == '1';
-            
+
             if ($useShifts) {
                 $currentShift = \App\Models\Shift::getCurrentShift();
                 if (!$currentShift) {
@@ -64,25 +65,36 @@ class PaymentController extends Controller
                     ], 422);
                 }
             }
-            
+
             $order = $this->orderRepository->find($orderId);
-            
+
             if (!$order) {
                 throw new \Exception('Order not found');
             }
-            
+
+            // Check if Midtrans QRIS is among payments
+            $hasMidtrans = false;
+            $midtransAmount = 0;
+            foreach ($validated['payments'] as $p) {
+                if ($p['method'] === 'qris' && MidtransService::isConfigured()) {
+                    $hasMidtrans = true;
+                    $midtransAmount = $p['amount'];
+                    break;
+                }
+            }
+
             // If payment method is QRIS and Midtrans is configured, use Midtrans
-            if ($validated['payment_method'] === 'qris' && MidtransService::isConfigured()) {
+            if ($hasMidtrans) {
                 \Log::info('Processing QRIS payment with Midtrans', [
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
-                    'total' => $order->total
+                    'amount' => $midtransAmount
                 ]);
-                
+
                 // Generate Midtrans Snap Token
                 $orderData = [
-                    'order_number' => $order->order_number,
-                    'total' => $order->total,
+                    'order_number' => $order->order_number . '-' . time(), // append time to avoid duplicate order id in midtrans
+                    'total' => $midtransAmount > 0 ? $midtransAmount : $order->total,
                     'customer_name' => $order->customer_name ?? 'Customer',
                     'customer_email' => $request->input('customer_email'),
                     'customer_phone' => $request->input('customer_phone'),
@@ -95,7 +107,7 @@ class PaymentController extends Controller
                         ];
                     })->toArray()
                 ];
-                
+
                 try {
                     $snapToken = $this->midtransService->createSnapToken($orderData);
                     
@@ -103,7 +115,7 @@ class PaymentController extends Controller
                         'order_number' => $order->order_number,
                         'token_length' => strlen($snapToken)
                     ]);
-                    
+
                     return response()->json([
                         'success' => true,
                         'use_midtrans' => true,
@@ -115,28 +127,45 @@ class PaymentController extends Controller
                         'error' => $e->getMessage(),
                         'order_number' => $order->order_number
                     ]);
-                    
+
                     return response()->json([
                         'success' => false,
                         'message' => 'Failed to generate payment: ' . $e->getMessage()
                     ], 422);
                 }
             }
+
+            // Process payments (Regular)
+            $lastPayment = null;
+            $orderTotalRemaining = $order->total;
             
-            // Regular payment processing
-            $paymentData = [
-                'order_id' => $orderId,
-                'method' => $validated['payment_method'],
-                'amount' => $order->total,
-                'received_amount' => $validated['amount_paid'],
-            ];
-            
-            $payment = $this->paymentService->processPayment($paymentData);
+            // Delete old incomplete payments if any? Assuming new process
+            // sum previous payments if partial?
+            $previousPaid = $order->payments()->sum('amount');
+            $orderTotalRemaining -= $previousPaid;
+
+            foreach ($validated['payments'] as $paymentInput) {
+                $amountPaid = $paymentInput['amount'];
+                if ($amountPaid <= 0) continue;
+                
+                $paymentAmount = min($orderTotalRemaining, $amountPaid);
+                $receivedAmount = $amountPaid;
+                
+                $paymentData = [
+                    'order_id' => $orderId,
+                    'method' => $paymentInput['method'],
+                    'amount' => $paymentAmount,
+                    'received_amount' => $receivedAmount,
+                ];
+
+                $lastPayment = $this->paymentService->processPayment($paymentData);
+                $orderTotalRemaining -= $paymentAmount;
+            }
 
             return response()->json([
                 'success' => true,
                 'message' => 'Payment processed successfully',
-                'data' => $payment,
+                'data' => $lastPayment,
                 'redirect' => route('orders.receipt', $orderId)
             ]);
         } catch (\Exception $e) {

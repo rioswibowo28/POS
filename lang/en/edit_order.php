@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Edit Order',
+    'search_products' => 'Search products...',
+    'clear' => 'Clear',
+    'done' => 'Done',
+    'favorite' => 'Favorite',
+    'all' => 'All',
+    'stock_low' => 'Stock Low',
+    'order_details' => 'Order Details',
+    'table' => 'Table',
+    'select_table' => 'Select Table',
+    'customer_name' => 'Customer Name',
+    'optional' => 'Optional',
+    'notes' => 'Notes',
+    'cart_items' => 'Cart Items',
+    'no_items' => 'No items in cart',
+    'subtotal' => 'Subtotal',
+    'tax' => 'Tax',
+    'total' => 'Total',
+    'update_order' => 'Update Order',
+    'process_payment' => 'Process Payment',
+    'cancel' => 'Cancel',
+];

@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'title' => 'Payment',
+    'order_summary' => 'Order Summary',
+    'bill_number' => 'Bill Number',
+    'order_number' => 'Order Number',
+    'type' => 'Type',
+    'table' => 'Table',
+    'customer' => 'Customer',
+    'items' => 'Items',
+    'subtotal' => 'Subtotal',
+    'tax' => 'Tax',
+    'discount' => 'Discount',
+    'total' => 'Total',
+    'payment_method' => 'Payment Method',
+    'amount_paid' => 'Amount Paid',
+    'exact' => 'Exact',
+    'clear' => 'Clear',
+    'done' => 'Done',
+    'change' => 'Change',
+    'insufficient_amount' => 'Insufficient payment amount',
+    'complete_payment' => 'Complete Payment',
+    'processing' => 'Processing...',
+    'payment_successful' => 'Payment Successful!',
+    'print_bill' => 'Print Bill',
+];
