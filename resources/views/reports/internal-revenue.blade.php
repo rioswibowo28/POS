@@ -122,6 +122,7 @@
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">PPN</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Diskon</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
@@ -156,6 +157,11 @@
                                 <td class="px-4 py-3 text-sm text-right text-green-600">Rp {{ number_format($order->tax_amount, 0, ',', '.') }}</td>
                                 <td class="px-4 py-3 text-sm text-right text-red-600">{{ $order->discount > 0 ? '- Rp ' . number_format($order->discount, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-right font-bold">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
+                                        <i class="fas fa-print text-xs"></i>
+                                    </button>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -182,6 +188,7 @@
                                 <td class="px-4 py-3 text-right text-sm text-green-600">Rp {{ number_format($summary['all_tax'], 0, ',', '.') }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-red-600">{{ $summary['all_discount'] > 0 ? '- Rp ' . number_format($summary['all_discount'], 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-green-600">Rp {{ number_format($summary['all_total'], 0, ',', '.') }}</td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -214,6 +221,7 @@
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">PPN</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Diskon</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
@@ -234,6 +242,11 @@
                                 <td class="px-4 py-3 text-sm text-right text-green-600">Rp {{ number_format($order->tax_amount, 0, ',', '.') }}</td>
                                 <td class="px-4 py-3 text-sm text-right text-red-600">{{ $order->discount > 0 ? '- Rp ' . number_format($order->discount, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-right font-bold">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
+                                        <i class="fas fa-print text-xs"></i>
+                                    </button>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -256,6 +269,7 @@
                                 <td class="px-4 py-3 text-right text-sm text-green-600">Rp {{ number_format($normalOrders->sum('tax_amount'), 0, ',', '.') }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-red-600">{{ $normalOrders->sum('discount') > 0 ? '- Rp ' . number_format($normalOrders->sum('discount'), 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-blue-600">Rp {{ number_format($normalOrders->sum('total'), 0, ',', '.') }}</td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -288,6 +302,7 @@
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">PPN</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Diskon</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
@@ -310,6 +325,11 @@
                                 <td class="px-4 py-3 text-sm text-right text-green-600">Rp {{ number_format($order->tax_amount, 0, ',', '.') }}</td>
                                 <td class="px-4 py-3 text-sm text-right text-red-600">{{ $order->discount > 0 ? '- Rp ' . number_format($order->discount, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-right font-bold">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
+                                        <i class="fas fa-print text-xs"></i>
+                                    </button>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -330,6 +350,7 @@
                                 <td class="px-4 py-3 text-right text-sm text-green-600">Rp {{ number_format($tempOrders->sum('tax_amount'), 0, ',', '.') }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-red-600">{{ $tempOrders->sum('discount') > 0 ? '- Rp ' . number_format($tempOrders->sum('discount'), 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-purple-600">Rp {{ number_format($tempOrders->sum('total'), 0, ',', '.') }}</td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -400,6 +421,18 @@
         flatpickr('input[name="start_date"]', { dateFormat: 'Y-m-d', altInput: true, altFormat: 'd-m-Y', allowInput: true });
         flatpickr('input[name="end_date"]', { dateFormat: 'Y-m-d', altInput: true, altFormat: 'd-m-Y', allowInput: true });
     });
+
+    function printReceipt(orderId) {
+        if (!orderId) return;
+        const printWindow = window.open(`/orders/${orderId}/receipt`, '_blank', 'width=800,height=600');
+        if (printWindow) {
+            printWindow.onload = function() {
+                setTimeout(() => {
+                    printWindow.print();
+                }, 500);
+            };
+        }
+    }
 </script>
 @endpush
 
