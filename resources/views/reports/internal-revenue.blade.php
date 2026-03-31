@@ -124,6 +124,7 @@
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
                                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
@@ -158,6 +159,11 @@
                                 <td class="px-4 py-3 text-sm text-right text-green-600">Rp {{ number_format($order->tax_amount, 0, ',', '.') }}</td>
                                 <td class="px-4 py-3 text-sm text-right text-red-600">{{ $order->discount > 0 ? '- Rp ' . number_format($order->discount, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-right font-bold">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
+                                        <i class="fas fa-print text-xs"></i>
+                                    </button>
+                                </td>
                                 <td class="px-4 py-3 text-center">
                                     <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
                                         <i class="fas fa-print text-xs"></i>
@@ -229,6 +235,7 @@
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
                                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
@@ -249,6 +256,11 @@
                                 <td class="px-4 py-3 text-sm text-right text-green-600">Rp {{ number_format($order->tax_amount, 0, ',', '.') }}</td>
                                 <td class="px-4 py-3 text-sm text-right text-red-600">{{ $order->discount > 0 ? '- Rp ' . number_format($order->discount, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-right font-bold">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
+                                        <i class="fas fa-print text-xs"></i>
+                                    </button>
+                                </td>
                                 <td class="px-4 py-3 text-center">
                                     <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
                                         <i class="fas fa-print text-xs"></i>
@@ -316,6 +328,7 @@
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
                                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200">
@@ -338,6 +351,11 @@
                                 <td class="px-4 py-3 text-sm text-right text-green-600">Rp {{ number_format($order->tax_amount, 0, ',', '.') }}</td>
                                 <td class="px-4 py-3 text-sm text-right text-red-600">{{ $order->discount > 0 ? '- Rp ' . number_format($order->discount, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-right font-bold">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
+                                <td class="px-4 py-3 text-center">
+                                    <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
+                                        <i class="fas fa-print text-xs"></i>
+                                    </button>
+                                </td>
                                 <td class="px-4 py-3 text-center">
                                     <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
                                         <i class="fas fa-print text-xs"></i>
