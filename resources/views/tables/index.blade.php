@@ -135,15 +135,8 @@
             </div>
             @endforelse
         </div>
-        
-        <!-- Pagination -->
-        @if($tables->hasPages())
-        <div class="mt-6">
-            {{ $tables->links() }}
-        </div>
-        @endif
     </div>
-    
+
     <!-- Modal Add Table -->
     <div x-show="showModal" 
          x-cloak

@@ -28,7 +28,7 @@ class TableController extends Controller
         }
 
         // Sort by number (numeric sorting for numbers, alphabetic for mixed)
-        $tables = $query->orderByRaw('CAST(number AS UNSIGNED) ASC, number ASC')->paginate(20);
+        $tables = $query->orderByRaw('CAST(number AS UNSIGNED) ASC, number ASC')->get();
 
         return view('tables.index', compact('tables'));
     }
