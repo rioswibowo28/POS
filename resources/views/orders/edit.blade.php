@@ -189,17 +189,21 @@
                 
                 <!-- Actions -->
                 <div class="space-y-2">
-                    <button type="submit" 
+                    <button type="submit"
                             :disabled="cart.length === 0"
                             :class="cart.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'"
                             class="w-full text-white font-semibold py-3 rounded-lg transition">
                         <i class="fas fa-save mr-2"></i> {{ __('edit_order.update_order') }}
                     </button>
-                    <a href="{{ route('orders.payment', $order->id) }}" 
-                       style="background-color: #16a34a; color: white;"
-                       class="block w-full hover:bg-green-700 text-white font-semibold text-center py-3 rounded-lg transition shadow-md">
+                    
+                    <button type="submit" name="redirect_to" value="payment"
+                            :disabled="cart.length === 0"
+                            :class="cart.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'hover:bg-green-700 shadow-md'"
+                            style="background-color: #16a34a; color: white;"
+                            class="w-full text-white font-semibold py-3 rounded-lg transition">
                         <i class="fas fa-credit-card mr-2"></i> {{ __('edit_order.process_payment') }}
-                    </a>
+                    </button>
+
                     <button type="button" @click="cancelEdit()" class="block w-full btn-secondary text-center py-3">
                         <i class="fas fa-times mr-2"></i> {{ __('edit_order.cancel') }}
                     </button>
