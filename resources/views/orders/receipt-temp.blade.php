@@ -14,7 +14,7 @@
                 justify-content: center;
             }
             .max-w-2xl {
-                width: 58mm;
+                width: 58mm; /* Sesuaikan tampilan layar dengan ukuran kertas */
             }
             #receipt {
                 width: 58mm;
@@ -25,7 +25,7 @@
         
         @page {
             margin: 0;
-            size: 58mm auto;
+            size: 58mm auto; /* Spesifik untuk printer 58mm */
         }
 
         @media print {
@@ -50,8 +50,8 @@
             }
             
             #receipt {
-                font-family: 'Courier New', Courier, monospace;
-                font-size: 8pt;
+                font-family: 'Courier New', Courier, monospace; /* Font printer thermal */
+                font-size: 6.5pt;
                 line-height: 1.2;
                 color: #000;
             }
@@ -72,10 +72,10 @@
             }
             
             #receipt table {
-                font-size: 8pt !important;
+                font-size: 6.5pt !important;
                 width: 100%;
             }
-            
+
             #receipt table th, #receipt table td {
                 padding: 1px 0 !important;
             }
@@ -89,7 +89,7 @@
             }
             
             #receipt .text-sm {
-                font-size: 8pt !important;
+                font-size: 6.5pt !important;
             }
             
             #receipt .mb-4 {
@@ -113,135 +113,116 @@
 <body>
 <div class="max-w-2xl mx-auto">
     <div class="bg-white rounded-lg shadow-sm p-6" id="receipt">
-        <!-- Header -->
+                                                                                <!-- Header -->
         @php
             $restaurantName = \App\Models\Setting::get('restaurant_name', 'POS Resto');
             $restaurantLogo = \App\Models\Setting::get('restaurant_logo');
             $restaurantAddress = \App\Models\Setting::get('restaurant_address', 'Jl. Contoh No. 123, Jakarta');
             $restaurantPhone = \App\Models\Setting::get('restaurant_phone', '021-12345678');
-            $restaurantEmail = \App\Models\Setting::get('restaurant_email', 'info@posresto.com');
+            $restaurantEmail = \App\Models\Setting::get('restaurant_email', '');
             $receiptFooter = \App\Models\Setting::get('receipt_footer', 'Terima kasih atas kunjungan Anda!');
+            $restaurantNpwp = \App\Models\Setting::get('restaurant_npwp', '');
         @endphp
         
-        <div class="text-center mb-4 border-b pb-4">
-            @if($restaurantLogo)
-            <div class="flex justify-center mb-2">
-                <img src="{{ asset('storage/' . $restaurantLogo) }}" alt="{{ $restaurantName }}" class="h-20 object-contain">
+        <div id="receipt-content" style="font-size: 6.5pt; font-family: 'Courier New', Courier, monospace; padding-top: 5mm;">
+            <div class="text-center" style="margin-bottom: 8px;">
+                <div style="font-size: 8.5pt; font-weight: bold;">{{ strtoupper($restaurantName) }}</div>
+                <div style="font-size: 7.5pt; font-weight: bold;">{{ strtoupper($restaurantAddress) }}</div>
+                @if($restaurantNpwp)
+                <div>NPWP : {{ $restaurantNpwp }}</div>
+                @endif
             </div>
-            @endif
-            <h1 class="text-2xl font-bold text-gray-900 mb-1">{{ strtoupper($restaurantName) }}</h1>
-            <p class="text-sm text-gray-600">{{ $restaurantAddress }}</p>
-            <p class="text-sm text-gray-600">Telp: {{ $restaurantPhone }}</p>
+            
+            <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
+            
+            <!-- Order Info -->
+            <div style="display: flex; justify-content: space-between; margin: 4px 0; align-items: flex-start;">
+                <div style="display: flex; flex-direction: column; width: 65%;">
+                    <span>No Bill :</span>
+                    <span>{{ $tempOrder->bill_number }}</span>
+                </div>
+                <div style="width: 35%; text-align: right;">
+                    <span>Kasir :<br>{{ strtoupper(Str::limit($tempOrder->cashier->name, 10)) }}</span>
+                </div>
+            </div>
+            
+            <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
+            
+            <!-- Items -->
+            <div style="margin: 4px 0;">
+                @php $totalItemCount = 0; @endphp
+                @foreach($tempOrder->items as $item)
+                @php $totalItemCount += $item->quantity; @endphp
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px; align-items: flex-start;">
+                    <span style="flex: 1; padding-right: 2px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; word-break: break-word;">{{ strtoupper($item->name) }}</span>
+                    <span style="width: 15px; text-align: right; flex-shrink: 0;">{{ $item->quantity }}</span>
+                    <span style="width: 40px; text-align: right; flex-shrink: 0;">{{ number_format($item->price, 0, ',', '.') }}</span>
+                    <span style="width: 50px; text-align: right; flex-shrink: 0;">{{ number_format($item->price * $item->quantity, 0, ',', '.') }}</span>
+                </div>
+                @endforeach
+            </div>
+            
+            <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
+            
+            <!-- Totals -->
+            <div style="margin: 4px 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span style="width: 40%;">Total Item</span>
+                    <span style="width: 15%; text-align: left;">{{ $totalItemCount }}</span>
+                    <span style="flex: 1; text-align: right;">{{ number_format($tempOrder->subtotal, 0, ',', '.') }}</span>
+                </div>
+                @if($tempOrder->discount > 0)
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span style="width: 55%;">Total Disc.</span>
+                    <span style="flex: 1; text-align: right;">{{ number_format($tempOrder->discount, 0, ',', '.') }}</span>
+                </div>
+                @endif
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span style="width: 55%;">Total Belanja</span>
+                    <span style="flex: 1; text-align: right;">{{ number_format($tempOrder->subtotal - $tempOrder->discount, 0, ',', '.') }}</span>
+                </div>
+
+                @if($tempOrder->tax_amount > 0)
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span style="width: 55%;">PPN</span>
+                    <span style="flex: 1; text-align: right;">{{ number_format($tempOrder->tax_amount, 0, ',', '.') }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span style="width: 55%;">Grand Total</span>
+                    <span style="flex: 1; text-align: right;">{{ number_format($tempOrder->total, 0, ',', '.') }}</span>
+                </div>
+                @endif
+
+                @php
+                      $kembali = $tempOrder->payment_change ?? 0;
+                  @endphp
+                  @if ($tempOrder->payment_method)
+                          @php
+                              $methodValue = $tempOrder->payment_method;
+                              $methodName = strtoupper(str_replace('_', ' ', $methodValue ?? ''));
+                              $amountPaid = $tempOrder->payment_received ?? $tempOrder->payment_amount;
+                          @endphp
+                          <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                              <span style="width: 55%;">{{ $methodName == 'CASH' ? 'TUNAI' : $methodName }}</span>
+                              <span style="flex: 1; text-align: right;">{{ number_format($amountPaid, 0, ',', '.') }}</span>
+                          </div>
+                  @endif
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span style="width: 55%;">Kembalian</span>
+                    <span style="flex: 1; text-align: right;">{{ number_format($kembali, 0, ',', '.') }}</span>
+                </div>
+            </div>
+
+            <div style="border-bottom: 1px dashed #000; margin: 4px 0;"></div>
+
+            <!-- Footer -->
+            <div class="text-center" style="margin-top: 4px; margin-bottom: 16px;">
+                <div>Tgl. {{ $tempOrder->created_at->format('d-m-Y H:i:s') }}</div>
+                @if($receiptFooter)
+                <div style="margin-top: 4px;">{{ $receiptFooter }}</div>
+                @endif
+            </div>
         </div>
-        
-        <!-- Order Info -->
-        <div class="mb-4 pb-4 border-b space-y-1 text-sm">
-            <div class="flex justify-between">
-                <span class="text-gray-600">Bill Number</span>
-                <span class="font-medium">{{ $tempOrder->bill_number }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-gray-600">Date</span>
-                <span class="font-medium">{{ $tempOrder->created_at->format('d/m/Y H:i') }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span class="text-gray-600">Type</span>
-                <span class="font-medium capitalize">{{ str_replace('_', ' ', $tempOrder->type->value) }}</span>
-            </div>
-            @if($tempOrder->table)
-            <div class="flex justify-between">
-                <span class="text-gray-600">Table</span>
-                <span class="font-medium">Table {{ $tempOrder->table->number }}</span>
-            </div>
-            @endif
-            @if($tempOrder->customer_name)
-            <div class="flex justify-between">
-                <span class="text-gray-600">Customer</span>
-                <span class="font-medium">{{ $tempOrder->customer_name }}</span>
-            </div>
-            @endif
-            <div class="flex justify-between">
-                <span class="text-gray-600">Cashier</span>
-                <span class="font-medium">{{ $tempOrder->cashier->name ?? '-' }}</span>
-            </div>
-        </div>
-        
-        <!-- Items -->
-        <div class="mb-4 pb-4 border-b">
-            <h3 class="font-semibold mb-3 text-sm">Items</h3>
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b">
-                        <th class="text-left py-1">Item</th>
-                        <th class="text-center py-1">Qty</th>
-                        <th class="text-right py-1">Price</th>
-                        <th class="text-right py-1">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($tempOrder->items as $item)
-                    <tr>
-                        <td class="py-1">{{ $item->name }}</td>
-                        <td class="text-center py-1">{{ $item->quantity }}</td>
-                        <td class="text-right py-1">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
-                        <td class="text-right py-1">Rp {{ number_format($item->price * $item->quantity, 0, ',', '.') }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Totals -->
-        <div class="mb-4 pb-4 border-b space-y-1 text-sm">
-            <div class="flex justify-between">
-                <span class="text-gray-600">Subtotal</span>
-                <span>Rp {{ number_format($tempOrder->subtotal, 0, ',', '.') }}</span>
-            </div>
-            @php
-                $taxPercentage = \App\Models\Setting::get('tax_percentage', '10');
-            @endphp
-            <div class="flex justify-between">
-                <span class="text-gray-600">Tax ({{ $taxPercentage }}%)</span>
-                <span>Rp {{ number_format($tempOrder->tax_amount, 0, ',', '.') }}</span>
-            </div>
-            @if($tempOrder->discount > 0)
-            <div class="flex justify-between text-green-600">
-                <span>Discount</span>
-                <span>- Rp {{ number_format($tempOrder->discount, 0, ',', '.') }}</span>
-            </div>
-            @endif
-            <div class="flex justify-between text-lg font-bold pt-2 border-t">
-                <span>Total</span>
-                <span>Rp {{ number_format($tempOrder->total, 0, ',', '.') }}</span>
-            </div>
-        </div>
-        
-        <!-- Payment -->
-        @if($tempOrder->payment_method)
-        <div class="mb-4 pb-4 border-b space-y-1 text-sm">
-            <h3 class="font-semibold mb-2">Payment</h3>
-            <div class="flex justify-between">
-                <span class="text-gray-600 capitalize">{{ str_replace('_', ' ', $tempOrder->payment_method) }}</span>
-                <span>Rp {{ number_format($tempOrder->payment_amount, 0, ',', '.') }}</span>
-            </div>
-            @if($tempOrder->payment_change > 0)
-            <div class="flex justify-between text-green-600">
-                <span>Change</span>
-                <span>Rp {{ number_format($tempOrder->payment_change, 0, ',', '.') }}</span>
-            </div>
-            @endif
-        </div>
-        @endif
-        
-        <!-- Footer -->
-        <div class="text-center text-gray-600">
-            <p class="mb-2">{{ $receiptFooter }}</p>
-            @if($restaurantEmail)
-            <p class="text-sm">{{ $restaurantEmail }}</p>
-            @endif
-        </div>
-    </div>
-    
     <!-- Actions -->
     <div class="mt-6 flex flex-col gap-3 no-print">
         <button onclick="window.print()" class="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition text-center w-full">
@@ -270,3 +251,8 @@ if (window === window.top) {
 </script>
 </body>
 </html>
+
+
+
+
+
