@@ -152,19 +152,16 @@ class OrderController extends Controller
                 ]);
             }
 
-            $taxRate = \App\Models\Setting::get('tax_percentage', '10') / 100;
-            $tax = $subtotal * $taxRate;
-            $total = $subtotal + $tax;
-
             // Update order
             $this->orderRepository->update($orderId, [
                 'table_id' => $validated['table_id'],
                 'customer_name' => $validated['customer_name'],
-                'notes' => $validated['notes'],
-                'subtotal' => $subtotal,
-                'tax' => $tax,
-                'total' => $total,
+                'notes' => $validated['notes']
             ]);
+
+            // Recalculate totals properly using the Order model's built-in calculation
+            $order = \App\Models\Order::find($orderId);
+            $order->calculateTotal();
             
             // Update table status jika meja berubah
             if ($oldTableId != $validated['table_id']) {
