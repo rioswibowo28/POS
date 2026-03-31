@@ -183,7 +183,7 @@ class OrderController extends Controller
                 return redirect()->route('orders.payment', $order->id)->with('success', 'Order updated successfully. Ready for payment.');
             }
 
-            return redirect()->route('orders.index')->with('success', 'Order updated successfully');
+            return redirect()->route('pos.index')->with('success', 'Order updated successfully');
         } catch (\Exception $e) {
             return redirect()->route('orders.index')->with('error', 'Failed to update order: ' . $e->getMessage());
         }
