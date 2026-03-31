@@ -196,14 +196,44 @@
                 @php
                       $kembali = $tempOrder->payment_change ?? 0;
                   @endphp
-                  @if ($tempOrder->payment_method)
+                  
+                  @if (!empty($tempOrder->payment_reference) && str_starts_with(trim($tempOrder->payment_reference), '{'))
+                      @php
+                          $ref = json_decode($tempOrder->payment_reference, true);
+                          $breakdown = $ref['split_breakdown'] ?? [];
+                          $receivedBreakdown = $ref['received_breakdown'] ?? [];
+                      @endphp
+                      @foreach($breakdown as $method => $amount)
+                          @php
+                              $methodName = strtoupper(str_replace('_', ' ', $method));
+                              if (isset($receivedBreakdown[$method])) {
+                                  $displayAmount = $receivedBreakdown[$method];
+                              } else {
+                                  $displayAmount = (strtolower($method) === 'cash') ? $amount + $kembali : $amount;
+                              }
+                          @endphp
+                          <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                              <span style="width: 55%;">{{ ltrim($methodName == 'CASH' ? 'TUNAI' : $methodName) }}</span>
+                              <span style="flex: 1; text-align: right;">{{ number_format($displayAmount, 0, ',', '.') }}</span>
+                          </div>
+                      @endforeach
+                  @elseif (str_contains(strtolower($tempOrder->payment_method), 'cash') && str_contains(strtolower($tempOrder->payment_method), 'qris'))
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                          <span style="width: 55%;">QRIS</span>
+                          <span style="flex: 1; text-align: right;">{{ number_format($tempOrder->total / 2, 0, ',', '.') }}</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                          <span style="width: 55%;">TUNAI</span>
+                          <span style="flex: 1; text-align: right;">{{ number_format((($tempOrder->payment_received ?? $tempOrder->payment_amount) - ($tempOrder->total / 2)), 0, ',', '.') }}</span>
+                      </div>
+                  @elseif ($tempOrder->payment_method)
                           @php
                               $methodValue = $tempOrder->payment_method;
                               $methodName = strtoupper(str_replace('_', ' ', $methodValue ?? ''));
                               $amountPaid = $tempOrder->payment_received ?? $tempOrder->payment_amount;
                           @endphp
                           <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                              <span style="width: 55%;">{{ $methodName == 'CASH' ? 'TUNAI' : $methodName }}</span>
+                              <span style="width: 55%;">{{ ltrim($methodName == 'CASH' ? 'TUNAI' : $methodName) }}</span>
                               <span style="flex: 1; text-align: right;">{{ number_format($amountPaid, 0, ',', '.') }}</span>
                           </div>
                   @endif

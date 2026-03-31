@@ -147,12 +147,17 @@ class PaymentService
         $paymentReference = $primaryPayment ? $primaryPayment->reference_number : null;
         if ($order->payments->count() > 1) {
             $breakdown = [];
+            $receivedBreakdown = [];
             foreach ($order->payments as $p) {
                 $methodStr = $p->getRawOriginal('method') ?? $p->method;
-                $breakdown[$methodStr] = ($breakdown[$methodStr] ?? 0) + $p->amount;
+                                $breakdown[$methodStr] = ($breakdown[$methodStr] ?? 0) + $p->amount;
+                $receivedBreakdown[$methodStr] = ($receivedBreakdown[$methodStr] ?? 0) + ($p->received_amount ?? $p->amount);
             }
             // Store breakdown in payment_reference
-            $paymentReference = json_encode(['split_breakdown' => $breakdown]);
+            $paymentReference = json_encode([
+                'split_breakdown' => $breakdown,
+                'received_breakdown' => $receivedBreakdown
+            ]);
         }
 
         // Create TempOrder with same data + payment info
