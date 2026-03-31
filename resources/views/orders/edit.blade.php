@@ -116,8 +116,8 @@
     <div class="space-y-6">
         <div class="card">
             <h3 class="text-lg font-semibold mb-4">{{ __('edit_order.order_details') }}</h3>
-            
-            <form @submit.prevent="updateOrder()">
+
+            <form @submit.prevent="updateOrder($event)">
                 <!-- Table Selection (if dine in) -->
                 @if($order->type->value === 'dine_in')
                 <div class="mb-4">
@@ -418,14 +418,19 @@ function editOrderApp() {
             window.location.href = '{{ route("pos.index") }}';
         },
 
-        updateOrder() {
+updateOrder(event) {
             if (this.cart.length === 0) {
                 alert('Please add items to cart');
                 return;
             }
-            
+
             const formData = new FormData();
             formData.append('_method', 'PUT');
+
+            // Cek apakah tombol Process Payment yang diklik
+            if (event && event.submitter && event.submitter.name === 'redirect_to') {
+                formData.append('redirect_to', event.submitter.value);
+            }
             
             // Only append table_id if it has a value
             if (this.tableId) {
@@ -448,8 +453,11 @@ function editOrderApp() {
                 },
                 body: formData
             })
-            .then(response => response.ok ? response : Promise.reject(response))
-            .then(() => {
+            .then(response => {
+                if (!response.ok) return Promise.reject(response);
+                return response;
+            })
+            .then((response) => {
                 // Clear customer display (local and server)
                 localStorage.removeItem('pos_customer_display');
                 fetch('/api/customer-display/data', {
@@ -472,8 +480,10 @@ function editOrderApp() {
                         orderNumber: ''
                     })
                 }).catch(err => console.error('Failed to clear server:', err));
-                
-                window.location.href = '{{ route("pos.index") }}';
+
+                // Redirect to the URL given by the fetch redirect (response.url)
+                // This correctly handles the Controller's dynamic redirect logic.
+                window.location.href = response.url;
             })
             .catch(error => {
                 console.error('Error:', error);
