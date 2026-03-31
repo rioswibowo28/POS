@@ -140,8 +140,21 @@
                                         $cashAmount = $order->payments->where('method.value', 'cash')->sum('amount');
                                         $qrisAmount = $order->payments->where('method.value', 'qris')->sum('amount');
                                     } elseif (($order->_source ?? '') === 'temp') {
-                                        if (strtolower($order->payment_method) === 'cash') $cashAmount = $order->total;
-                                        if (strtolower($order->payment_method) === 'qris') $qrisAmount = $order->total;
+                                        
+                                        if (strtolower($order->payment_method) === 'cash') {
+                                            $cashAmount = $order->total;
+                                        } elseif (strtolower($order->payment_method) === 'qris') {
+                                            $qrisAmount = $order->total;
+                                        } else {
+                                            if (!empty($order->payment_reference) && str_starts_with(trim($order->payment_reference), '{')) {
+                                                $ref = json_decode($order->payment_reference, true);
+                                                $cashAmount = $ref['split_breakdown']['cash'] ?? 0;
+                                                $qrisAmount = $ref['split_breakdown']['qris'] ?? 0;
+                                            } elseif (str_contains(strtolower($order->payment_method), 'cash') && str_contains(strtolower($order->payment_method), 'qris')) {
+                                                $cashAmount = $order->total / 2;
+                                                $qrisAmount = $order->total / 2;
+                                            }
+                                        }
                                     }
                                 @endphp
                                 <td class="px-4 py-3 text-sm text-right">{{ $cashAmount > 0 ? 'Rp ' . number_format($cashAmount, 0, ',', '.') : '-' }}</td>
@@ -174,8 +187,20 @@
                                         $allCashTotal += $order->payments->where('method.value', 'cash')->sum('amount');
                                         $allQrisTotal += $order->payments->where('method.value', 'qris')->sum('amount');
                                     } elseif (($order->_source ?? '') === 'temp') {
-                                        if (strtolower($order->payment_method) === 'cash') $allCashTotal += $order->total;
-                                        if (strtolower($order->payment_method) === 'qris') $allQrisTotal += $order->total;
+                                        if (strtolower($order->payment_method) === 'cash') {
+                                            $allCashTotal += $order->total;
+                                        } elseif (strtolower($order->payment_method) === 'qris') {
+                                            $allQrisTotal += $order->total;
+                                        } else {
+                                            if (!empty($order->payment_reference) && str_starts_with(trim($order->payment_reference), '{')) {
+                                                $ref = json_decode($order->payment_reference, true);
+                                                $allCashTotal += $ref['split_breakdown']['cash'] ?? 0;
+                                                $allQrisTotal += $ref['split_breakdown']['qris'] ?? 0;
+                                            } elseif (str_contains(strtolower($order->payment_method), 'cash') && str_contains(strtolower($order->payment_method), 'qris')) {
+                                                $allCashTotal += $order->total / 2;
+                                                $allQrisTotal += $order->total / 2;
+                                            }
+                                        }
                                     }
                                 }
                             @endphp
@@ -316,9 +341,21 @@
                                 @php
                                     $cashAmount = 0;
                                     $qrisAmount = 0;
-                                    if (strtolower($order->payment_method) === 'cash') $cashAmount = $order->total;
-                                    if (strtolower($order->payment_method) === 'qris') $qrisAmount = $order->total;
-                                @endphp
+                                    
+                                    if (strtolower($order->payment_method) === 'cash') {
+                                        $cashAmount = $order->total;
+                                    } elseif (strtolower($order->payment_method) === 'qris') {
+                                        $qrisAmount = $order->total;
+                                    } else {
+                                        if (!empty($order->payment_reference) && str_starts_with(trim($order->payment_reference), '{')) {
+                                            $ref = json_decode($order->payment_reference, true);
+                                            $cashAmount = $ref['split_breakdown']['cash'] ?? 0;
+                                            $qrisAmount = $ref['split_breakdown']['qris'] ?? 0;
+                                        } elseif (str_contains(strtolower($order->payment_method), 'cash') && str_contains(strtolower($order->payment_method), 'qris')) {
+                                            $cashAmount = $order->total / 2;
+                                            $qrisAmount = $order->total / 2;
+                                        }
+                                    }@endphp
                                 <td class="px-4 py-3 text-sm text-right">{{ $cashAmount > 0 ? 'Rp ' . number_format($cashAmount, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-right">{{ $qrisAmount > 0 ? 'Rp ' . number_format($qrisAmount, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-right">Rp {{ number_format($order->subtotal, 0, ',', '.') }}</td>
@@ -338,9 +375,21 @@
                                 $tempCashTotal = 0;
                                 $tempQrisTotal = 0;
                                 foreach($tempOrders as $order) {
-                                    if (strtolower($order->payment_method) === 'cash') $tempCashTotal += $order->total;
-                                    if (strtolower($order->payment_method) === 'qris') $tempQrisTotal += $order->total;
-                                }
+                                    
+                                    if (strtolower($order->payment_method) === 'cash') {
+                                        $tempCashTotal += $order->total;
+                                    } elseif (strtolower($order->payment_method) === 'qris') {
+                                        $tempQrisTotal += $order->total;
+                                    } else {
+                                        if (!empty($order->payment_reference) && str_starts_with(trim($order->payment_reference), '{')) {
+                                            $ref = json_decode($order->payment_reference, true);
+                                            $tempCashTotal += $ref['split_breakdown']['cash'] ?? 0;
+                                            $tempQrisTotal += $ref['split_breakdown']['qris'] ?? 0;
+                                        } elseif (str_contains(strtolower($order->payment_method), 'cash') && str_contains(strtolower($order->payment_method), 'qris')) {
+                                            $tempCashTotal += $order->total / 2;
+                                            $tempQrisTotal += $order->total / 2;
+                                        }
+                                    }}
                             @endphp
                             <tr>
                                 <td colspan="5" class="px-4 py-3 text-right text-sm">Subtotal Other</td>

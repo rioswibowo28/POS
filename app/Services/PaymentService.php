@@ -144,6 +144,17 @@ class PaymentService
         $totalChangeAmount = $order->payments->sum('change_amount');
         $primaryPayment = $order->payments->first();
 
+        $paymentReference = $primaryPayment ? $primaryPayment->reference_number : null;
+        if ($order->payments->count() > 1) {
+            $breakdown = [];
+            foreach ($order->payments as $p) {
+                $methodStr = $p->getRawOriginal('method') ?? $p->method;
+                $breakdown[$methodStr] = ($breakdown[$methodStr] ?? 0) + $p->amount;
+            }
+            // Store breakdown in payment_reference
+            $paymentReference = json_encode(['split_breakdown' => $breakdown]);
+        }
+
         // Create TempOrder with same data + payment info
         $tempOrder = TempOrder::create([
             'order_number' => $order->order_number,
@@ -170,7 +181,7 @@ class PaymentService
             'payment_amount' => $totalPaymentAmount ?: 0,
             'payment_received' => $totalReceivedAmount ?: 0,
             'payment_change' => $totalChangeAmount ?: 0,
-            'payment_reference' => $primaryPayment ? $primaryPayment->reference_number : null,
+            'payment_reference' => $paymentReference,
             'payment_at' => $primaryPayment ? $primaryPayment->processed_at : now(),
         ]);
 

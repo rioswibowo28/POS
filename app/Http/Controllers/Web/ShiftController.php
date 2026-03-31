@@ -180,23 +180,37 @@ class ShiftController extends Controller
         $totalOrders = $shift->orders()->count();
 
         if ($includeTempOrders) {
-            $tempCashPayments = \App\Models\TempOrder::where('shift_id', $shift->id)
-                ->where('payment_method', 'cash')
-                ->sum(\Illuminate\Support\Facades\DB::raw('CASE WHEN payment_amount > 0 THEN payment_amount ELSE total END'));
-            $cashPayments += $tempCashPayments;
-
-            $tempQrisPayments = \App\Models\TempOrder::where('shift_id', $shift->id)
-                ->where('payment_method', '!=', 'cash')
-                ->whereNotNull('payment_method')
-                ->sum(\Illuminate\Support\Facades\DB::raw('CASE WHEN payment_amount > 0 THEN payment_amount ELSE total END'));
-            $qrisPayments += $tempQrisPayments;
-
-            $tempSales = \App\Models\TempOrder::where('shift_id', $shift->id)
-                ->sum(\Illuminate\Support\Facades\DB::raw('CASE WHEN payment_amount > 0 THEN payment_amount ELSE total END'));
-            $totalSales += $tempSales;
+            $tempOrdersForShift = \App\Models\TempOrder::where('shift_id', $shift->id)->get();
+            $tempCashPayments = 0;
+            $tempQrisPayments = 0;
+            $tempSales = 0;
             
-            $tempOrdersCount = \App\Models\TempOrder::where('shift_id', $shift->id)->count();
-            $totalOrders += $tempOrdersCount;
+            foreach ($tempOrdersForShift as $order) {
+                $amt = $order->payment_amount > 0 ? $order->payment_amount : $order->total;
+                $tempSales += $amt;
+                
+                if (strtolower($order->payment_method) === 'cash') {
+                    $tempCashPayments += $amt;
+                } elseif (strtolower($order->payment_method) === 'qris') {
+                    $tempQrisPayments += $amt;
+                } else {
+                    if (!empty($order->payment_reference) && str_starts_with(trim($order->payment_reference), '{')) {
+                        $ref = json_decode($order->payment_reference, true);
+                        $tempCashPayments += $ref['split_breakdown']['cash'] ?? 0;
+                        $tempQrisPayments += $ref['split_breakdown']['qris'] ?? 0;
+                    } elseif (str_contains(strtolower($order->payment_method), 'cash') && str_contains(strtolower($order->payment_method), 'qris')) {
+                        $tempCashPayments += $amt / 2;
+                        $tempQrisPayments += $amt / 2;
+                    } else {
+                        $tempQrisPayments += $amt;
+                    }
+                }
+            }
+            
+            $cashPayments += $tempCashPayments;
+            $qrisPayments += $tempQrisPayments;
+            $totalSales += $tempSales;
+            $totalOrders += $tempOrdersForShift->count();
         }
 
         $expectedCash = $shift->opening_cash + $cashPayments;
@@ -247,18 +261,29 @@ class ShiftController extends Controller
                 ->sum('amount');
 
             if ($includeTempOrders) {
-                $tempSales = \App\Models\TempOrder::where('shift_id', $shift->id)
-                    ->sum(\Illuminate\Support\Facades\DB::raw('CASE WHEN payment_amount > 0 THEN payment_amount ELSE total END'));
+                $tempOrdersForShift = \App\Models\TempOrder::where('shift_id', $shift->id)->get();
+                $tempCashPayments = 0;
+                $tempSales = 0;
                 
-                $tempCashPayments = \App\Models\TempOrder::where('shift_id', $shift->id)
-                    ->where('payment_method', 'cash')
-                    ->sum(\Illuminate\Support\Facades\DB::raw('CASE WHEN payment_amount > 0 THEN payment_amount ELSE total END'));
-                
-                $tempOrdersCount = \App\Models\TempOrder::where('shift_id', $shift->id)->count();
+                foreach ($tempOrdersForShift as $order) {
+                    $amt = $order->payment_amount > 0 ? $order->payment_amount : $order->total;
+                    $tempSales += $amt;
+                    
+                    if (strtolower($order->payment_method) === 'cash') {
+                        $tempCashPayments += $amt;
+                    } else {
+                        if (!empty($order->payment_reference) && str_starts_with(trim($order->payment_reference), '{')) {
+                            $ref = json_decode($order->payment_reference, true);
+                            $tempCashPayments += $ref['split_breakdown']['cash'] ?? 0;
+                        } elseif (str_contains(strtolower($order->payment_method), 'cash') && str_contains(strtolower($order->payment_method), 'qris')) {
+                            $tempCashPayments += $amt / 2;
+                        }
+                    }
+                }
                 
                 $totalSales += $tempSales;
                 $cashPayments += $tempCashPayments;
-                $totalOrders += $tempOrdersCount;
+                $totalOrders += $tempOrdersForShift->count();
             }
 
             $expectedCash = $shift->opening_cash + $cashPayments;
