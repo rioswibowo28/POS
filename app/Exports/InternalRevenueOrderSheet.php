@@ -137,12 +137,12 @@ class InternalRevenueOrderSheet implements FromCollection, WithHeadings, WithMap
                 $totalRow = $lastRow + 1;
 
                 // Column references differ based on type (all has extra Sumber column)
-                $lastCol = $this->type === 'all' ? 'K' : 'J';
-                $totalLabelCol = $this->type === 'all' ? 'G' : 'F';
-                $subtotalCol = $this->type === 'all' ? 'H' : 'G';
-                $taxCol = $this->type === 'all' ? 'I' : 'H';
-                $discountCol = $this->type === 'all' ? 'J' : 'I';
-                $grandTotalCol = $this->type === 'all' ? 'K' : 'J';
+                $lastCol = $this->type === 'all' ? 'L' : 'K';
+                $totalLabelCol = $this->type === 'all' ? 'H' : 'G';
+                $subtotalCol = $this->type === 'all' ? 'I' : 'H';
+                $taxCol = $this->type === 'all' ? 'J' : 'I';
+                $discountCol = $this->type === 'all' ? 'K' : 'J';
+                $grandTotalCol = $this->type === 'all' ? 'L' : 'K';
 
                 if ($this->rowCount > 0) {
                     // Total row

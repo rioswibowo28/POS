@@ -216,7 +216,7 @@
                                 }
                             @endphp
                             <tr>
-                                <td colspan="5" class="px-4 py-3 text-right text-sm">Subtotal All</td>
+                                <td colspan="6" class="px-4 py-3 text-right text-sm">Subtotal All</td>
                                 <td class="px-4 py-3 text-right text-sm text-green-600">{{ $allCashTotal > 0 ? 'Rp ' . number_format($allCashTotal, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-blue-600">{{ $allQrisTotal > 0 ? 'Rp ' . number_format($allQrisTotal, 0, ',', '.') : '-' }}</td>
                                 <td></td>
@@ -300,7 +300,7 @@
                                 }
                             @endphp
                             <tr>
-                                <td colspan="5" class="px-4 py-3 text-right text-sm">Subtotal Normal</td>
+                                <td colspan="6" class="px-4 py-3 text-right text-sm">Subtotal Normal</td>
                                 <td class="px-4 py-3 text-right text-sm text-green-600">{{ $normalCashTotal > 0 ? 'Rp ' . number_format($normalCashTotal, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-blue-600">{{ $normalQrisTotal > 0 ? 'Rp ' . number_format($normalQrisTotal, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-right text-sm">Rp {{ number_format($normalOrders->sum('subtotal'), 0, ',', '.') }}</td>
@@ -407,7 +407,7 @@
                                     }}
                             @endphp
                             <tr>
-                                <td colspan="5" class="px-4 py-3 text-right text-sm">Subtotal Other</td>
+                                <td colspan="6" class="px-4 py-3 text-right text-sm">Subtotal Other</td>
                                 <td class="px-4 py-3 text-right text-sm text-green-600">{{ $tempCashTotal > 0 ? 'Rp ' . number_format($tempCashTotal, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-right text-sm text-blue-600">{{ $tempQrisTotal > 0 ? 'Rp ' . number_format($tempQrisTotal, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-right text-sm">Rp {{ number_format($tempOrders->sum('subtotal'), 0, ',', '.') }}</td>
