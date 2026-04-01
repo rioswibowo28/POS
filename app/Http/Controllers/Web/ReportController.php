@@ -74,7 +74,7 @@ class ReportController extends Controller
         
         // Calculate totals
         $subtotal = $orders->sum('subtotal');
-        $tax = $orders->sum('tax');
+        $tax = $orders->sum('tax_amount');
         $discount = $orders->sum('discount');
         
         return [
