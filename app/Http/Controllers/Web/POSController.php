@@ -43,7 +43,8 @@ class POSController extends Controller
         $orderLimitAmount = (int) \App\Models\Setting::get('order_limit_amount', '0');
         $orderLimitStart = \App\Models\Setting::get('order_limit_start', '00:00');
         $orderLimitEnd = \App\Models\Setting::get('order_limit_end', '23:59');
-        $todayOrderTotal = (int) \App\Models\Order::whereDate('created_at', today())->sum('total');
+        $todayOrderTotal = (int) \App\Models\Order::whereDate('created_at', today())->sum('total') 
+                         + (int) \App\Models\TempOrder::whereDate('created_at', today())->sum('total');
 
         // Check if current time is within limit range
         $now = now()->format('H:i');
@@ -107,7 +108,8 @@ class POSController extends Controller
                 $now = now()->format('H:i');
                 if ($now >= $limitStart && $now <= $limitEnd) {
                     $orderLimitAmount = (int) \App\Models\Setting::get('order_limit_amount', '0');
-                    $todayTotal = (int) \App\Models\Order::whereDate('created_at', today())->sum('total');
+                    $todayTotal = (int) \App\Models\Order::whereDate('created_at', today())->sum('total') 
+                                + (int) \App\Models\TempOrder::whereDate('created_at', today())->sum('total');
                     if ($orderLimitAmount > 0 && $todayTotal >= $orderLimitAmount) {
                         $limitWarning = "Total penjualan hari ini sudah mencapai limit (Rp " . number_format($todayTotal, 0, ',', '.') . " / Rp " . number_format($orderLimitAmount, 0, ',', '.') . ")";
                     }
