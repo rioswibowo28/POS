@@ -18,10 +18,19 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Dari Tanggal</label>
                     <input type="date" name="start_date" value="{{ $startDate }}" class="input" required>
                 </div>
-                <div class="flex-1 min-w-[150px]">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Sampai Tanggal</label>
-                    <input type="date" name="end_date" value="{{ $endDate }}" class="input" required>
-                </div>
+                                  <div class="flex-1 min-w-[150px]">
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Sampai Tanggal</label>
+                      <input type="date" name="end_date" value="{{ $endDate }}" class="input" required>
+                  </div>
+                  <div class="flex-1 min-w-[150px]">
+                      <label class="block text-sm font-medium text-gray-700 mb-2">Shift</label>
+                      <select name="shift_id" class="input">
+                          <option value="all" {{ $shiftId == 'all' ? 'selected' : '' }}>Semua Shift</option>
+                          @foreach($masterShifts as $ms)
+                              <option value="{{ $ms->id }}" {{ $shiftId == $ms->id ? 'selected' : '' }}>{{ $ms->name }}</option>
+                          @endforeach
+                      </select>
+                  </div>
                 <div>
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-search mr-2"></i> Tampilkan
@@ -29,13 +38,13 @@
                 </div>
             </div>
             <div class="flex flex-wrap gap-2 items-center">
-                <a href="{{ route('reports.internal-revenue.print', ['start_date' => $startDate, 'end_date' => $endDate]) }}" target="_blank" class="btn-secondary inline-flex items-center">
+                <a href="{{ route('reports.internal-revenue.print', ['start_date' => $startDate, 'end_date' => $endDate, 'shift_id' => $shiftId]) }}" target="_blank" class="btn-secondary inline-flex items-center">
                     <i class="fas fa-print mr-2"></i> Cetak
                 </a>
-                <a href="{{ route('reports.internal-revenue.export-pdf', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn-secondary inline-flex items-center" style="background-color: #dc2626; color: white; border-color: #dc2626;">
+                <a href="{{ route('reports.internal-revenue.export-pdf', ['start_date' => $startDate, 'end_date' => $endDate, 'shift_id' => $shiftId]) }}" class="btn-secondary inline-flex items-center" style="background-color: #dc2626; color: white; border-color: #dc2626;">
                     <i class="fas fa-file-pdf mr-2"></i> PDF
                 </a>
-                <a href="{{ route('reports.internal-revenue.export-excel', ['start_date' => $startDate, 'end_date' => $endDate]) }}" class="btn-secondary inline-flex items-center" style="background-color: #16a34a; color: white; border-color: #16a34a;">
+                <a href="{{ route('reports.internal-revenue.export-excel', ['start_date' => $startDate, 'end_date' => $endDate, 'shift_id' => $shiftId]) }}" class="btn-secondary inline-flex items-center" style="background-color: #16a34a; color: white; border-color: #16a34a;">
                     <i class="fas fa-file-excel mr-2"></i> Excel
                 </a>
             </div>
@@ -114,6 +123,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jam</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Bill</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Order</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tunai</th><th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">QRIS</th>
@@ -131,6 +141,7 @@
                                 <td class="px-4 py-3 text-sm">{{ $i + 1 }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->created_at->format('d/m/Y') }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->created_at->format('H:i') }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $order->shift->masterShift->name ?? '-' }}</td>
                                 <td class="px-4 py-3 text-sm font-medium">{{ $order->bill_number }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->order_number }}</td>
                                 @php
@@ -239,6 +250,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jam</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Bill</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Order</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tunai</th><th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">QRIS</th>
@@ -255,6 +267,7 @@
                                 <td class="px-4 py-3 text-sm">{{ $i + 1 }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->created_at->format('d/m/Y') }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->created_at->format('H:i') }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $order->shift->masterShift->name ?? '-' }}</td>
                                 <td class="px-4 py-3 text-sm font-medium">{{ $order->bill_number }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->order_number }}</td>
                                 @php
@@ -320,6 +333,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jam</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Shift</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Bill</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. Order</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Tunai</th><th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">QRIS</th>
@@ -336,6 +350,7 @@
                                 <td class="px-4 py-3 text-sm">{{ $i + 1 }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->created_at->format('d/m/Y') }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->created_at->format('H:i') }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $order->shift->masterShift->name ?? '-' }}</td>
                                 <td class="px-4 py-3 text-sm font-medium">{{ $order->bill_number }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->order_number }}</td>
                                 @php

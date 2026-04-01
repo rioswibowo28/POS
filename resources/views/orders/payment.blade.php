@@ -61,12 +61,15 @@
             <div class="border-t pt-4 space-y-2">
                 <div class="flex justify-between text-sm">
                     <span class="text-gray-600">{{ __('payment.subtotal') }}</span>
-                    <span>Rp {{ number_format($order->subtotal, 0, ',', '.') }}</span>
+                    <span x-text="'Rp ' + formatMoney(subtotal)"></span>
                 </div>
                 <div class="flex justify-between text-sm">
                     @php $taxType = \App\Models\Setting::get('tax_type', 'exclude'); @endphp
-                    <span class="text-gray-600">{{ __('payment.tax') }} ({{ (int)$order->tax }}%){{ $taxType === 'include' ? ' (incl)' : '' }}</span>
-                    <span>Rp {{ number_format($order->tax_amount, 0, ',', '.') }}</span>
+                    <span class="text-gray-600">
+                        {{ __('payment.tax') }} (<span x-text="(activeTaxRate * 100).toFixed(0)"></span>%)
+                        @if($taxType === 'include') (incl) @endif
+                    </span>
+                    <span x-text="'Rp ' + formatMoney(taxAmount)"></span>
                 </div>
                 @if($order->discount > 0)
                 <div class="flex justify-between text-sm text-green-600">
@@ -76,7 +79,7 @@
                 @endif
                 <div class="flex justify-between text-lg font-bold border-t pt-2">
                     <span>{{ __('payment.total') }}</span>
-                    <span class="text-primary-600">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
+                    <span class="text-primary-600" x-text="'Rp ' + formatMoney(total)"></span>
                 </div>
             </div>
         </div>
@@ -86,10 +89,22 @@
             <h2 class="text-xl font-bold text-gray-900 mb-4">{{ __('payment.payment_method') }}</h2>
             
             <form @submit.prevent="processPayment()">
+                
+                <!-- No Tax Mode Checkbox -->
+                @if (\App\Models\Setting::get('pos_show_tax_flag', '1') == '1')
+                <div class="mb-4">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox"
+                               x-model="flag"
+                               class="w-4 h-4 text-orange-600 bg-white border-gray-300 rounded focus:ring-orange-500 focus:ring-2">
+                    </label>
+                </div>
+                @endif
+                
                 <!-- Payment Methods Toggle -->
-                <div class="mb-4 flex items-center bg-blue-50 p-3 rounded-lg border border-blue-100">
-                    <label class="cursor-pointer flex items-center w-full">
-                        <input type="checkbox" x-model="isSplitPayment" class="form-checkbox text-primary-600 w-5 h-5 rounded">
+                <div class="mb-4 flex items-center bg-blue-50 p-3 rounded-lg border border-blue-100" x-bind:class="flag ? 'opacity-50 cursor-not-allowed' : ''">
+                    <label class="cursor-pointer flex items-center w-full" x-bind:class="flag ? 'cursor-not-allowed' : ''">
+                        <input type="checkbox" x-model="isSplitPayment" :disabled="flag" class="form-checkbox text-primary-600 w-5 h-5 rounded" x-bind:class="flag ? 'bg-gray-200 opacity-50 cursor-not-allowed' : ''">
                         <span class="ml-3 font-semibold text-blue-900">Split Payment</span>
                     </label>
                 </div>
@@ -106,24 +121,24 @@
                             </div>
                         </label>
 
-                        <label class="relative cursor-pointer">
-                            <input type="radio" x-model="paymentMethod" value="qris" class="sr-only">
-                            <div :class="paymentMethod === 'qris' ? 'border-primary-600 bg-primary-50' : 'border-gray-200'" class="border-2 rounded-lg p-4 text-center transition">
-                                <i class="fas fa-qrcode text-3xl mb-2" :class="paymentMethod === 'qris' ? 'text-primary-600' : 'text-gray-400'"></i>
+                        <label class="relative cursor-pointer" :class="flag ? 'opacity-50 cursor-not-allowed' : ''">
+                            <input type="radio" x-model="paymentMethod" value="qris" class="sr-only" :disabled="flag">
+                            <div :class="(paymentMethod === 'qris' ? 'border-primary-600 bg-primary-50 ' : 'border-gray-200 ') + (flag ? 'bg-gray-100 cursor-not-allowed' : '')" class="border-2 rounded-lg p-4 text-center transition">
+                                <i class="fas fa-qrcode text-3xl mb-2" :class="(paymentMethod === 'qris' ? 'text-primary-600 ' : 'text-gray-400 ') + (flag ? 'opacity-50' : '')"></i>
                                 <p class="font-medium text-sm">QRIS</p>
                             </div>
                         </label>
                     </div>
 
                     <!-- Amount Paid -->
-                    <div class="mb-6 relative" @click.outside="if(!event.target.closest('.keypad-container')) showKeypad = false">
+                    <div class="mb-6 relative" @click.outside="if(!$event.target.closest('.keypad-container')) showKeypad = false">
                         <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('payment.amount_paid') }}</label>
                         <div class="relative">
                             <input type="text" inputmode="none" x-model="amountPaidFormatted" @input="handleAmountInput($event.target.value)" @focus="showKeypad = true" class="input text-lg font-bold w-full" placeholder="0" required>
                             <button type="button" @click="showKeypad = !showKeypad" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"><i class="fas fa-keyboard text-xl"></i></button>
                         </div>
                         <div class="grid grid-cols-4 gap-2 mt-3">
-                            <button type="button" @click="setAmount({{ $order->total }})" class="btn-secondary text-xs py-2">{{ __('payment.exact') }}</button>
+                            <button type="button" @click="setAmount(total)" class="btn-secondary text-xs py-2">{{ __('payment.exact') }}</button>
                             <button type="button" @click="setAmount(50000)" class="btn-secondary text-xs py-2">50k</button>
                             <button type="button" @click="setAmount(100000)" class="btn-secondary text-xs py-2">100k</button>
                             <button type="button" @click="setAmount(200000)" class="btn-secondary text-xs py-2">200k</button>
@@ -142,7 +157,7 @@
                 </div>
 
                 <!-- Split Payment View -->
-                <div x-show="isSplitPayment" x-cloak class="mb-6 space-y-3" @click.outside="if(!event.target.closest('.split-keypad-container')) activeSplitIndex = null">
+                <div x-show="isSplitPayment" x-cloak class="mb-6 space-y-3" @click.outside="if(!$event.target.closest('.split-keypad-container')) activeSplitIndex = null">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Split Payments (QRIS / Tunai)</label>
                     <template x-for="(payment, index) in multiPayments" :key="index">
                         <div class="flex gap-2 items-center bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
@@ -229,10 +244,44 @@
 <script>
 function paymentApp() {
     return {
-        orderTotal: {{ $order->total }},
+        flag: {{ ($order->flag ?? 0) ? "true" : "false" }},
+        taxRateSetting: {{ (float)($order->tax ?? \App\Models\Setting::get('tax_percentage', 10)) / 100 }},
+        taxType: '{{ \App\Models\Setting::get('tax_type', 'exclude') }}',
+        itemsTotal: {{ (float)($order->items->sum(function ($item) { return $item->price * $item->quantity; }) ?? 0) }},
+        discount: {{ (float)($order->discount ?? 0) }},
+        
+        get activeTaxRate() {
+            return this.taxRateSetting;
+        },
+        
+        get subtotal() {
+            if (this.taxType === 'include') {
+                return Math.round(this.itemsTotal / (1 + this.activeTaxRate));
+            }
+            return this.itemsTotal;
+        },
+        
+        get taxAmount() {
+            if (this.taxType === 'include') {
+                return this.itemsTotal - this.subtotal;
+            }
+            return Math.round(this.subtotal * this.activeTaxRate);
+        },
+        
+        get total() {
+            if (this.taxType === 'include') {
+                return this.itemsTotal - this.discount;
+            }
+            return this.subtotal + this.taxAmount - this.discount;
+        },
+        
+        get orderTotal() {
+            return this.total;
+        },
+        
         paymentMethod: 'cash',
-        amountPaid: {{ $order->total }},
-        amountPaidFormatted: '{{ number_format($order->total, 0, ',', '.') }}',
+        amountPaid: {{ (float)($order->total ?? 0) }},
+        amountPaidFormatted: '{{ number_format($order->total ?? 0, 0, ',', '.') }}',
         
         isSplitPayment: false,
         multiPayments: [{ method: 'qris', amount: 0, formatted_amount: '0' }, { method: 'cash', amount: 0, formatted_amount: '0' }],
@@ -264,21 +313,31 @@ function paymentApp() {
             this.$watch('isSplitPayment', value => {
                 this.calculateChange();
             });
+            this.$watch('flag', value => {
+                // When tax logic changes
+                if (value) {
+                    // Disable split payment & force cash on No Tax
+                    this.isSplitPayment = false;
+                    this.paymentMethod = 'cash';
+                }
+                this.setAmount(this.total);
+                this.syncToCustomerDisplay();
+            });
         },
 
 syncToCustomerDisplay() {
             const displayData = {
                 mode: 'payment',
-                orderNumber: '{{ $order->order_number }}',
+                orderNumber: '{{ $order->order_number }}', // this won't change until payment finishes
                 orderType: '{{ $order->type->value }}',
                 tableNumber: '{{ $order->table ? $order->table->number : "" }}',
                 customerName: '{{ $order->customer_name ?? "" }}',
                 cartItems: @json($cartItems),
-                subtotal: {{ $order->subtotal }},
-                tax: {{ $order->tax_amount }},
-                discount: {{ $order->discount }},
-                total: {{ $order->total }},
-                taxRate: {{ $order->tax / 100 }}
+                subtotal: this.subtotal,
+                tax: this.taxAmount,
+                discount: this.discount,
+                total: this.total,
+                taxRate: this.activeTaxRate
             };
             localStorage.setItem('pos_customer_display', JSON.stringify(displayData));
             if (this.broadcastChannel) {
@@ -444,7 +503,8 @@ syncToCustomerDisplay() {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     },
                     body: JSON.stringify({
-                        payments: this.isSplitPayment ? this.multiPayments.map(p => ({method: p.method, amount: p.amount})) : [{method: this.paymentMethod, amount: this.amountPaid}]
+                        payments: this.isSplitPayment ? this.multiPayments.map(p => ({method: p.method, amount: p.amount})) : [{method: this.paymentMethod, amount: this.amountPaid}],
+                        flag: this.flag ? 1 : 0
                     })
                 });
                 
@@ -484,7 +544,8 @@ syncToCustomerDisplay() {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     },
                     body: JSON.stringify({
-                        payments: [{method: 'qris', amount: this.orderTotal}]
+                        payments: [{method: 'qris', amount: this.orderTotal}],
+                        flag: this.flag ? 1 : 0
                     })
                 });
                 

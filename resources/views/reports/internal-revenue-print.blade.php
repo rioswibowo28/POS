@@ -129,6 +129,7 @@
                 <th class="text-center" style="width:30px;">No</th>
                 <th>Tanggal</th>
                 <th>Jam</th>
+                <th>Shift</th>
                 <th>No. Bill</th>
                 <th>No. Order</th>
                 <th>Pembayaran</th>
@@ -145,6 +146,7 @@
                 <td class="text-center">{{ $i + 1 }}</td>
                 <td>{{ $order->created_at->format('d/m/Y') }}</td>
                 <td>{{ $order->created_at->format('H:i') }}</td>
+                <td>{{ $order->shift->masterShift->name ?? '-' }}</td>
                 <td class="font-bold">{{ $order->bill_number }}</td>
                 <td>{{ $order->order_number }}</td>
                 <td>
@@ -187,6 +189,7 @@
                 <th class="text-center" style="width:30px;">No</th>
                 <th>Tanggal</th>
                 <th>Jam</th>
+                <th>Shift</th>
                 <th>No. Bill</th>
                 <th>No. Order</th>
                 <th>Pembayaran</th>
@@ -202,6 +205,7 @@
                 <td class="text-center">{{ $i + 1 }}</td>
                 <td>{{ $order->created_at->format('d/m/Y') }}</td>
                 <td>{{ $order->created_at->format('H:i') }}</td>
+                <td>{{ $order->shift->masterShift->name ?? '-' }}</td>
                 <td class="font-bold">{{ $order->bill_number }}</td>
                 <td>{{ $order->order_number }}</td>
                 <td>
@@ -239,6 +243,7 @@
                 <th class="text-center" style="width:30px;">No</th>
                 <th>Tanggal</th>
                 <th>Jam</th>
+                <th>Shift</th>
                 <th>No. Bill</th>
                 <th>No. Order</th>
                 <th>Pembayaran</th>
@@ -254,6 +259,7 @@
                 <td class="text-center">{{ $i + 1 }}</td>
                 <td>{{ $order->created_at->format('d/m/Y') }}</td>
                 <td>{{ $order->created_at->format('H:i') }}</td>
+                <td>{{ $order->shift->masterShift->name ?? '-' }}</td>
                 <td class="font-bold">{{ $order->bill_number }}</td>
                 <td>{{ $order->order_number }}</td>
                 <td>{{ $order->payment_method ? ucfirst($order->payment_method) : '-' }}</td>

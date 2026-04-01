@@ -146,7 +146,7 @@
                 <!-- Cart Items -->
                 <div class="mb-4">
                     <h4 class="font-semibold mb-3">{{ __('edit_order.cart_items') }}</h4>
-                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                    <div id="cart-container" class="space-y-2 max-h-64 overflow-y-auto scroll-smooth">
                         <template x-for="(item, index) in cart" :key="index">
                             <div class="flex items-center gap-2 p-2 bg-gray-50 rounded">
                                 <div class="flex-1">
@@ -370,6 +370,14 @@ function editOrderApp() {
                 });
             }
             this.syncToCustomerDisplay();
+            
+            // Scroll ke bawah
+            this.$nextTick(() => {
+                const container = document.getElementById('cart-container');
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            });
         },
         
         increaseQty(index) {

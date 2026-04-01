@@ -19,12 +19,14 @@ class InternalRevenueRecapSheet implements FromArray, WithHeadings, WithStyles, 
     protected $summary;
     protected $startDate;
     protected $endDate;
+    protected $shiftId;
 
-    public function __construct(array $summary, string $startDate, string $endDate)
+    public function __construct(array $summary, string $startDate, string $endDate, $shiftId = "all")
     {
         $this->summary = $summary;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
+        $this->shiftId = $shiftId;
     }
 
     public function array(): array

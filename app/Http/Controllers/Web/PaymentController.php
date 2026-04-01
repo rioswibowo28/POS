@@ -49,6 +49,7 @@ class PaymentController extends Controller
             'payments' => 'required|array|min:1',
             'payments.*.method' => 'required|in:cash,qris,midtrans',
             'payments.*.amount' => 'required|numeric|min:0',
+            'flag' => 'nullable|boolean',
         ]);
 
         try {
@@ -72,6 +73,18 @@ class PaymentController extends Controller
                 throw new \Exception('Order not found');
             }
 
+            // Update flag if provided
+            if ($request->has('flag')) {
+                $newFlag = (bool) $request->input('flag');
+                if ($order->flag != $newFlag) {
+                    $order->flag = $newFlag;
+                    
+                    // Regenerate new numbers since flag changed
+                    $order->order_number = \App\Models\Order::generateOrderNumber($newFlag);
+                    $order->bill_number = \App\Models\Order::generateBillNumber($newFlag);
+                    $order->save();
+                }
+            }
             // Check if Midtrans QRIS is among payments
             $hasMidtrans = false;
             $midtransAmount = 0;

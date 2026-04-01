@@ -367,23 +367,32 @@ class ReportController extends Controller
     {
         $startDate = $request->input('start_date', Carbon::today()->toDateString());
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
-        
+        $shiftId = $request->input('shift_id', 'all');
+
         $start = Carbon::parse($startDate)->startOfDay();
         $end = Carbon::parse($endDate)->endOfDay();
-        
-        // Normal orders (flag=0)
-        $normalOrders = Order::with(['cashier', 'payments'])
+
+        $normalOrdersQuery = Order::with(['cashier', 'payments', 'shift.masterShift'])
             ->whereBetween('created_at', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
-            ->orderBy('created_at', 'asc')
-            ->get();
-        
-        // Temp orders (from shift closing archive)
-        $tempOrders = TempOrder::with(['cashier'])
+            ->orderBy('created_at', 'asc');
+
+        $tempOrdersQuery = \App\Models\TempOrder::with(['cashier', 'shift.masterShift'])
             ->whereBetween('created_at', [$start, $end])
-            ->orderBy('created_at', 'asc')
-            ->get();
+            ->orderBy('created_at', 'asc');
+
+        if ($shiftId !== 'all') {
+            $normalOrdersQuery->whereHas('shift', function($query) use ($shiftId) {
+                $query->where('master_shift_id', $shiftId);
+            });
+            $tempOrdersQuery->whereHas('shift', function($query) use ($shiftId) {
+                $query->where('master_shift_id', $shiftId);
+            });
+        }
+
+        $normalOrders = $normalOrdersQuery->get();
+        $tempOrders = $tempOrdersQuery->get();
 
         // All transactions combined (normal + temp) sorted by date
         $allOrders = $normalOrders->map(function($order) {
@@ -414,7 +423,8 @@ class ReportController extends Controller
             'temp_total' => $tempOrders->sum('total'),
         ];
         
-        return view('reports.internal-revenue', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate'));
+        $masterShifts = \App\Models\MasterShift::all();
+          return view('reports.internal-revenue', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate', 'shiftId', 'masterShifts'));
     }
 
     /**
@@ -424,21 +434,32 @@ class ReportController extends Controller
     {
         $startDate = $request->input('start_date', Carbon::today()->toDateString());
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
-        
+        $shiftId = $request->input('shift_id', 'all');
+
         $start = Carbon::parse($startDate)->startOfDay();
         $end = Carbon::parse($endDate)->endOfDay();
-        
-        $normalOrders = Order::with(['cashier', 'payments'])
+
+        $normalOrdersQuery = Order::with(['cashier', 'payments', 'shift.masterShift'])
             ->whereBetween('created_at', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
-            ->orderBy('created_at', 'asc')
-            ->get();
-        
-        $tempOrders = TempOrder::with(['cashier'])
+            ->orderBy('created_at', 'asc');
+
+        $tempOrdersQuery = \App\Models\TempOrder::with(['cashier', 'shift.masterShift'])
             ->whereBetween('created_at', [$start, $end])
-            ->orderBy('created_at', 'asc')
-            ->get();
+            ->orderBy('created_at', 'asc');
+
+        if ($shiftId !== 'all') {
+            $normalOrdersQuery->whereHas('shift', function($query) use ($shiftId) {
+                $query->where('master_shift_id', $shiftId);
+            });
+            $tempOrdersQuery->whereHas('shift', function($query) use ($shiftId) {
+                $query->where('master_shift_id', $shiftId);
+            });
+        }
+
+        $normalOrders = $normalOrdersQuery->get();
+        $tempOrders = $tempOrdersQuery->get();
 
         $allOrders = $normalOrders->map(function($order) {
             $order->_source = 'order';
@@ -468,7 +489,7 @@ class ReportController extends Controller
             'temp_total' => $tempOrders->sum('total'),
         ];
         
-        return view('reports.internal-revenue-print', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate'));
+        return view('reports.internal-revenue-print', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate', 'shiftId'));
     }
 
     /**
@@ -609,21 +630,32 @@ class ReportController extends Controller
     {
         $startDate = $request->input('start_date', Carbon::today()->toDateString());
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
-        
+        $shiftId = $request->input('shift_id', 'all');
+
         $start = Carbon::parse($startDate)->startOfDay();
         $end = Carbon::parse($endDate)->endOfDay();
-        
-        $normalOrders = Order::with(['cashier', 'payments'])
+
+        $normalOrdersQuery = Order::with(['cashier', 'payments', 'shift.masterShift'])
             ->whereBetween('created_at', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
-            ->orderBy('created_at', 'asc')
-            ->get();
-        
-        $tempOrders = \App\Models\TempOrder::with(['cashier'])
+            ->orderBy('created_at', 'asc');
+
+        $tempOrdersQuery = \App\Models\TempOrder::with(['cashier', 'shift.masterShift'])
             ->whereBetween('created_at', [$start, $end])
-            ->orderBy('created_at', 'asc')
-            ->get();
+            ->orderBy('created_at', 'asc');
+
+        if ($shiftId !== 'all') {
+            $normalOrdersQuery->whereHas('shift', function($query) use ($shiftId) {
+                $query->where('master_shift_id', $shiftId);
+            });
+            $tempOrdersQuery->whereHas('shift', function($query) use ($shiftId) {
+                $query->where('master_shift_id', $shiftId);
+            });
+        }
+
+        $normalOrders = $normalOrdersQuery->get();
+        $tempOrders = $tempOrdersQuery->get();
 
         $allOrders = $normalOrders->map(function($order) {
             $order->_source = 'order';
@@ -653,7 +685,7 @@ class ReportController extends Controller
 
         $filename = 'Penjualan_ALL_' . $startDate . '_' . $endDate . '.xlsx';
 
-        return (new InternalRevenueExport($allOrders, $normalOrders, $tempOrders, $summary, $startDate, $endDate))
+        return (new InternalRevenueExport($allOrders, $normalOrders, $tempOrders, $summary, $startDate, $endDate, $shiftId))
             ->download($filename);
     }
 
@@ -664,21 +696,32 @@ class ReportController extends Controller
     {
         $startDate = $request->input('start_date', Carbon::today()->toDateString());
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
-        
+        $shiftId = $request->input('shift_id', 'all');
+
         $start = Carbon::parse($startDate)->startOfDay();
         $end = Carbon::parse($endDate)->endOfDay();
-        
-        $normalOrders = Order::with(['cashier', 'payments'])
+
+        $normalOrdersQuery = Order::with(['cashier', 'payments', 'shift.masterShift'])
             ->whereBetween('created_at', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
-            ->orderBy('created_at', 'asc')
-            ->get();
-        
-        $tempOrders = TempOrder::with(['cashier'])
+            ->orderBy('created_at', 'asc');
+
+        $tempOrdersQuery = \App\Models\TempOrder::with(['cashier', 'shift.masterShift'])
             ->whereBetween('created_at', [$start, $end])
-            ->orderBy('created_at', 'asc')
-            ->get();
+            ->orderBy('created_at', 'asc');
+
+        if ($shiftId !== 'all') {
+            $normalOrdersQuery->whereHas('shift', function($query) use ($shiftId) {
+                $query->where('master_shift_id', $shiftId);
+            });
+            $tempOrdersQuery->whereHas('shift', function($query) use ($shiftId) {
+                $query->where('master_shift_id', $shiftId);
+            });
+        }
+
+        $normalOrders = $normalOrdersQuery->get();
+        $tempOrders = $tempOrdersQuery->get();
 
         $allOrders = $normalOrders->map(function($order) {
             $order->_source = 'order';
@@ -709,7 +752,7 @@ class ReportController extends Controller
         ];
 
         $isPdf = true;
-        $pdf = Pdf::loadView('reports.internal-revenue-print', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate', 'isPdf'))
+        $pdf = Pdf::loadView('reports.internal-revenue-print', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate', 'isPdf', 'shiftId'))
             ->setPaper('a4', 'landscape');
 
         $filename = 'Penjualan_ALL_' . $startDate . '_' . $endDate . '.pdf';

@@ -162,7 +162,9 @@ class OrderService
         return DB::transaction(function () use ($orderId) {
             $order = $this->orderRepository->findOrFail($orderId);
             
-            $order->status = 'cancelled';
+                        $order->status = 'cancelled';
+            $order->order_number = 'CANO-' . date('ymd-His') . '-' . $order->id;
+            $order->bill_number = 'CANB-' . date('ymd-His') . '-' . $order->id;
             $order->deleted_by = auth()->id();
             $order->save();
 

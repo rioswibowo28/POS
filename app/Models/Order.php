@@ -94,22 +94,25 @@ class Order extends Model
         $date = date('Ymd');
         $prefix = 'ORD-';
         
-        // Count orders for today with the same flag (including soft-deleted)
-        $count = Order::withTrashed()
+        $maxOrder = static::withTrashed()
             ->whereDate('created_at', today())
             ->where('flag', $flag)
-            ->count();
-        
-        // Also count orders that were moved to temp_orders
-        $countTemp = TempOrder::whereDate('created_at', today())
+            ->where('order_number', 'like', 'ORD-%')
+            ->max('order_number');
+
+        $maxTemp = TempOrder::whereDate('created_at', today())
             ->where('flag', $flag)
-            ->count();
+            ->where('order_number', 'like', 'ORD-%')
+            ->max('order_number');
+
+        $seqOrder = $maxOrder ? (int) substr($maxOrder, strrpos($maxOrder, '-') + 1) : 0;
+        $seqTemp = $maxTemp ? (int) substr($maxTemp, strrpos($maxTemp, '-') + 1) : 0;
         
-        $totalCount = $count + $countTemp;
-        
+        $maxSeq = max($seqOrder, $seqTemp);
+
         // Different padding based on flag: 4 digits for normal, 3 digits for flag=1
-        $number = $flag ? str_pad($totalCount + 1, 3, '0', STR_PAD_LEFT) : str_pad($totalCount + 1, 4, '0', STR_PAD_LEFT);
-        
+        $number = $flag ? str_pad($maxSeq + 1, 3, '0', STR_PAD_LEFT) : str_pad($maxSeq + 1, 4, '0', STR_PAD_LEFT);
+
         return $prefix . $date . '-' . $number;
     }
 
@@ -122,23 +125,26 @@ class Order extends Model
     {
         $date = date('ymd'); // YY format (2 digits untuk tahun)
         $prefix = 'BILL-';
-        
-        // Count orders for today with the same flag (including soft-deleted)
-        $count = Order::withTrashed()
+
+        $maxOrder = static::withTrashed()
             ->whereDate('created_at', today())
             ->where('flag', $flag)
-            ->count();
-        
-        // Also count orders that were moved to temp_orders
-        $countTemp = TempOrder::whereDate('created_at', today())
+            ->where('bill_number', 'like', 'BILL-%')
+            ->max('bill_number');
+
+        $maxTemp = TempOrder::whereDate('created_at', today())
             ->where('flag', $flag)
-            ->count();
+            ->where('bill_number', 'like', 'BILL-%')
+            ->max('bill_number');
+
+        $seqOrder = $maxOrder ? (int) substr($maxOrder, strrpos($maxOrder, '-') + 1) : 0;
+        $seqTemp = $maxTemp ? (int) substr($maxTemp, strrpos($maxTemp, '-') + 1) : 0;
         
-        $totalCount = $count + $countTemp;
-        
+        $maxSeq = max($seqOrder, $seqTemp);
+
         // Different padding based on flag
-        $number = $flag ? str_pad($totalCount + 1, 3, '0', STR_PAD_LEFT) : str_pad($totalCount + 1, 4, '0', STR_PAD_LEFT);
-        
+        $number = $flag ? str_pad($maxSeq + 1, 3, '0', STR_PAD_LEFT) : str_pad($maxSeq + 1, 4, '0', STR_PAD_LEFT);
+
         return $prefix . $date . '-' . $number;
     }
 
@@ -146,7 +152,6 @@ class Order extends Model
     {
         return $this->belongsTo(Table::class);
     }
-
     public function items()
     {
         return $this->hasMany(OrderItem::class);
