@@ -37,6 +37,7 @@ class SettingController extends Controller
                 'cashier_can_access_reports' => 'nullable|boolean',
                 'enable_packages' => 'nullable|boolean',
                 'pos_show_tax_flag' => 'nullable|boolean',
+                'allow_qris_split_on_no_tax' => 'nullable|boolean',
                 'table_layout_columns' => 'nullable|integer|min:2|max:10',
                 'customer_display_poster' => 'nullable|image|mimes:png,jpg,jpeg|max:10240',
                 'customer_display_mode' => 'nullable|in:local,network',
@@ -131,7 +132,7 @@ class SettingController extends Controller
             }
             
             // Handle unchecked booleans
-            $booleanSettings = ['midtrans_enabled', 'midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports', 'enable_packages', 'pos_show_tax_flag'];
+            $booleanSettings = ['midtrans_enabled', 'midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports', 'enable_packages', 'pos_show_tax_flag', 'allow_qris_split_on_no_tax'];
             foreach ($booleanSettings as $boolKey) {
                 if (!array_key_exists($boolKey, $validated) && !$request->hasFile($boolKey)) {
                      $this->settingRepository->setByKey($boolKey, '0', 'boolean');

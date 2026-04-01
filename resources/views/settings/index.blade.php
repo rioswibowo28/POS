@@ -197,8 +197,22 @@
                                     <p class="text-xs text-gray-600 mt-1">Jika aktif, kasir bisa mencentang kotak kosong pembebasan pajak/pembuatan bill sementara saat memesan.</p>
                                 </div>
                             </label>
+
+                            <!-- Checkbox Flexible No Tax Features -->
+                            <label class="flex items-center p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-primary-300 cursor-pointer transition mt-3">
+                                <input type="hidden" name="allow_qris_split_on_no_tax" value="0">
+                                <input type="checkbox" 
+                                       name="allow_qris_split_on_no_tax" 
+                                       value="1" 
+                                       {{ old('allow_qris_split_on_no_tax', $settings['allow_qris_split_on_no_tax'] ?? '0') == '1' ? 'checked' : '' }}
+                                       class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5 flex-shrink-0">
+                                <div class="ml-3">
+                                    <span class="text-sm font-semibold text-gray-900">Izinkan QRIS/Split Bill saat No-Tax</span>
+                                    <p class="text-xs text-gray-600 mt-1">Jika aktif, pembayaran dengan metode Split Bill dan QRIS tetap dapat dipilih meskipun pesanan diatur tanpa pajak (No-Tax).</p>
+                                </div>
+                            </label>
                         </div>
-                        
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Access Control</label>
                             

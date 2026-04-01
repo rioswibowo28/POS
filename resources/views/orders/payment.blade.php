@@ -102,9 +102,9 @@
                 @endif
                 
                 <!-- Payment Methods Toggle -->
-                <div class="mb-4 flex items-center bg-blue-50 p-3 rounded-lg border border-blue-100" x-bind:class="flag ? 'opacity-50 cursor-not-allowed' : ''">
-                    <label class="cursor-pointer flex items-center w-full" x-bind:class="flag ? 'cursor-not-allowed' : ''">
-                        <input type="checkbox" x-model="isSplitPayment" :disabled="flag" class="form-checkbox text-primary-600 w-5 h-5 rounded" x-bind:class="flag ? 'bg-gray-200 opacity-50 cursor-not-allowed' : ''">
+                <div class="mb-4 flex items-center bg-blue-50 p-3 rounded-lg border border-blue-100" x-bind:class="(flag && !allowQrisSplitOnNoTax) ? 'opacity-50 cursor-not-allowed' : ''">
+                    <label class="cursor-pointer flex items-center w-full" x-bind:class="(flag && !allowQrisSplitOnNoTax) ? 'cursor-not-allowed' : ''">
+                        <input type="checkbox" x-model="isSplitPayment" :disabled="flag && !allowQrisSplitOnNoTax" class="form-checkbox text-primary-600 w-5 h-5 rounded" x-bind:class="(flag && !allowQrisSplitOnNoTax) ? 'bg-gray-200 opacity-50 cursor-not-allowed' : ''">
                         <span class="ml-3 font-semibold text-blue-900">Split Payment</span>
                     </label>
                 </div>
@@ -121,10 +121,10 @@
                             </div>
                         </label>
 
-                        <label class="relative cursor-pointer" :class="flag ? 'opacity-50 cursor-not-allowed' : ''">
-                            <input type="radio" x-model="paymentMethod" value="qris" class="sr-only" :disabled="flag">
-                            <div :class="(paymentMethod === 'qris' ? 'border-primary-600 bg-primary-50 ' : 'border-gray-200 ') + (flag ? 'bg-gray-100 cursor-not-allowed' : '')" class="border-2 rounded-lg p-4 text-center transition">
-                                <i class="fas fa-qrcode text-3xl mb-2" :class="(paymentMethod === 'qris' ? 'text-primary-600 ' : 'text-gray-400 ') + (flag ? 'opacity-50' : '')"></i>
+                        <label class="relative cursor-pointer" :class="(flag && !allowQrisSplitOnNoTax) ? 'opacity-50 cursor-not-allowed' : ''">
+                            <input type="radio" x-model="paymentMethod" value="qris" class="sr-only" :disabled="flag && !allowQrisSplitOnNoTax">
+                            <div :class="(paymentMethod === 'qris' ? 'border-primary-600 bg-primary-50 ' : 'border-gray-200 ') + ((flag && !allowQrisSplitOnNoTax) ? 'bg-gray-100 cursor-not-allowed' : '')" class="border-2 rounded-lg p-4 text-center transition">
+                                <i class="fas fa-qrcode text-3xl mb-2" :class="(paymentMethod === 'qris' ? 'text-primary-600 ' : 'text-gray-400 ') + ((flag && !allowQrisSplitOnNoTax) ? 'opacity-50' : '')"></i>
                                 <p class="font-medium text-sm">QRIS</p>
                             </div>
                         </label>
@@ -250,6 +250,7 @@
 function paymentApp() {
     return {
         flag: {{ ($order->flag ?? 0) ? "true" : "false" }},
+        allowQrisSplitOnNoTax: {{ \App\Models\Setting::get('allow_qris_split_on_no_tax', '0') == '1' ? 'true' : 'false' }},
         taxRateSetting: {{ (float)($order->tax ?? \App\Models\Setting::get('tax_percentage', 10)) / 100 }},
         taxType: '{{ \App\Models\Setting::get('tax_type', 'exclude') }}',
         itemsTotal: {{ (float)($order->items->sum(function ($item) { return $item->price * $item->quantity; }) ?? 0) }},
@@ -320,7 +321,7 @@ function paymentApp() {
             });
             this.$watch('flag', value => {
                 // When tax logic changes
-                if (value) {
+                if (value && !this.allowQrisSplitOnNoTax) {
                     // Disable split payment & force cash on No Tax
                     this.isSplitPayment = false;
                     this.paymentMethod = 'cash';
