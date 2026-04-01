@@ -691,13 +691,7 @@ function posApp() {
                 return;
             }
 
-            // Check order limit warning (rupiah-based, time-range aware)
-            if (this.isOrderLimitActive() && this.orderLimitAmount > 0 && this.todayOrderTotal >= this.orderLimitAmount) {
-                if (!confirm(`⚠️ Peringatan: Total penjualan hari ini sudah mencapai limit (${this.formatRupiah(this.todayOrderTotal)} / ${this.formatRupiah(this.orderLimitAmount)}).\nBerlaku: ${this.orderLimitStart} - ${this.orderLimitEnd}\n\nApakah tetap ingin melanjutkan order?`)) {
-                    return;
-                }
-            }
-            
+            // Order limit warning (Sudah diubah hanya tampil sebagai Notifikasi di banner atas).
             const orderData = {
                 type: this.orderType,
                 table_id: this.orderType === 'dine_in' ? this.tableId : null,
@@ -729,13 +723,7 @@ function posApp() {
                 return;
             }
 
-            // Check order limit warning (rupiah-based, time-range aware)
-            if (this.isOrderLimitActive() && this.orderLimitAmount > 0 && this.todayOrderTotal >= this.orderLimitAmount) {
-                if (!confirm(`⚠️ Peringatan: Total penjualan hari ini sudah mencapai limit (${this.formatRupiah(this.todayOrderTotal)} / ${this.formatRupiah(this.orderLimitAmount)}).\nBerlaku: ${this.orderLimitStart} - ${this.orderLimitEnd}\n\nApakah tetap ingin melanjutkan order?`)) {
-                    return;
-                }
-            }
-            
+            // Order limit warning (Sudah diubah hanya tampil sebagai Notifikasi di banner atas).
             const orderData = {
                 type: this.orderType,
                 table_id: this.orderType === 'dine_in' ? this.tableId : null,
