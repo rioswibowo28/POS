@@ -116,7 +116,7 @@
         <template x-if="showQris && qrisImageUrl != null && qrisImageUrl != ''">
             <div class="flex flex-col items-center justify-center p-8 bg-white w-full h-full">
                 <h2 class="text-4xl font-bold mb-8 text-gray-800">Scan QRIS Untuk Membayar</h2>
-                <img :src="qrisImageUrl" alt="QRIS" class="max-w-full max-h-[60%] object-contain shadow-2xl rounded-2xl border-8 border-gray-100" />
+                <img :src="qrisImageUrl" alt="QRIS" class="h-auto w-auto max-w-full max-h-[60vh] object-contain shadow-2xl rounded-2xl border-8 border-gray-100" />
                 <div class="mt-10 flex items-center justify-center space-x-3 text-3xl text-gray-700 bg-gray-50 px-10 py-5 rounded-full font-bold border-4 border-gray-200 shadow-inner">
                     <span class="text-gray-500 mr-2">TOTAL:</span>
                     <span class="text-green-600">Rp <span x-text="formatMoney(total)"></span></span>
