@@ -251,6 +251,10 @@ function paymentApp() {
     return {
         flag: {{ ($order->flag ?? 0) ? "true" : "false" }},
         allowQrisSplitOnNoTax: {{ \App\Models\Setting::get('allow_qris_split_on_no_tax', '0') == '1' ? 'true' : 'false' }},
+          qrisCustomerDisplayEnabled: {{ \App\Models\Setting::get('enable_qris_customer_display', '0') == '1' ? 'true' : 'false' }},
+          qrisImage1: '{{ \App\Models\Setting::get('qris_image_1') ? asset('storage/' . \App\Models\Setting::get('qris_image_1')) : null }}',
+          qrisImage2: '{{ \App\Models\Setting::get('qris_image_2') ? asset('storage/' . \App\Models\Setting::get('qris_image_2')) : null }}',
+
         taxRateSetting: {{ (float)($order->tax ?? \App\Models\Setting::get('tax_percentage', 10)) / 100 }},
         taxType: '{{ \App\Models\Setting::get('tax_type', 'exclude') }}',
         itemsTotal: {{ (float)($order->items->sum(function ($item) { return $item->price * $item->quantity; }) ?? 0) }},
@@ -316,7 +320,8 @@ function paymentApp() {
             this.calculateChange();
             
             // Watch for changes
-            this.$watch('isSplitPayment', value => {
+            this.$watch('paymentMethod', value => { this.syncToCustomerDisplay(); });
+              this.$watch('isSplitPayment', value => {
                 this.calculateChange();
             });
             this.$watch('flag', value => {
@@ -343,7 +348,9 @@ syncToCustomerDisplay() {
                 tax: this.taxAmount,
                 discount: this.discount,
                 total: this.total,
-                taxRate: this.activeTaxRate
+                taxRate: this.activeTaxRate,
+                  showQris: this.paymentMethod === 'qris' && !this.isSplitPayment && this.qrisCustomerDisplayEnabled,
+                  qrisImageUrl: this.flag ? this.qrisImage2 : this.qrisImage1
             };
             localStorage.setItem('pos_customer_display', JSON.stringify(displayData));
             if (this.broadcastChannel) {

@@ -41,6 +41,9 @@ class SettingController extends Controller
                 'table_layout_columns' => 'nullable|integer|min:2|max:10',
                 'customer_display_poster' => 'nullable|image|mimes:png,jpg,jpeg|max:10240',
                 'customer_display_mode' => 'nullable|in:local,network',
+                'enable_qris_customer_display' => 'nullable|boolean',
+                'qris_image_1' => 'nullable|image|mimes:png,jpg,jpeg|max:10240',
+                'qris_image_2' => 'nullable|image|mimes:png,jpg,jpeg|max:10240',
                 'midtrans_enabled' => 'nullable|boolean',
                 'midtrans_merchant_id' => 'nullable|string|max:255',
                 'midtrans_client_key' => 'nullable|string|max:255',
@@ -98,6 +101,23 @@ class SettingController extends Controller
                 }
             }
 
+            // Handle QRIS images upload
+            foreach (['qris_image_1', 'qris_image_2'] as $qrisField) {
+                if ($request->hasFile($qrisField)) {
+                    try {
+                        $oldImg = $this->settingRepository->getByKey($qrisField);
+                        if ($oldImg && \Storage::disk('public')->exists($oldImg)) {
+                            \Storage::disk('public')->delete($oldImg);
+                        }
+                        $imgPath = $request->file($qrisField)->store('qris', 'public');
+                        $this->settingRepository->setByKey($qrisField, $imgPath, 'string');
+                        unset($validated[$qrisField]);
+                    } catch (\Exception $e) {
+                         \Log::error("Failed to upload " . $qrisField, ['error' => $e->getMessage()]);
+                    }
+                }
+            }
+
             // Handle customer display poster upload
             if ($request->hasFile('customer_display_poster')) {
                 try {
@@ -132,7 +152,7 @@ class SettingController extends Controller
             }
             
             // Handle unchecked booleans
-            $booleanSettings = ['midtrans_enabled', 'midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports', 'enable_packages', 'pos_show_tax_flag', 'allow_qris_split_on_no_tax'];
+            $booleanSettings = ['midtrans_enabled', 'midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports', 'enable_packages', 'pos_show_tax_flag', 'allow_qris_split_on_no_tax', 'enable_qris_customer_display'];
             foreach ($booleanSettings as $boolKey) {
                 if (!array_key_exists($boolKey, $validated) && !$request->hasFile($boolKey)) {
                      $this->settingRepository->setByKey($boolKey, '0', 'boolean');
