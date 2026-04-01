@@ -229,10 +229,15 @@
                             <p class="text-green-600 text-sm">Order #{{ $order->order_number }}</p>
                         </div>
                         
-                        <button type="button" @click="printBill()" 
+                        <button type="button" @click="printBill()"
                                 class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
                             <i class="fas fa-print mr-2"></i> Print Bill
                         </button>
+                        
+                        <a href="{{ route('pos.index') }}" 
+                           class="flex justify-center items-center w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 rounded-lg transition shadow-sm border border-gray-300">
+                            <i class="fas fa-times-circle mr-2"></i> No Print Bill
+                        </a>
                     </div>
                 </template>
             </form>
