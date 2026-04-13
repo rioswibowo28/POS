@@ -402,25 +402,39 @@ class ReportController extends Controller
             $order->_source = 'temp';
             return $order;
         }))->sortBy('created_at')->values();
-        
+        $normalCash = $normalOrders->sum(function($order) {
+            return $order->payments->where('method', \App\Enums\PaymentMethod::CASH)->sum('amount');
+        });
+        $normalQris = $normalOrders->sum(function($order) {
+            return $order->payments->where('method', \App\Enums\PaymentMethod::QRIS)->sum('amount');
+        });
+        $tempCash = $tempOrders->where('payment_method', 'cash')->sum('total');
+        $tempQris = $tempOrders->where('payment_method', 'qris')->sum('total');
+
         $summary = [
             'all_count' => $normalOrders->count() + $tempOrders->count(),
             'all_subtotal' => $normalOrders->sum('subtotal') + $tempOrders->sum('subtotal'),
             'all_tax' => $normalOrders->sum('tax_amount') + $tempOrders->sum('tax_amount'),
             'all_discount' => $normalOrders->sum('discount') + $tempOrders->sum('discount'),
             'all_total' => $normalOrders->sum('total') + $tempOrders->sum('total'),
+            'all_cash' => $normalCash + $tempCash,
+            'all_qris' => $normalQris + $tempQris,
 
             'normal_count' => $normalOrders->count(),
             'normal_subtotal' => $normalOrders->sum('subtotal'),
             'normal_tax' => $normalOrders->sum('tax_amount'),
             'normal_discount' => $normalOrders->sum('discount'),
             'normal_total' => $normalOrders->sum('total'),
+            'normal_cash' => $normalCash,
+            'normal_qris' => $normalQris,
             
             'temp_count' => $tempOrders->count(),
             'temp_subtotal' => $tempOrders->sum('subtotal'),
             'temp_tax' => $tempOrders->sum('tax_amount'),
             'temp_discount' => $tempOrders->sum('discount'),
             'temp_total' => $tempOrders->sum('total'),
+            'temp_cash' => $tempCash,
+            'temp_qris' => $tempQris,
         ];
         
         $masterShifts = \App\Models\MasterShift::all();
@@ -468,25 +482,39 @@ class ReportController extends Controller
             $order->_source = 'temp';
             return $order;
         }))->sortBy('created_at')->values();
-        
+        $normalCash = $normalOrders->sum(function($order) {
+            return $order->payments->where('method', \App\Enums\PaymentMethod::CASH)->sum('amount');
+        });
+        $normalQris = $normalOrders->sum(function($order) {
+            return $order->payments->where('method', \App\Enums\PaymentMethod::QRIS)->sum('amount');
+        });
+        $tempCash = $tempOrders->where('payment_method', 'cash')->sum('total');
+        $tempQris = $tempOrders->where('payment_method', 'qris')->sum('total');
+
         $summary = [
             'all_count' => $normalOrders->count() + $tempOrders->count(),
             'all_subtotal' => $normalOrders->sum('subtotal') + $tempOrders->sum('subtotal'),
             'all_tax' => $normalOrders->sum('tax_amount') + $tempOrders->sum('tax_amount'),
             'all_discount' => $normalOrders->sum('discount') + $tempOrders->sum('discount'),
             'all_total' => $normalOrders->sum('total') + $tempOrders->sum('total'),
+            'all_cash' => $normalCash + $tempCash,
+            'all_qris' => $normalQris + $tempQris,
 
             'normal_count' => $normalOrders->count(),
             'normal_subtotal' => $normalOrders->sum('subtotal'),
             'normal_tax' => $normalOrders->sum('tax_amount'),
             'normal_discount' => $normalOrders->sum('discount'),
             'normal_total' => $normalOrders->sum('total'),
+            'normal_cash' => $normalCash,
+            'normal_qris' => $normalQris,
             
             'temp_count' => $tempOrders->count(),
             'temp_subtotal' => $tempOrders->sum('subtotal'),
             'temp_tax' => $tempOrders->sum('tax_amount'),
             'temp_discount' => $tempOrders->sum('discount'),
             'temp_total' => $tempOrders->sum('total'),
+            'temp_cash' => $tempCash,
+            'temp_qris' => $tempQris,
         ];
         
         return view('reports.internal-revenue-print', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate', 'shiftId'));
@@ -664,23 +692,39 @@ class ReportController extends Controller
             $order->_source = 'temp';
             return $order;
         }))->sortBy('created_at')->values();
-        
+        $normalCash = $normalOrders->sum(function($order) {
+            return $order->payments->where('method', \App\Enums\PaymentMethod::CASH)->sum('amount');
+        });
+        $normalQris = $normalOrders->sum(function($order) {
+            return $order->payments->where('method', \App\Enums\PaymentMethod::QRIS)->sum('amount');
+        });
+        $tempCash = $tempOrders->where('payment_method', 'cash')->sum('total');
+        $tempQris = $tempOrders->where('payment_method', 'qris')->sum('total');
+
         $summary = [
             'all_count' => $normalOrders->count() + $tempOrders->count(),
             'all_subtotal' => $normalOrders->sum('subtotal') + $tempOrders->sum('subtotal'),
             'all_tax' => $normalOrders->sum('tax_amount') + $tempOrders->sum('tax_amount'),
             'all_discount' => $normalOrders->sum('discount') + $tempOrders->sum('discount'),
             'all_total' => $normalOrders->sum('total') + $tempOrders->sum('total'),
+            'all_cash' => $normalCash + $tempCash,
+            'all_qris' => $normalQris + $tempQris,
+
             'normal_count' => $normalOrders->count(),
             'normal_subtotal' => $normalOrders->sum('subtotal'),
             'normal_tax' => $normalOrders->sum('tax_amount'),
             'normal_discount' => $normalOrders->sum('discount'),
             'normal_total' => $normalOrders->sum('total'),
+            'normal_cash' => $normalCash,
+            'normal_qris' => $normalQris,
+            
             'temp_count' => $tempOrders->count(),
             'temp_subtotal' => $tempOrders->sum('subtotal'),
             'temp_tax' => $tempOrders->sum('tax_amount'),
             'temp_discount' => $tempOrders->sum('discount'),
             'temp_total' => $tempOrders->sum('total'),
+            'temp_cash' => $tempCash,
+            'temp_qris' => $tempQris,
         ];
 
         $filename = 'Penjualan_ALL_' . $startDate . '_' . $endDate . '.xlsx';
@@ -730,25 +774,39 @@ class ReportController extends Controller
             $order->_source = 'temp';
             return $order;
         }))->sortBy('created_at')->values();
-        
+        $normalCash = $normalOrders->sum(function($order) {
+            return $order->payments->where('method', \App\Enums\PaymentMethod::CASH)->sum('amount');
+        });
+        $normalQris = $normalOrders->sum(function($order) {
+            return $order->payments->where('method', \App\Enums\PaymentMethod::QRIS)->sum('amount');
+        });
+        $tempCash = $tempOrders->where('payment_method', 'cash')->sum('total');
+        $tempQris = $tempOrders->where('payment_method', 'qris')->sum('total');
+
         $summary = [
             'all_count' => $normalOrders->count() + $tempOrders->count(),
             'all_subtotal' => $normalOrders->sum('subtotal') + $tempOrders->sum('subtotal'),
             'all_tax' => $normalOrders->sum('tax_amount') + $tempOrders->sum('tax_amount'),
             'all_discount' => $normalOrders->sum('discount') + $tempOrders->sum('discount'),
             'all_total' => $normalOrders->sum('total') + $tempOrders->sum('total'),
+            'all_cash' => $normalCash + $tempCash,
+            'all_qris' => $normalQris + $tempQris,
 
             'normal_count' => $normalOrders->count(),
             'normal_subtotal' => $normalOrders->sum('subtotal'),
             'normal_tax' => $normalOrders->sum('tax_amount'),
             'normal_discount' => $normalOrders->sum('discount'),
             'normal_total' => $normalOrders->sum('total'),
+            'normal_cash' => $normalCash,
+            'normal_qris' => $normalQris,
             
             'temp_count' => $tempOrders->count(),
             'temp_subtotal' => $tempOrders->sum('subtotal'),
             'temp_tax' => $tempOrders->sum('tax_amount'),
             'temp_discount' => $tempOrders->sum('discount'),
             'temp_total' => $tempOrders->sum('total'),
+            'temp_cash' => $tempCash,
+            'temp_qris' => $tempQris,
         ];
 
         $isPdf = true;

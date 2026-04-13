@@ -57,6 +57,7 @@ Route::middleware(['auth', 'check.license'])->group(function () {
     Route::post('/orders/{id}/payment', [PaymentController::class, 'process']);
     Route::get('/orders/{id}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
     Route::put('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::put('/temp-orders/{id}/cancel', [OrderController::class, 'cancelTempOrder'])->name('temp-orders.cancel');
     
     // Shifts
     Route::get('/shifts', [ShiftController::class, 'index'])->name('shifts.index');

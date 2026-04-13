@@ -87,6 +87,23 @@ class OrderController extends Controller
         }
     }
 
+    public function cancelTempOrder($id)
+    {
+        try {
+            $tempOrder = TempOrder::findOrFail($id);
+            $tempOrder->status = \App\Enums\OrderStatus::CANCELLED;
+            $tempOrder->deleted_by = auth()->id();
+            $tempOrder->order_number = 'CANO-' . date('ymd-His') . '-' . $tempOrder->id;
+            $tempOrder->bill_number = 'CANB-' . date('ymd-His') . '-' . $tempOrder->id;
+            $tempOrder->save();
+            $tempOrder->delete(); // Soft delete it so it's not included in reports
+            
+            return redirect()->back()->with('success', 'Temp Order cancelled successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to cancel temp order: ' . $e->getMessage());
+        }
+    }
+
     public function edit($orderId)
     {
         $order = $this->orderRepository

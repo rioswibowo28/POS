@@ -182,9 +182,20 @@
                                 <td class="px-4 py-3 text-sm text-right text-red-600">{{ $order->discount > 0 ? '- Rp ' . number_format($order->discount, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-right font-bold">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
                                 <td class="px-4 py-3 text-center">
-                                    <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
-                                        <i class="fas fa-print text-xs"></i>
-                                    </button>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
+                                            <i class="fas fa-print text-xs"></i>
+                                        </button>
+                                        @if(isset($order->original_order_id) || $order instanceof \App\Models\TempOrder)
+                                        <form action="{{ route('temp-orders.cancel', $order->id) }}" method="POST" class="inline" onsubmit="return confirm('Cancel this temp order?')">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit" class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition" title="Cancel Temp Order">
+                                                <i class="fas fa-times text-xs"></i>
+                                            </button>
+                                        </form>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach
@@ -281,9 +292,20 @@
                                 <td class="px-4 py-3 text-sm text-right text-red-600">{{ $order->discount > 0 ? '- Rp ' . number_format($order->discount, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-right font-bold">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
                                 <td class="px-4 py-3 text-center">
-                                    <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
-                                        <i class="fas fa-print text-xs"></i>
-                                    </button>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
+                                            <i class="fas fa-print text-xs"></i>
+                                        </button>
+                                        @if(isset($order->original_order_id) || $order instanceof \App\Models\TempOrder)
+                                        <form action="{{ route('temp-orders.cancel', $order->id) }}" method="POST" class="inline" onsubmit="return confirm('Cancel this temp order?')">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit" class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition" title="Cancel Temp Order">
+                                                <i class="fas fa-times text-xs"></i>
+                                            </button>
+                                        </form>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach
@@ -378,9 +400,20 @@
                                 <td class="px-4 py-3 text-sm text-right text-red-600">{{ $order->discount > 0 ? '- Rp ' . number_format($order->discount, 0, ',', '.') : '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-right font-bold">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
                                 <td class="px-4 py-3 text-center">
-                                    <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
-                                        <i class="fas fa-print text-xs"></i>
-                                    </button>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button onclick="printReceipt({{ $order->original_order_id ?? $order->id }})" class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" title="Print Receipt">
+                                            <i class="fas fa-print text-xs"></i>
+                                        </button>
+                                        @if(isset($order->original_order_id) || $order instanceof \App\Models\TempOrder)
+                                        <form action="{{ route('temp-orders.cancel', $order->id) }}" method="POST" class="inline" onsubmit="return confirm('Cancel this temp order?')">
+                                            @csrf
+                                            @method('PUT')
+                                            <button type="submit" class="inline-flex items-center px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition" title="Cancel Temp Order">
+                                                <i class="fas fa-times text-xs"></i>
+                                            </button>
+                                        </form>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach
@@ -441,6 +474,8 @@
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase">Subtotal</th>
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase">PPN</th>
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase">Diskon</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-blue-600 uppercase">Tunai</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-blue-600 uppercase">QRIS</th>
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-600 uppercase">Total</th>
                     </tr>
                 </thead>
@@ -451,6 +486,8 @@
                         <td class="px-4 py-3 text-sm text-right">Rp {{ number_format($summary['normal_subtotal'], 0, ',', '.') }}</td>
                         <td class="px-4 py-3 text-sm text-right">Rp {{ number_format($summary['normal_tax'], 0, ',', '.') }}</td>
                         <td class="px-4 py-3 text-sm text-right">Rp {{ number_format($summary['normal_discount'], 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-sm text-right text-blue-700">Rp {{ number_format($summary['normal_cash'] ?? 0, 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-sm text-right text-blue-700">Rp {{ number_format($summary['normal_qris'] ?? 0, 0, ',', '.') }}</td>
                         <td class="px-4 py-3 text-sm text-right font-bold">Rp {{ number_format($summary['normal_total'], 0, ',', '.') }}</td>
                     </tr>
                     <tr>
@@ -459,6 +496,8 @@
                         <td class="px-4 py-3 text-sm text-right">Rp {{ number_format($summary['temp_subtotal'], 0, ',', '.') }}</td>
                         <td class="px-4 py-3 text-sm text-right">Rp {{ number_format($summary['temp_tax'], 0, ',', '.') }}</td>
                         <td class="px-4 py-3 text-sm text-right">Rp {{ number_format($summary['temp_discount'], 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-sm text-right text-blue-700">Rp {{ number_format($summary['temp_cash'] ?? 0, 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-sm text-right text-blue-700">Rp {{ number_format($summary['temp_qris'] ?? 0, 0, ',', '.') }}</td>
                         <td class="px-4 py-3 text-sm text-right font-bold">Rp {{ number_format($summary['temp_total'], 0, ',', '.') }}</td>
                     </tr>
                 </tbody>
@@ -469,6 +508,8 @@
                         <td class="px-4 py-3 text-sm text-right">Rp {{ number_format($summary['all_subtotal'], 0, ',', '.') }}</td>
                         <td class="px-4 py-3 text-sm text-right">Rp {{ number_format($summary['all_tax'], 0, ',', '.') }}</td>
                         <td class="px-4 py-3 text-sm text-right">Rp {{ number_format($summary['all_discount'], 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-sm text-right text-blue-800">Rp {{ number_format($summary['all_cash'] ?? 0, 0, ',', '.') }}</td>
+                        <td class="px-4 py-3 text-sm text-right text-blue-800">Rp {{ number_format($summary['all_qris'] ?? 0, 0, ',', '.') }}</td>
                         <td class="px-4 py-3 text-sm text-right text-lg">Rp {{ number_format($summary['all_total'], 0, ',', '.') }}</td>
                     </tr>
                 </tfoot>
@@ -499,4 +540,5 @@
     }
 </script>
 @endpush
+
 

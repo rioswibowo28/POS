@@ -88,6 +88,13 @@
         <div class="bg-white rounded-lg shadow-sm p-6">
             <h2 class="text-xl font-bold text-gray-900 mb-4">{{ __('payment.payment_method') }}</h2>
             
+            @if($order->flag == 1 || $order->flag == true)
+            <form id="cancel-flag-order-form" action="{{ route('orders.cancel', $order->id) }}" method="POST" class="hidden">
+                @csrf
+                @method('PUT')
+            </form>
+            @endif
+            
             <form @submit.prevent="processPayment()">
                 
                 <!-- No Tax Mode Checkbox -->
@@ -208,17 +215,27 @@
 
                 <!-- Submit Button / Print Button -->
                 <template x-if="!paymentCompleted">
-                    <button type="submit" 
-                            :disabled="change < 0 || processing"
-                            :class="change < 0 || processing ? 'bg-gray-300 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'"
-                            class="w-full text-white font-semibold py-3 rounded-lg transition">
-                        <template x-if="processing">
-                            <span><i class="fas fa-spinner fa-spin mr-2"></i> Processing...</span>
-                        </template>
-                        <template x-if="!processing">
-                            <span><i class="fas fa-check-circle mr-2"></i> Complete Payment</span>
-                        </template>
-                    </button>
+                    <div class="space-y-3">
+                        <button type="submit" 
+                                :disabled="change < 0 || processing"
+                                :class="change < 0 || processing ? 'bg-gray-300 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'"
+                                class="w-full text-white font-semibold py-3 rounded-lg transition">
+                            <template x-if="processing">
+                                <span><i class="fas fa-spinner fa-spin mr-2"></i> Processing...</span>
+                            </template>
+                            <template x-if="!processing">
+                                <span><i class="fas fa-check-circle mr-2"></i> Complete Payment</span>
+                            </template>
+                        </button>
+
+                        @if($order->flag == 1 || $order->flag == true)
+                        <button type="button" 
+                                onclick="if(confirm('Cancel this order?')) { document.getElementById('cancel-flag-order-form').submit(); }"
+                                class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition shadow-sm">
+                            <i class="fas fa-times-circle mr-2"></i> Cancel Order
+                        </button>
+                        @endif
+                    </div>
                 </template>
                 
                 <template x-if="paymentCompleted">
@@ -495,6 +512,9 @@ syncToCustomerDisplay() {
         },
 
         async processPayment() {
+            if (this.processing) return;
+            this.processing = true;
+            
             // If QRIS is selected and Midtrans is configured, use Midtrans Snap
             if (this.paymentMethod === 'qris' && this.midtransConfigured) {
                 await this.processMidtransPayment();
@@ -503,10 +523,9 @@ syncToCustomerDisplay() {
             
             if (this.change < 0) {
                 alert('Payment amount is insufficient');
+                this.processing = false;
                 return;
             }
-            
-            this.processing = true;
             
             try {
                 const response = await fetch('/orders/{{ $order->id }}/payment', {
@@ -545,8 +564,6 @@ syncToCustomerDisplay() {
         },
         
         async processMidtransPayment() {
-            this.processing = true;
-            
             try {
                 console.log('Processing Midtrans payment...');
                 
