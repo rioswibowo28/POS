@@ -251,7 +251,33 @@
                                       <span class="text-sm font-semibold text-gray-900">Enable Master Paket</span>
                                       <p class="text-xs text-gray-600 mt-1">If enabled, Master Paket menu and order options will be available.</p>
                                   </div>
-                              </label>                        </div>
+                              </label>
+
+                              <label class="flex flex-col p-4 bg-gray-50 rounded-lg border-2 border-gray-200 hover:border-primary-300 transition mt-4 w-full">
+                                  <div class="flex items-center cursor-pointer mb-3">
+                                      <input type="hidden" name="enable_late_night_trading" value="0">
+                                      <input type="checkbox" 
+                                             name="enable_late_night_trading"
+                                             value="1"
+                                             {{ old('enable_late_night_trading', $settings['enable_late_night_trading'] ?? '0') == '1' ? 'checked' : '' }}
+                                             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5 flex-shrink-0 cursor-pointer">
+                                      <div class="ml-3">
+                                          <span class="text-sm font-semibold text-gray-900">Enable Late Night Trading</span>
+                                          <p class="text-xs text-gray-600 mt-1">Tanya kasir tujuan pencatatan omset ke hari "Kemarin" atau "Hari ini" pada rentang jam di bawah (biasanya shift tengah malam atau masuk dini hari berikutnya).</p>
+                                      </div>
+                                  </div>
+                                  <div class="grid grid-cols-2 gap-4 mt-2 pl-8">
+                                      <div>
+                                          <label class="block text-xs font-semibold text-gray-700 mb-2">Mulai Aktif Jam</label>
+                                          <input type="time" name="late_night_start_time" value="{{ old('late_night_start_time', $settings['late_night_start_time'] ?? '00:00') }}" class="input py-2 text-sm bg-white" required>
+                                      </div>
+                                      <div>
+                                          <label class="block text-xs font-semibold text-gray-700 mb-2">Sampai Jam</label>
+                                          <input type="time" name="late_night_end_time" value="{{ old('late_night_end_time', $settings['late_night_end_time'] ?? '03:00') }}" class="input py-2 text-sm bg-white" required>
+                                      </div>
+                                  </div>
+                              </label>
+                        </div>
                     </div>
                 </div>
 

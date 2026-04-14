@@ -59,8 +59,10 @@ class SettingController extends Controller
                 'order_limit_enabled' => 'nullable|boolean',
                 'order_limit_amount' => 'nullable|integer|min:1',
                 'order_limit_start' => 'nullable|date_format:H:i',
-                'order_limit_end' => 'nullable|date_format:H:i',
-                // Backup Settings
+                'order_limit_end' => 'nullable|date_format:H:i',                  // Late Night Trading Settings
+                  'enable_late_night_trading' => 'nullable|boolean',
+                  'late_night_start_time' => 'nullable|date_format:H:i',
+                  'late_night_end_time' => 'nullable|date_format:H:i',                // Backup Settings
                 'backup_path' => 'nullable|string|max:500',
                 'backup_schedule_1_enabled' => 'nullable|boolean',
                 'backup_schedule_1' => 'nullable|date_format:H:i',
@@ -152,7 +154,7 @@ class SettingController extends Controller
             }
             
             // Handle unchecked booleans
-            $booleanSettings = ['midtrans_enabled', 'midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports', 'enable_packages', 'pos_show_tax_flag', 'allow_qris_split_on_no_tax', 'enable_qris_customer_display'];
+            $booleanSettings = ['midtrans_enabled', 'midtrans_is_production', 'license_auto_check', 'backup_schedule_1_enabled', 'backup_schedule_2_enabled', 'order_limit_enabled', 'enable_late_night_trading', 'use_shifts', 'include_temp_orders_in_shift_close', 'cashier_can_access_reports', 'enable_packages', 'pos_show_tax_flag', 'allow_qris_split_on_no_tax', 'enable_qris_customer_display'];
             foreach ($booleanSettings as $boolKey) {
                 if (!array_key_exists($boolKey, $validated) && !$request->hasFile($boolKey)) {
                      $this->settingRepository->setByKey($boolKey, '0', 'boolean');

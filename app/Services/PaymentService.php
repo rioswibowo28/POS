@@ -164,6 +164,7 @@ class PaymentService
         $tempOrder = TempOrder::create([
             'order_number' => $order->order_number,
             'bill_number' => $order->bill_number,
+            'business_date' => $order->business_date,
             'table_id' => $order->table_id,
             'customer_name' => $order->customer_name,
             'customer_phone' => $order->customer_phone,

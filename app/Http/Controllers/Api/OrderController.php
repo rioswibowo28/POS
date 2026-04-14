@@ -42,7 +42,7 @@ class OrderController extends BaseController
     {
         try {
             $orders = Order::where('flag', false)
-                ->whereDate('created_at', today())
+                ->whereDate('business_date', today())
                 ->with(['table', 'items', 'payments'])
                 ->get();
             return $this->sendResponse($orders, 'Today orders retrieved successfully.');

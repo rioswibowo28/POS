@@ -36,7 +36,7 @@ class OrderRepository extends BaseRepository
 
     public function getTodayOrders()
     {
-        return $this->model->whereDate('created_at', today())
+        return $this->model->whereDate('business_date', today())
             ->with(['table', 'items', 'payments'])
             ->get();
     }

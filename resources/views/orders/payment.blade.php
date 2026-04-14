@@ -238,6 +238,30 @@
                     </div>
                 </template>
                 
+                <!-- Business Date Modal Options -->
+                <template x-if="showBusinessDateModal">
+                    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 mt-0">
+                        <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-lg m-4">
+                            <h3 class="text-xl font-bold mb-4 text-center">Pilih Tanggal Omset</h3>
+                            <p class="text-gray-600 mb-6 text-center">Saat ini masuk dalam range waktu Late Night Trading (Shift Malam). Tentukan order ini masuk ke omset hari apa.</p>
+                            
+                            <div class="grid grid-cols-1 gap-4">
+                                <button type="button" @click="selectedBusinessDate = 'yesterday'; processPaymentAction()" class="bg-primary-600 hover:bg-primary-700 text-white font-bold py-4 px-4 rounded-lg shadow transition">
+                                    Catat sbg Omset KEMARIN<br>
+                                    <span class="text-xs font-normal">Mengikuti tanggal kemarin di jam 23:59</span>
+                                </button>
+                                
+                                <button type="button" @click="selectedBusinessDate = 'today'; processPaymentAction()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 rounded-lg shadow transition">
+                                    Catat sbg Omset HARI INI<br>
+                                    <span class="text-xs font-normal">Tanggal & Nomor Invoice normal hari ini</span>
+                                </button>
+                            </div>
+                            
+                            <button type="button" @click="showBusinessDateModal = false; processing = false;" class="mt-6 w-full text-gray-500 hover:text-gray-800 text-sm font-semibold">Tutup</button>
+                        </div>
+                    </div>
+                </template>
+                
                 <template x-if="paymentCompleted">
                     <div class="space-y-3">
                         <div class="bg-green-50 border-2 border-green-500 rounded-lg p-4 text-center">
@@ -271,6 +295,12 @@ function paymentApp() {
           qrisCustomerDisplayEnabled: {{ \App\Models\Setting::get('enable_qris_customer_display', '0') == '1' ? 'true' : 'false' }},
           qrisImage1: '{{ \App\Models\Setting::get('qris_image_1') ? asset('storage/' . \App\Models\Setting::get('qris_image_1')) : null }}',
           qrisImage2: '{{ \App\Models\Setting::get('qris_image_2') ? asset('storage/' . \App\Models\Setting::get('qris_image_2')) : null }}',
+
+        enableLateNightTrading: {{ \App\Models\Setting::get('enable_late_night_trading', '0') == '1' ? 'true' : 'false' }},
+        lateNightStartTime: '{{ \App\Models\Setting::get('late_night_start_time', '00:00') }}',
+        lateNightEndTime: '{{ \App\Models\Setting::get('late_night_end_time', '03:00') }}',
+        showBusinessDateModal: false,
+        selectedBusinessDate: null,
 
         taxRateSetting: {{ (float)($order->tax ?? \App\Models\Setting::get('tax_percentage', 10)) / 100 }},
         taxType: '{{ \App\Models\Setting::get('tax_type', 'exclude') }}',
@@ -511,19 +541,39 @@ syncToCustomerDisplay() {
             this.handleSplitAmountInput(this.activeSplitIndex, amount.toString());
         },
 
+        isLateNight() {
+            if (!this.enableLateNightTrading) return false;
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit'});
+            
+            // Check if current time is within range (assumes same day e.g., 00:00 to 03:00)
+            return timeString >= this.lateNightStartTime && timeString <= this.lateNightEndTime;
+        },
+
         async processPayment() {
             if (this.processing) return;
             this.processing = true;
+
+            if (this.change < 0) {
+                alert('Payment amount is insufficient');
+                this.processing = false;
+                return;
+            }
+
+            if (this.isLateNight() && !this.selectedBusinessDate) {
+                this.showBusinessDateModal = true;
+                return; // processing=true ensures "pay" button is disabled. It's safe to halt here
+            }
+
+            this.processPaymentAction();
+        },
+
+        async processPaymentAction() {
+            this.showBusinessDateModal = false;
             
             // If QRIS is selected and Midtrans is configured, use Midtrans Snap
             if (this.paymentMethod === 'qris' && this.midtransConfigured) {
                 await this.processMidtransPayment();
-                return;
-            }
-            
-            if (this.change < 0) {
-                alert('Payment amount is insufficient');
-                this.processing = false;
                 return;
             }
             
@@ -536,7 +586,8 @@ syncToCustomerDisplay() {
                     },
                     body: JSON.stringify({
                         payments: this.isSplitPayment ? this.multiPayments.map(p => ({method: p.method, amount: p.amount})) : [{method: this.paymentMethod, amount: this.amountPaid}],
-                        flag: this.flag ? 1 : 0
+                        flag: this.flag ? 1 : 0,
+                        business_date_option: this.selectedBusinessDate
                     })
                 });
                 
@@ -575,7 +626,8 @@ syncToCustomerDisplay() {
                     },
                     body: JSON.stringify({
                         payments: [{method: 'qris', amount: this.orderTotal}],
-                        flag: this.flag ? 1 : 0
+                        flag: this.flag ? 1 : 0,
+                        business_date_option: this.selectedBusinessDate
                     })
                 });
                 

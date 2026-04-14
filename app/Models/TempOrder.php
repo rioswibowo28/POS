@@ -51,6 +51,7 @@ class TempOrder extends Model
         'payment_change',
         'payment_reference',
         'payment_at',
+        'business_date',
     ];
 
     protected $casts = [

@@ -57,7 +57,7 @@ class ReportController extends Controller
      */
     private function getSalesSummary($start, $end)
     {
-        $orders = Order::whereBetween('created_at', [$start, $end])
+        $orders = Order::whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->get();
         
@@ -104,7 +104,7 @@ class ReportController extends Controller
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->leftJoin('products', 'order_items.product_id', '=', 'products.id')
             ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
-            ->whereBetween('orders.created_at', [$start, $end])
+            ->whereBetween('orders.business_date', [$start, $end])
             ->where('orders.status', OrderStatus::COMPLETED)
             ->groupBy('order_items.product_id', 'order_items.name', 'products.category_id', 'categories.name')
             ->orderByDesc('total_quantity')
@@ -122,7 +122,7 @@ class ReportController extends Controller
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(amount) as total_amount')
             )
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->where('status', PaymentStatus::PAID)
             ->groupBy('method')
             ->get()
@@ -150,7 +150,7 @@ class ReportController extends Controller
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->leftJoin('products', 'order_items.product_id', '=', 'products.id')
             ->leftJoin('categories', 'products.category_id', '=', 'categories.id')
-            ->whereBetween('orders.created_at', [$start, $end])
+            ->whereBetween('orders.business_date', [$start, $end])
             ->where('orders.status', OrderStatus::COMPLETED)
             ->whereNotNull('categories.id')
             ->groupBy('categories.id', 'categories.name')
@@ -168,7 +168,7 @@ class ReportController extends Controller
                 DB::raw('COUNT(*) as order_count'),
                 DB::raw('SUM(total) as total_sales')
             )
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->groupBy('hour')
             ->orderBy('hour')
@@ -192,7 +192,7 @@ class ReportController extends Controller
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(total) as total_amount')
             )
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->groupBy('status')
             ->get()
             ->map(function($order) {
@@ -217,7 +217,7 @@ class ReportController extends Controller
                 DB::raw('AVG(total) as avg_order_value')
             )
             ->leftJoin('users', 'orders.cashier_id', '=', 'users.id')
-            ->whereBetween('orders.created_at', [$start, $end])
+            ->whereBetween('orders.business_date', [$start, $end])
             ->where('orders.status', OrderStatus::COMPLETED)
             ->whereNotNull('cashier_id')
             ->groupBy('cashier_id', 'users.name')
@@ -255,7 +255,7 @@ class ReportController extends Controller
         
         // Only flag=0 (normal/with tax) and completed orders
         $orders = Order::with(['items', 'cashier', 'payments'])
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
             ->orderBy('created_at', 'asc')
@@ -271,7 +271,7 @@ class ReportController extends Controller
 
         // Daily recap grouped by date
         $dailyRecap = $orders->groupBy(function($order) {
-            return $order->created_at->format('Y-m-d');
+            return $order->business_date->format('Y-m-d');
         })->map(function($dayOrders, $date) {
             return [
                 'date' => $date,
@@ -300,7 +300,7 @@ class ReportController extends Controller
         $taxPercentage = Setting::get('tax_percentage', '10');
         
         $orders = Order::with(['items', 'cashier'])
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
             ->orderBy('created_at', 'asc')
@@ -330,7 +330,7 @@ class ReportController extends Controller
         
         $taxPercentage = Setting::get('tax_percentage', '10');
         
-        $orders = Order::whereBetween('created_at', [$start, $end])
+        $orders = Order::whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
             ->orderBy('created_at', 'asc')
@@ -345,7 +345,7 @@ class ReportController extends Controller
         ];
 
         $dailyRecap = $orders->groupBy(function($order) {
-            return $order->created_at->format('Y-m-d');
+            return $order->business_date->format('Y-m-d');
         })->map(function($dayOrders, $date) {
             return [
                 'date' => $date,
@@ -373,13 +373,13 @@ class ReportController extends Controller
         $end = Carbon::parse($endDate)->endOfDay();
 
         $normalOrdersQuery = Order::with(['cashier', 'payments', 'shift.masterShift'])
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
             ->orderBy('created_at', 'asc');
 
         $tempOrdersQuery = \App\Models\TempOrder::with(['cashier', 'shift.masterShift'])
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->orderBy('created_at', 'asc');
 
         if ($shiftId !== 'all') {
@@ -454,13 +454,13 @@ class ReportController extends Controller
         $end = Carbon::parse($endDate)->endOfDay();
 
         $normalOrdersQuery = Order::with(['cashier', 'payments', 'shift.masterShift'])
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
             ->orderBy('created_at', 'asc');
 
         $tempOrdersQuery = \App\Models\TempOrder::with(['cashier', 'shift.masterShift'])
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->orderBy('created_at', 'asc');
 
         if ($shiftId !== 'all') {
@@ -534,7 +534,7 @@ class ReportController extends Controller
         $taxPercentage = Setting::get('tax_percentage', '10');
         
         $orders = Order::with(['items', 'cashier', 'payments'])
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
             ->orderBy('created_at', 'asc')
@@ -549,7 +549,7 @@ class ReportController extends Controller
         ];
 
         $dailyRecap = $orders->groupBy(function($order) {
-            return $order->created_at->format('Y-m-d');
+            return $order->business_date->format('Y-m-d');
         })->map(function($dayOrders, $date) {
             return [
                 'date' => $date,
@@ -581,7 +581,7 @@ class ReportController extends Controller
         $taxPercentage = Setting::get('tax_percentage', '10');
         
         $orders = Order::with(['items', 'cashier', 'payments'])
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
             ->orderBy('created_at', 'asc')
@@ -616,7 +616,7 @@ class ReportController extends Controller
         
         $taxPercentage = Setting::get('tax_percentage', '10');
         
-        $orders = Order::whereBetween('created_at', [$start, $end])
+        $orders = Order::whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
             ->orderBy('created_at', 'asc')
@@ -631,7 +631,7 @@ class ReportController extends Controller
         ];
 
         $dailyRecap = $orders->groupBy(function($order) {
-            return $order->created_at->format('Y-m-d');
+            return $order->business_date->format('Y-m-d');
         })->map(function($dayOrders, $date) {
             return [
                 'date' => $date,
@@ -664,13 +664,13 @@ class ReportController extends Controller
         $end = Carbon::parse($endDate)->endOfDay();
 
         $normalOrdersQuery = Order::with(['cashier', 'payments', 'shift.masterShift'])
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
             ->orderBy('created_at', 'asc');
 
         $tempOrdersQuery = \App\Models\TempOrder::with(['cashier', 'shift.masterShift'])
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->orderBy('created_at', 'asc');
 
         if ($shiftId !== 'all') {
@@ -746,13 +746,13 @@ class ReportController extends Controller
         $end = Carbon::parse($endDate)->endOfDay();
 
         $normalOrdersQuery = Order::with(['cashier', 'payments', 'shift.masterShift'])
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
             ->orderBy('created_at', 'asc');
 
         $tempOrdersQuery = \App\Models\TempOrder::with(['cashier', 'shift.masterShift'])
-            ->whereBetween('created_at', [$start, $end])
+            ->whereBetween('business_date', [$start, $end])
             ->orderBy('created_at', 'asc');
 
         if ($shiftId !== 'all') {

@@ -42,6 +42,7 @@ class Order extends Model
         'flag',
         'tax_amount',
         'completed_at',
+        'business_date',
     ];
 
     protected $casts = [
@@ -54,6 +55,7 @@ class Order extends Model
         'flag' => 'boolean',
         'tax_amount' => 'decimal:2',
         'completed_at' => 'datetime',
+        'business_date' => 'date',
     ];
 
     protected static function boot()
@@ -61,11 +63,14 @@ class Order extends Model
         parent::boot();
 
         static::creating(function ($order) {
+            if (!$order->business_date) {
+                $order->business_date = today();
+            }
             if (!$order->order_number) {
-                $order->order_number = static::generateOrderNumber($order->flag ?? false);
+                $order->order_number = static::generateOrderNumber($order->flag ?? false, $order->business_date);
             }
             if (!$order->bill_number) {
-                $order->bill_number = static::generateBillNumber($order->flag ?? false);
+                $order->bill_number = static::generateBillNumber($order->flag ?? false, $order->business_date);
             }
         });
 
@@ -89,25 +94,26 @@ class Order extends Model
      * flag=0 (Normal): ORD-20260304-0001 (4 digits)
      * flag=1 (No Tax): ORD-20260304-001 (3 digits)
      */
-    public static function generateOrderNumber($flag = false)
+public static function generateOrderNumber($flag = false, $businessDate = null)
     {
-        $date = date('Ymd');
+        $targetDate = $businessDate ? \Carbon\Carbon::parse($businessDate) : today();
+        $date = $targetDate->format('Ymd');
         $prefix = 'ORD-';
-        
+
         $maxOrder = static::withTrashed()
-            ->whereDate('created_at', today())
+            ->whereDate('business_date', $targetDate)
             ->where('flag', $flag)
             ->where('order_number', 'like', 'ORD-%')
             ->max('order_number');
 
-        $maxTemp = TempOrder::whereDate('created_at', today())
+        $maxTemp = TempOrder::whereDate('business_date', $targetDate)
             ->where('flag', $flag)
             ->where('order_number', 'like', 'ORD-%')
             ->max('order_number');
 
         $seqOrder = $maxOrder ? (int) substr($maxOrder, strrpos($maxOrder, '-') + 1) : 0;
         $seqTemp = $maxTemp ? (int) substr($maxTemp, strrpos($maxTemp, '-') + 1) : 0;
-        
+
         $maxSeq = max($seqOrder, $seqTemp);
 
         // Different padding based on flag: 4 digits for normal, 3 digits for flag=1
@@ -121,18 +127,19 @@ class Order extends Model
      * flag=0 (Normal): BILL-YYMMDD-0001 (4 digits)
      * flag=1 (No Tax): BILL-YYMMDD-001 (3 digits)
      */
-    public static function generateBillNumber($flag = false)
+    public static function generateBillNumber($flag = false, $businessDate = null)
     {
-        $date = date('ymd'); // YY format (2 digits untuk tahun)
+        $targetDate = $businessDate ? \Carbon\Carbon::parse($businessDate) : today();
+        $date = $targetDate->format('ymd'); // YY format (2 digits untuk tahun)
         $prefix = 'BILL-';
 
         $maxOrder = static::withTrashed()
-            ->whereDate('created_at', today())
+            ->whereDate('business_date', $targetDate)
             ->where('flag', $flag)
             ->where('bill_number', 'like', 'BILL-%')
             ->max('bill_number');
 
-        $maxTemp = TempOrder::whereDate('created_at', today())
+        $maxTemp = TempOrder::whereDate('business_date', $targetDate)
             ->where('flag', $flag)
             ->where('bill_number', 'like', 'BILL-%')
             ->max('bill_number');

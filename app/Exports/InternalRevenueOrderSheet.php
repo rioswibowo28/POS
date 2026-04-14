@@ -86,7 +86,7 @@ class InternalRevenueOrderSheet implements FromCollection, WithHeadings, WithMap
 
         $row = [
             $counters[$this->type],
-            $order->created_at->format('d/m/Y'),
+            $order->business_date->format('d/m/Y'),
             $order->created_at->format('H:i'),
             $order->shift->masterShift->name ?? '-',
             $order->bill_number ?? '-',

@@ -50,6 +50,7 @@ class PaymentController extends Controller
             'payments.*.method' => 'required|in:cash,qris,midtrans',
             'payments.*.amount' => 'required|numeric|min:0',
             'flag' => 'nullable|boolean',
+            'business_date_option' => 'nullable|in:today,yesterday',
         ]);
 
         try {
@@ -73,15 +74,26 @@ class PaymentController extends Controller
                 throw new \Exception('Order not found');
             }
 
+            // Update business_date and regenerate numbers if needed
+            if (!empty($validated['business_date_option'])) {
+                $targetDate = $validated['business_date_option'] === 'yesterday' ? today()->subDay() : today();
+                if (\Carbon\Carbon::parse($order->business_date)->format('Y-m-d') !== $targetDate->format('Y-m-d')) {
+                    $order->business_date = $targetDate;
+                    $order->order_number = \App\Models\Order::generateOrderNumber($order->flag ?? false, $targetDate);
+                    $order->bill_number = \App\Models\Order::generateBillNumber($order->flag ?? false, $targetDate);
+                    $order->save();
+                }
+            }
+
             // Update flag if provided
             if ($request->has('flag')) {
                 $newFlag = (bool) $request->input('flag');
                 if ($order->flag != $newFlag) {
                     $order->flag = $newFlag;
-                    
+
                     // Regenerate new numbers since flag changed
-                    $order->order_number = \App\Models\Order::generateOrderNumber($newFlag);
-                    $order->bill_number = \App\Models\Order::generateBillNumber($newFlag);
+                    $order->order_number = \App\Models\Order::generateOrderNumber($newFlag, $order->business_date);
+                    $order->bill_number = \App\Models\Order::generateBillNumber($newFlag, $order->business_date);
                     $order->save();
                 }
             }

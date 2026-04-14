@@ -43,9 +43,9 @@ class PaymentController extends BaseController
     {
         try {
             $payments = Payment::whereHas('order', function ($q) {
-                    $q->where('flag', false);
+                    $q->where('flag', false)
+                      ->whereDate('business_date', today());
                 })
-                ->whereDate('created_at', today())
                 ->with(['order'])
                 ->get();
             return $this->sendResponse($payments, 'Today payments retrieved successfully.');

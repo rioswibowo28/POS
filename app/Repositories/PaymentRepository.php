@@ -19,7 +19,9 @@ class PaymentRepository extends BaseRepository
 
     public function getTodayPayments()
     {
-        return $this->model->whereDate('created_at', today())
+        return $this->model->whereHas('order', function ($q) {
+                $q->whereDate('business_date', today());
+            })
             ->where('status', PaymentStatus::COMPLETED)
             ->with('order')
             ->get();

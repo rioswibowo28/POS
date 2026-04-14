@@ -47,10 +47,10 @@ class OrderController extends Controller
         $fromDate = $request->input('from_date', now()->format('Y-m-d'));
         $toDate = $request->input('to_date', now()->format('Y-m-d'));
 
-        $query->whereDate('created_at', '>=', $fromDate)
-              ->whereDate('created_at', '<=', $toDate);
+        $query->whereDate('business_date', '>=', $fromDate)
+              ->whereDate('business_date', '<=', $toDate);
 
-        $orders = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
+        $orders = $query->orderBy('business_date', 'desc')->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
 
         return view('orders.index', compact('orders', 'fromDate', 'toDate'));
     }
