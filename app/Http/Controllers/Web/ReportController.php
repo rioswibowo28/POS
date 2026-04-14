@@ -122,7 +122,9 @@ class ReportController extends Controller
                 DB::raw('COUNT(*) as count'),
                 DB::raw('SUM(amount) as total_amount')
             )
-            ->whereBetween('business_date', [$start, $end])
+            ->whereHas('order', function($q) use ($start, $end) {
+                $q->whereBetween('business_date', [$start, $end]);
+            })
             ->where('status', PaymentStatus::PAID)
             ->groupBy('method')
             ->get()

@@ -262,8 +262,8 @@
                                              {{ old('enable_late_night_trading', $settings['enable_late_night_trading'] ?? '0') == '1' ? 'checked' : '' }}
                                              class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 w-5 h-5 flex-shrink-0 cursor-pointer">
                                       <div class="ml-3">
-                                          <span class="text-sm font-semibold text-gray-900">Enable Late Night Trading</span>
-                                          <p class="text-xs text-gray-600 mt-1">Tanya kasir tujuan pencatatan omset ke hari "Kemarin" atau "Hari ini" pada rentang jam di bawah (biasanya shift tengah malam atau masuk dini hari berikutnya).</p>
+                                          <span class="text-sm font-semibold text-gray-900">Penginputan Pergantian Hari</span>
+                                          <p class="text-xs text-gray-600 mt-1"></p>
                                       </div>
                                   </div>
                                   <div class="grid grid-cols-2 gap-4 mt-2 pl-8">
