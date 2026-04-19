@@ -216,6 +216,11 @@
                 <!-- Submit Button / Print Button -->
                 <template x-if="!paymentCompleted">
                     <div class="space-y-3">
+                        <button type="button" @click="printReceiptBeforePayment()"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition">
+                            <i class="fas fa-print mr-2"></i> Print Receipt
+                        </button>
+
                         <button type="submit" 
                                 :disabled="change < 0 || processing"
                                 :class="change < 0 || processing ? 'bg-gray-300 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'"
@@ -646,16 +651,22 @@ syncToCustomerDisplay() {
                     
                     // Open Midtrans Snap
                     window.snap.pay(result.snap_token, {
-                        onSuccess: (result) => {
-                            console.log('Midtrans success:', result);
-                            this.clearCustomerDisplay();
-                            this.paymentCompleted = true;
-                            this.processing = false;
+                        onSuccess: async (result) => {
+                            console.log('Midtrans success callback:', result);
+
+                            const confirmation = await this.confirmMidtransSuccess(result);
+                            if (confirmation.success) {
+                                this.clearCustomerDisplay();
+                                this.paymentCompleted = true;
+                                this.processing = false;
+                            } else {
+                                alert('Pembayaran belum terverifikasi sukses. Status meja tidak akan diubah ke available.');
+                                this.processing = false;
+                            }
                         },
                         onPending: (result) => {
                             console.log('Midtrans pending:', result);
-                            this.clearCustomerDisplay();
-                            this.paymentCompleted = true;
+                            alert('Pembayaran masih pending. Selesaikan pembayaran terlebih dahulu agar status meja bisa berubah.');
                             this.processing = false;
                         },
                         onError: (result) => {
@@ -677,6 +688,61 @@ syncToCustomerDisplay() {
                 alert('Failed to process payment: ' + error.message);
                 this.processing = false;
             }
+        },
+
+        async confirmMidtransSuccess(midtransResult) {
+            try {
+                const response = await fetch('/orders/{{ $order->id }}/payment/confirm-midtrans', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        transaction_id: midtransResult?.transaction_id || null,
+                        order_id: midtransResult?.order_id || null,
+                        transaction_status: midtransResult?.transaction_status || null,
+                        status_code: midtransResult?.status_code || null,
+                        fraud_status: midtransResult?.fraud_status || null,
+                        gross_amount: midtransResult?.gross_amount || this.orderTotal,
+                    })
+                });
+
+                const result = await response.json();
+                if (!response.ok || !result.success) {
+                    console.error('Midtrans confirmation failed:', result);
+                    return { success: false, message: result.message || 'Failed to confirm payment' };
+                }
+
+                return { success: true };
+            } catch (error) {
+                console.error('Midtrans confirmation exception:', error);
+                return { success: false, message: error.message };
+            }
+        },
+
+        printReceiptBeforePayment() {
+            const receiptUrl = '/orders/{{ $order->id }}/receipt';
+
+            let iframe = document.getElementById('print-iframe-before-payment');
+            if (!iframe) {
+                iframe = document.createElement('iframe');
+                iframe.id = 'print-iframe-before-payment';
+                iframe.style.position = 'absolute';
+                iframe.style.width = '0';
+                iframe.style.height = '0';
+                iframe.style.border = 'none';
+                iframe.style.overflow = 'hidden';
+                document.body.appendChild(iframe);
+            }
+
+            iframe.onload = function() {
+                setTimeout(() => {
+                    iframe.contentWindow.print();
+                }, 400);
+            };
+
+            iframe.src = receiptUrl;
         },
         
         printBill() {

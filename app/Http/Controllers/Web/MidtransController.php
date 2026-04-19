@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Services\MidtransService;
 use App\Repositories\OrderRepository;
 use App\Repositories\PaymentRepository;
+use App\Services\OrderService;
+use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use Illuminate\Http\Request;
 
 class MidtransController extends Controller
@@ -13,7 +16,8 @@ class MidtransController extends Controller
     public function __construct(
         private MidtransService $midtransService,
         private OrderRepository $orderRepository,
-        private PaymentRepository $paymentRepository
+        private PaymentRepository $paymentRepository,
+        private OrderService $orderService
     ) {}
 
     /**
@@ -86,8 +90,8 @@ class MidtransController extends Controller
             'method' => 'midtrans',
             'amount' => $notification['gross_amount'],
             'status' => $status === 'completed' ? 'paid' : $status,
-            'transaction_id' => $notification['transaction_id'],
-            'payment_type' => $notification['payment_type'],
+            'reference_number' => $notification['transaction_id'],
+            'notes' => 'Midtrans ' . ($notification['payment_type'] ?? 'payment'),
         ];
 
         if ($payment) {
@@ -96,11 +100,16 @@ class MidtransController extends Controller
             $this->paymentRepository->create($paymentData);
         }
 
-        // Update order status if payment completed
+        // Only release table when payment status is truly success.
         if ($status === 'completed') {
-            $this->orderRepository->update($order->id, [
-                'status' => 'processing'
-            ]);
+            $order->refresh();
+            $totalPaid = $order->payments()->where('status', PaymentStatus::PAID)->sum('amount');
+
+            if ($totalPaid >= $order->total && $order->status !== OrderStatus::COMPLETED) {
+                $order->paid_by = $order->paid_by ?? auth()->id();
+                $order->save();
+                $this->orderService->updateOrderStatus($order->id, OrderStatus::COMPLETED);
+            }
         }
     }
 

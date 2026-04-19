@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Repositories\OrderRepository;
 use App\Services\PaymentService;
 use App\Services\MidtransService;
+use App\Services\OrderService;
+use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use Illuminate\Http\Request;
 
 class PaymentController extends Controller
@@ -13,7 +16,8 @@ class PaymentController extends Controller
     public function __construct(
         private OrderRepository $orderRepository,
         private PaymentService $paymentService,
-        private MidtransService $midtransService
+        private MidtransService $midtransService,
+        private OrderService $orderService
     ) {}
 
     public function show($orderId)
@@ -202,6 +206,98 @@ class PaymentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function confirmMidtransSuccess(Request $request, $orderId)
+    {
+        $validated = $request->validate([
+            'transaction_id' => 'nullable|string|max:255',
+            'order_id' => 'nullable|string|max:255',
+            'transaction_status' => 'required|string|in:capture,settlement,pending,deny,expire,cancel',
+            'status_code' => 'nullable|string',
+            'fraud_status' => 'nullable|string',
+            'gross_amount' => 'nullable|numeric|min:0',
+        ]);
+
+        try {
+            $order = $this->orderRepository->with(['payments'])->find($orderId);
+
+            if (!$order) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Order not found'
+                ], 404);
+            }
+
+            $isSuccessStatus = in_array($validated['transaction_status'], ['capture', 'settlement'], true)
+                && ($validated['transaction_status'] !== 'capture' || ($validated['fraud_status'] ?? 'accept') === 'accept')
+                && (($validated['status_code'] ?? '200') === '200');
+
+            if (!$isSuccessStatus) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Midtrans payment is not in success state yet.'
+                ], 422);
+            }
+
+            // Idempotent: if already completed and has a successful payment, no need to process again.
+            $alreadyPaidEnough = $order->payments
+                ->where('status', PaymentStatus::PAID)
+                ->sum('amount') >= $order->total;
+
+            if ($order->status === OrderStatus::COMPLETED && $alreadyPaidEnough) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment already confirmed and order already completed.'
+                ]);
+            }
+
+            $transactionId = $validated['transaction_id'] ?? null;
+
+            // Avoid duplicate payment rows for same Midtrans transaction.
+            $existingPayment = $order->payments
+                ->where('status', PaymentStatus::PAID)
+                ->first(function ($payment) use ($transactionId) {
+                    if (!$transactionId) {
+                        return false;
+                    }
+
+                    return (string) $payment->reference_number === (string) $transactionId;
+                });
+
+            if (!$existingPayment) {
+                $amount = isset($validated['gross_amount']) ? (float) $validated['gross_amount'] : (float) $order->total;
+
+                $this->paymentService->processPayment([
+                    'order_id' => $order->id,
+                    'method' => 'midtrans',
+                    'amount' => $amount,
+                    'received_amount' => $amount,
+                    'reference_number' => $transactionId,
+                    'notes' => 'Confirmed from Midtrans success callback',
+                ]);
+            } elseif ($order->status !== OrderStatus::COMPLETED) {
+                // Payment exists and successful, but order not finalized yet.
+                $order->paid_by = auth()->id();
+                $order->save();
+                $this->orderService->updateOrderStatus($order->id, OrderStatus::COMPLETED);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Midtrans payment confirmed successfully.'
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to confirm Midtrans success', [
+                'order_id' => $orderId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
             ], 422);
         }
     }

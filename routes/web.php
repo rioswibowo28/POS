@@ -55,6 +55,7 @@ Route::middleware(['auth', 'check.license'])->group(function () {
     Route::put('/orders/{id}', [OrderController::class, 'update'])->name('orders.update');
     Route::get('/orders/{id}/payment', [PaymentController::class, 'show'])->name('orders.payment');
     Route::post('/orders/{id}/payment', [PaymentController::class, 'process']);
+    Route::post('/orders/{id}/payment/confirm-midtrans', [PaymentController::class, 'confirmMidtransSuccess']);
     Route::get('/orders/{id}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
     Route::put('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::put('/temp-orders/{id}/cancel', [OrderController::class, 'cancelTempOrder'])->name('temp-orders.cancel');
