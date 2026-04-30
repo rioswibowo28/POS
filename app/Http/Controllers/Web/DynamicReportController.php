@@ -196,7 +196,9 @@ class DynamicReportController extends Controller
         if ($type === 'excel' && $request->has('separate_files') && $request->separate_files == 1 && $dynamicReport->date_column) {
             $zip = new \ZipArchive();
             $zipFileName = 'export_' . Str::slug($dynamicReport->name) . '_' . date('YmdHis') . '.zip';
-            $zipPath = storage_path('app/public/' . $zipFileName);
+            
+            // Gunakan sys_get_temp_dir() bawaan server OS agar tidak akan ada limitasi storage permission
+            $zipPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $zipFileName;
 
             if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
                 // Group data by date
