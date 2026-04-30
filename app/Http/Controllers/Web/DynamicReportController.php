@@ -199,13 +199,6 @@ class DynamicReportController extends Controller
             $zipPath = storage_path('app/public/' . $zipFileName);
 
             if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
-                
-                // Pastikan folder temp ada (untuk antisipasi environment di sisi client/server produksi)
-                $tempDir = storage_path('app/public/temp');
-                if (!file_exists($tempDir)) {
-                    @mkdir($tempDir, 0777, true);
-                }
-
                 // Group data by date
                 $groupedData = collect($data)->groupBy(function ($item) use ($dynamicReport) {
                     $dateStr = is_array($item) ? ($item[$dynamicReport->date_column] ?? null) : ($item->{$dynamicReport->date_column} ?? null);
@@ -221,22 +214,15 @@ class DynamicReportController extends Controller
 
                 foreach ($groupedData as $date => $items) {
                     $export = new DynamicDataExport($items->toArray(), $headings);
-                    $excelFile = 'temp_' . Str::slug($dynamicReport->name) . '_' . date('YmdHis') . '_' . $date . '.xlsx';
                     
-                    // Store inside storage/app/public/temp/ using the 'public' disk
-                    Excel::store($export, 'temp/' . $excelFile, 'public');
+                    // Generate Excel file in memory (raw string) instead of storing it to disk
+                    $rawExcelContent = Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
                     
-                    // Add to zip (the file should be accessible at storage_path)
-                    $added = $zip->addFile(storage_path('app/public/temp/' . $excelFile), $date . '.xlsx');
+                    // Add directly to zip from memory
+                    $zip->addFromString($date . '.xlsx', $rawExcelContent);
                 }
                 $zip->close();
                 
-                // Cleanup temp files
-                foreach ($groupedData as $date => $items) {
-                     $excelFile = 'temp_' . Str::slug($dynamicReport->name) . '_' . date('YmdHis') . '_' . $date . '.xlsx';
-                     @unlink(storage_path('app/public/temp/' . $excelFile));
-                }
-
                 return response()->download($zipPath)->deleteFileAfterSend(true);
             }
         }
