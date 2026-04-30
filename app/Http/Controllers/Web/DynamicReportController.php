@@ -196,8 +196,6 @@ class DynamicReportController extends Controller
         if ($type === 'excel' && $request->has('separate_files') && $request->separate_files == 1 && $dynamicReport->date_column) {
             $zip = new \ZipArchive();
             $zipFileName = 'export_' . Str::slug($dynamicReport->name) . '_' . date('YmdHis') . '.zip';
-            
-            // Gunakan sys_get_temp_dir() bawaan server OS agar tidak akan ada limitasi storage permission
             $zipPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $zipFileName;
 
             if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
@@ -214,16 +212,31 @@ class DynamicReportController extends Controller
                     return 'Unknown_Date';
                 });
 
+                $filesToDelete = [];
                 foreach ($groupedData as $date => $items) {
                     $export = new DynamicDataExport($items->toArray(), $headings);
+                    $excelFile = 'temp_' . Str::slug($dynamicReport->name) . '_' . date('YmdHis') . '_' . $date . '.xlsx';
                     
-                    // Generate Excel file in memory (raw string) instead of storing it to disk
-                    $rawExcelContent = Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
+                    // Store locally inside real OS temp directory directly bypassing Laravel disks
+                    $tempExcelPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $excelFile;
+                    Excel::store($export, $tempExcelPath, config('excel.temporary_files.local_disk', 'local'));
                     
-                    // Add directly to zip from memory
-                    $zip->addFromString($date . '.xlsx', $rawExcelContent);
+                    // Laravel local disk means storage_path('app/' . $tempExcelPath) wait NO
+                    // If we pass an absolute path using store, it doesn't work well.
+                    // Better to use Excel::store with 'local' disk and relative path
+                    Excel::store($export, 'temp_exports/' . $excelFile, 'local');
+                    $realPath = storage_path('app/temp_exports/' . $excelFile);
+                    
+                    if (file_exists($realPath)) {
+                        $zip->addFile($realPath, $date . '.xlsx');
+                        $filesToDelete[] = $realPath;
+                    }
                 }
                 $zip->close();
+                
+                foreach ($filesToDelete as $file) {
+                    @unlink($file);
+                }
                 
                 return response()->download($zipPath)->deleteFileAfterSend(true);
             }
