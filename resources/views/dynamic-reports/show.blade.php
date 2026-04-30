@@ -48,6 +48,14 @@
                         <span class="font-medium">Show Grand Total</span>
                     </label>
                 </div>
+                @if($dynamicReport->date_column)
+                <div class="flex items-center mb-1">
+                    <label class="flex items-center space-x-2 text-sm text-gray-700 bg-white border border-gray-300 px-3 py-1 rounded cursor-pointer hover:bg-gray-50 shadow-sm">
+                        <input type="checkbox" name="separate_files" value="1" {{ request('separate_files') ? 'checked' : '' }} class="form-checkbox h-4 w-4 text-primary-600">
+                        <span class="font-medium">Export Separate Files/Date</span>
+                    </label>
+                </div>
+                @endif
                 <div class="flex gap-2">
                     <button type="submit" class="bg-primary-600 text-white px-3 py-1.5 rounded text-sm hover:bg-primary-700 shadow-sm transition-colors">Apply</button>
                     @if(request('start_date') || request('end_date') || request('show_grand_total') !== null)
@@ -59,7 +67,7 @@
             <div class="flex gap-2">
                 @if(!session('error') && isset($data) && count($data) > 0)      
                     @php
-                        $exportParams = request()->only(['start_date', 'end_date', 'show_grand_total']);
+                        $exportParams = request()->only(['start_date', 'end_date', 'show_grand_total', 'separate_files']);
                     @endphp
                     <a href="{{ route('dynamic-reports.export', array_merge(['dynamic_report' => $dynamicReport->id, 'type' => 'excel'], $exportParams)) }}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm font-semibold transition-colors flex items-center shadow-sm">
                         <i class="fas fa-file-excel mr-2"></i> Excel

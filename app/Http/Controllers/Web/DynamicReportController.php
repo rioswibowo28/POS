@@ -113,6 +113,24 @@ class DynamicReportController extends Controller
         $data = $query->get();
         $headings = $data->count() > 0 ? array_keys((array)$data->first()) : [];
 
+        $sortColumn = null;
+        foreach (['bill_number', 'receipt_number', 'order_number'] as $col) {
+            if (in_array($col, $headings)) {
+                $sortColumn = $col;
+                break;
+            }
+        }
+
+        if ($sortColumn) {
+            $data = collect($data)->sortBy(function($item) use ($sortColumn) {
+                return is_array($item) ? $item[$sortColumn] : $item->{$sortColumn};
+            }, SORT_NATURAL)->values();
+        } elseif ($dynamicReport->date_column && in_array($dynamicReport->date_column, $headings)) {
+            $data = collect($data)->sortBy(function($item) use ($dynamicReport) {
+                return is_array($item) ? $item[$dynamicReport->date_column] : $item->{$dynamicReport->date_column};
+            })->values();
+        }
+
         return [$data, $headings];
     }
 
@@ -153,8 +171,70 @@ class DynamicReportController extends Controller
             return back()->with('error', 'Database View not found or query error: ' . $e->getMessage());
         }
 
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        
+        if ($startDate && $endDate) {
+            if ($startDate === $endDate) {
+                try {
+                    $formattedDate = \Carbon\Carbon::parse($startDate)->format('Y-m-d');
+                    $fileName = $formattedDate;
+                } catch (\Exception $e) {
+                    $fileName = $startDate;
+                }
+            } else {
+                $fileName = Str::slug($dynamicReport->name) . '_' . $startDate . '_to_' . $endDate;
+            }
+        } elseif ($startDate) {
+            $fileName = Str::slug($dynamicReport->name) . '_from_' . $startDate;
+        } elseif ($endDate) {
+            $fileName = Str::slug($dynamicReport->name) . '_until_' . $endDate;
+        } else {
+            $fileName = Str::slug($dynamicReport->name) . '_' . date('Ymd_His');
+        }
+
+        if ($type === 'excel' && $request->has('separate_files') && $request->separate_files == 1 && $dynamicReport->date_column) {
+            $zip = new \ZipArchive();
+            $zipFileName = 'export_' . $fileName . '.zip';
+            $zipPath = storage_path('app/public/' . $zipFileName);
+
+            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
+                // Group data by date
+                $groupedData = collect($data)->groupBy(function ($item) use ($dynamicReport) {
+                    $dateStr = is_array($item) ? ($item[$dynamicReport->date_column] ?? null) : ($item->{$dynamicReport->date_column} ?? null);
+                    if ($dateStr) {
+                        try {
+                            return \Carbon\Carbon::parse($dateStr)->format('Y-m-d');
+                        } catch (\Exception $e) {
+                            return 'Unknown_Date';
+                        }
+                    }
+                    return 'Unknown_Date';
+                });
+
+                foreach ($groupedData as $date => $items) {
+                    $export = new DynamicDataExport($items->toArray(), $headings);
+                    $excelFile = 'temp_' . $fileName . '_' . $date . '.xlsx';
+                    
+                    // Store inside storage/app/public/temp/ using the 'public' disk
+                    Excel::store($export, 'temp/' . $excelFile, 'public');
+                    
+                    // Add to zip (the file should be accessible at storage_path)
+                    $added = $zip->addFile(storage_path('app/public/temp/' . $excelFile), $date . '.xlsx');
+                }
+                $zip->close();
+                
+                // Cleanup temp files
+                foreach ($groupedData as $date => $items) {
+                     $excelFile = 'temp_' . $fileName . '_' . $date . '.xlsx';
+                     @unlink(storage_path('app/public/temp/' . $excelFile));
+                }
+
+                return response()->download($zipPath)->deleteFileAfterSend(true);
+            }
+        }
+
         $export = new DynamicDataExport($data, $headings);
-        $fileName = Str::slug($dynamicReport->name) . '_' . date('Ymd_His');
 
         if ($type === 'excel') {
             return Excel::download($export, $fileName . '.xlsx');
