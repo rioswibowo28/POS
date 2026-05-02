@@ -31,6 +31,14 @@
                           @endforeach
                       </select>
                   </div>
+                <div class="flex-1 min-w-[150px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Tipe Pembayaran</label>
+                    <select name="payment_type" class="input">
+                        <option value="all" {{ ($paymentType ?? 'all') == 'all' ? 'selected' : '' }}>Semua</option>
+                        <option value="cash" {{ ($paymentType ?? 'all') == 'cash' ? 'selected' : '' }}>Tunai</option>
+                        <option value="qris" {{ ($paymentType ?? 'all') == 'qris' ? 'selected' : '' }}>QRIS</option>
+                    </select>
+                </div>
                 <div>
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-search mr-2"></i> Tampilkan
@@ -38,13 +46,13 @@
                 </div>
             </div>
             <div class="flex flex-wrap gap-2 items-center">
-                <a href="{{ route('reports.internal-revenue.print', ['start_date' => $startDate, 'end_date' => $endDate, 'shift_id' => $shiftId]) }}" target="_blank" class="btn-secondary inline-flex items-center">
+                <a href="{{ route('reports.internal-revenue.print', ['start_date' => $startDate, 'end_date' => $endDate, 'shift_id' => $shiftId, 'payment_type' => $paymentType ?? 'all']) }}" target="_blank" class="btn-secondary inline-flex items-center">
                     <i class="fas fa-print mr-2"></i> Cetak
                 </a>
-                <a href="{{ route('reports.internal-revenue.export-pdf', ['start_date' => $startDate, 'end_date' => $endDate, 'shift_id' => $shiftId]) }}" class="btn-secondary inline-flex items-center" style="background-color: #dc2626; color: white; border-color: #dc2626;">
+                <a href="{{ route('reports.internal-revenue.export-pdf', ['start_date' => $startDate, 'end_date' => $endDate, 'shift_id' => $shiftId, 'payment_type' => $paymentType ?? 'all']) }}" class="btn-secondary inline-flex items-center" style="background-color: #dc2626; color: white; border-color: #dc2626;">
                     <i class="fas fa-file-pdf mr-2"></i> PDF
                 </a>
-                <a href="{{ route('reports.internal-revenue.export-excel', ['start_date' => $startDate, 'end_date' => $endDate, 'shift_id' => $shiftId]) }}" class="btn-secondary inline-flex items-center" style="background-color: #16a34a; color: white; border-color: #16a34a;">
+                <a href="{{ route('reports.internal-revenue.export-excel', ['start_date' => $startDate, 'end_date' => $endDate, 'shift_id' => $shiftId, 'payment_type' => $paymentType ?? 'all']) }}" class="btn-secondary inline-flex items-center" style="background-color: #16a34a; color: white; border-color: #16a34a;">
                     <i class="fas fa-file-excel mr-2"></i> Excel
                 </a>
             </div>
@@ -139,7 +147,7 @@
                             @foreach($allOrders as $i => $order)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3 text-sm">{{ $i + 1 }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $order->created_at->format('d/m/Y') }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $order->business_date->format('d/m/Y') }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->created_at->format('H:i') }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->shift->masterShift->name ?? '-' }}</td>
                                 <td class="px-4 py-3 text-sm font-medium">{{ $order->bill_number }}</td>
@@ -276,7 +284,7 @@
                             @foreach($normalOrders as $i => $order)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3 text-sm">{{ $i + 1 }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $order->created_at->format('d/m/Y') }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $order->business_date->format('d/m/Y') }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->created_at->format('H:i') }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->shift->masterShift->name ?? '-' }}</td>
                                 <td class="px-4 py-3 text-sm font-medium">{{ $order->bill_number }}</td>
@@ -370,7 +378,7 @@
                             @foreach($tempOrders as $i => $order)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3 text-sm">{{ $i + 1 }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $order->created_at->format('d/m/Y') }}</td>
+                                <td class="px-4 py-3 text-sm">{{ $order->business_date->format('d/m/Y') }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->created_at->format('H:i') }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $order->shift->masterShift->name ?? '-' }}</td>
                                 <td class="px-4 py-3 text-sm font-medium">{{ $order->bill_number }}</td>

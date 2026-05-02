@@ -89,7 +89,7 @@
             @forelse($orders as $index => $order)
             <tr>
                 <td class="text-center">{{ $index + 1 }}</td>
-                <td>{{ $order->created_at->format('d/m/Y') }}</td>
+                <td>{{ $order->business_date->format('d/m/Y') }}</td>
                 <td>{{ $order->created_at->format('H:i') }}</td>
                 <td class="font-bold">{{ $order->bill_number }}</td>
                 <td>{{ $order->payments->count() > 0 ? $order->payments->map(fn($p) => $p->method->label())->join(', ') : '-' }}</td>

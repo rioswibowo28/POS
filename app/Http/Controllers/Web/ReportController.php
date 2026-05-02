@@ -370,6 +370,7 @@ class ReportController extends Controller
         $startDate = $request->input('start_date', Carbon::today()->toDateString());
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
         $shiftId = $request->input('shift_id', 'all');
+        $paymentType = $this->normalizePaymentType($request->input('payment_type', 'all'));
 
         $start = Carbon::parse($startDate)->startOfDay();
         $end = Carbon::parse($endDate)->endOfDay();
@@ -378,11 +379,11 @@ class ReportController extends Controller
             ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
-            ->orderBy('created_at', 'asc');
+            ->orderBy('bill_number', 'asc')->orderBy('business_date', 'asc');
 
         $tempOrdersQuery = \App\Models\TempOrder::with(['cashier', 'shift.masterShift'])
             ->whereBetween('business_date', [$start, $end])
-            ->orderBy('created_at', 'asc');
+            ->orderBy('bill_number', 'asc')->orderBy('business_date', 'asc');
 
         if ($shiftId !== 'all') {
             $normalOrdersQuery->whereHas('shift', function($query) use ($shiftId) {
@@ -396,6 +397,9 @@ class ReportController extends Controller
         $normalOrders = $normalOrdersQuery->get();
         $tempOrders = $tempOrdersQuery->get();
 
+        $normalOrders = $this->filterOrdersByPaymentType($normalOrders, $paymentType);
+        $tempOrders = $this->filterTempOrdersByPaymentType($tempOrders, $paymentType);
+
         // All transactions combined (normal + temp) sorted by date
         $allOrders = $normalOrders->map(function($order) {
             $order->_source = 'order';
@@ -403,7 +407,7 @@ class ReportController extends Controller
         })->concat($tempOrders->map(function($order) {
             $order->_source = 'temp';
             return $order;
-        }))->sortBy('created_at')->values();
+        }))->sortBy([['bill_number', 'asc'],['business_date', 'asc']])->values();
         $normalCash = $normalOrders->sum(function($order) {
             return $order->payments->where('method', \App\Enums\PaymentMethod::CASH)->sum('amount');
         });
@@ -440,7 +444,7 @@ class ReportController extends Controller
         ];
         
         $masterShifts = \App\Models\MasterShift::all();
-          return view('reports.internal-revenue', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate', 'shiftId', 'masterShifts'));
+        return view('reports.internal-revenue', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate', 'shiftId', 'masterShifts', 'paymentType'));
     }
 
     /**
@@ -451,6 +455,7 @@ class ReportController extends Controller
         $startDate = $request->input('start_date', Carbon::today()->toDateString());
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
         $shiftId = $request->input('shift_id', 'all');
+        $paymentType = $this->normalizePaymentType($request->input('payment_type', 'all'));
 
         $start = Carbon::parse($startDate)->startOfDay();
         $end = Carbon::parse($endDate)->endOfDay();
@@ -459,11 +464,11 @@ class ReportController extends Controller
             ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
-            ->orderBy('created_at', 'asc');
+            ->orderBy('bill_number', 'asc')->orderBy('business_date', 'asc');
 
         $tempOrdersQuery = \App\Models\TempOrder::with(['cashier', 'shift.masterShift'])
             ->whereBetween('business_date', [$start, $end])
-            ->orderBy('created_at', 'asc');
+            ->orderBy('bill_number', 'asc')->orderBy('business_date', 'asc');
 
         if ($shiftId !== 'all') {
             $normalOrdersQuery->whereHas('shift', function($query) use ($shiftId) {
@@ -477,13 +482,16 @@ class ReportController extends Controller
         $normalOrders = $normalOrdersQuery->get();
         $tempOrders = $tempOrdersQuery->get();
 
+        $normalOrders = $this->filterOrdersByPaymentType($normalOrders, $paymentType);
+        $tempOrders = $this->filterTempOrdersByPaymentType($tempOrders, $paymentType);
+
         $allOrders = $normalOrders->map(function($order) {
             $order->_source = 'order';
             return $order;
         })->concat($tempOrders->map(function($order) {
             $order->_source = 'temp';
             return $order;
-        }))->sortBy('created_at')->values();
+        }))->sortBy([['bill_number', 'asc'],['business_date', 'asc']])->values();
         $normalCash = $normalOrders->sum(function($order) {
             return $order->payments->where('method', \App\Enums\PaymentMethod::CASH)->sum('amount');
         });
@@ -519,7 +527,7 @@ class ReportController extends Controller
             'temp_qris' => $tempQris,
         ];
         
-        return view('reports.internal-revenue-print', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate', 'shiftId'));
+        return view('reports.internal-revenue-print', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate', 'shiftId', 'paymentType'));
     }
 
     /**
@@ -661,6 +669,7 @@ class ReportController extends Controller
         $startDate = $request->input('start_date', Carbon::today()->toDateString());
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
         $shiftId = $request->input('shift_id', 'all');
+        $paymentType = $this->normalizePaymentType($request->input('payment_type', 'all'));
 
         $start = Carbon::parse($startDate)->startOfDay();
         $end = Carbon::parse($endDate)->endOfDay();
@@ -669,11 +678,11 @@ class ReportController extends Controller
             ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
-            ->orderBy('created_at', 'asc');
+            ->orderBy('bill_number', 'asc')->orderBy('business_date', 'asc');
 
         $tempOrdersQuery = \App\Models\TempOrder::with(['cashier', 'shift.masterShift'])
             ->whereBetween('business_date', [$start, $end])
-            ->orderBy('created_at', 'asc');
+            ->orderBy('bill_number', 'asc')->orderBy('business_date', 'asc');
 
         if ($shiftId !== 'all') {
             $normalOrdersQuery->whereHas('shift', function($query) use ($shiftId) {
@@ -687,13 +696,16 @@ class ReportController extends Controller
         $normalOrders = $normalOrdersQuery->get();
         $tempOrders = $tempOrdersQuery->get();
 
+        $normalOrders = $this->filterOrdersByPaymentType($normalOrders, $paymentType);
+        $tempOrders = $this->filterTempOrdersByPaymentType($tempOrders, $paymentType);
+
         $allOrders = $normalOrders->map(function($order) {
             $order->_source = 'order';
             return $order;
         })->concat($tempOrders->map(function($order) {
             $order->_source = 'temp';
             return $order;
-        }))->sortBy('created_at')->values();
+        }))->sortBy([['bill_number', 'asc'],['business_date', 'asc']])->values();
         $normalCash = $normalOrders->sum(function($order) {
             return $order->payments->where('method', \App\Enums\PaymentMethod::CASH)->sum('amount');
         });
@@ -743,6 +755,7 @@ class ReportController extends Controller
         $startDate = $request->input('start_date', Carbon::today()->toDateString());
         $endDate = $request->input('end_date', Carbon::today()->toDateString());
         $shiftId = $request->input('shift_id', 'all');
+        $paymentType = $this->normalizePaymentType($request->input('payment_type', 'all'));
 
         $start = Carbon::parse($startDate)->startOfDay();
         $end = Carbon::parse($endDate)->endOfDay();
@@ -751,11 +764,11 @@ class ReportController extends Controller
             ->whereBetween('business_date', [$start, $end])
             ->where('status', OrderStatus::COMPLETED)
             ->where('flag', false)
-            ->orderBy('created_at', 'asc');
+            ->orderBy('bill_number', 'asc')->orderBy('business_date', 'asc');
 
         $tempOrdersQuery = \App\Models\TempOrder::with(['cashier', 'shift.masterShift'])
             ->whereBetween('business_date', [$start, $end])
-            ->orderBy('created_at', 'asc');
+            ->orderBy('bill_number', 'asc')->orderBy('business_date', 'asc');
 
         if ($shiftId !== 'all') {
             $normalOrdersQuery->whereHas('shift', function($query) use ($shiftId) {
@@ -769,13 +782,16 @@ class ReportController extends Controller
         $normalOrders = $normalOrdersQuery->get();
         $tempOrders = $tempOrdersQuery->get();
 
+        $normalOrders = $this->filterOrdersByPaymentType($normalOrders, $paymentType);
+        $tempOrders = $this->filterTempOrdersByPaymentType($tempOrders, $paymentType);
+
         $allOrders = $normalOrders->map(function($order) {
             $order->_source = 'order';
             return $order;
         })->concat($tempOrders->map(function($order) {
             $order->_source = 'temp';
             return $order;
-        }))->sortBy('created_at')->values();
+        }))->sortBy([['bill_number', 'asc'],['business_date', 'asc']])->values();
         $normalCash = $normalOrders->sum(function($order) {
             return $order->payments->where('method', \App\Enums\PaymentMethod::CASH)->sum('amount');
         });
@@ -812,10 +828,68 @@ class ReportController extends Controller
         ];
 
         $isPdf = true;
-        $pdf = Pdf::loadView('reports.internal-revenue-print', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate', 'isPdf', 'shiftId'))
+        $pdf = Pdf::loadView('reports.internal-revenue-print', compact('allOrders', 'normalOrders', 'tempOrders', 'summary', 'startDate', 'endDate', 'isPdf', 'shiftId', 'paymentType'))
             ->setPaper('a4', 'landscape');
 
         $filename = 'Penjualan_ALL_' . $startDate . '_' . $endDate . '.pdf';
         return $pdf->download($filename);
+    }
+
+    private function normalizePaymentType(?string $paymentType): string
+    {
+        return in_array($paymentType, ['all', 'cash', 'qris'], true) ? $paymentType : 'all';
+    }
+
+    private function filterOrdersByPaymentType($orders, string $paymentType)
+    {
+        if ($paymentType === 'all') {
+            return $orders;
+        }
+
+        return $orders->filter(function ($order) use ($paymentType) {
+            $cashTotal = $order->payments->where('method', \App\Enums\PaymentMethod::CASH)->sum('amount');
+            $qrisTotal = $order->payments->where('method', \App\Enums\PaymentMethod::QRIS)->sum('amount');
+
+            return $paymentType === 'cash'
+                ? $cashTotal > 0
+                : $qrisTotal > 0;
+        })->values();
+    }
+
+    private function filterTempOrdersByPaymentType($orders, string $paymentType)
+    {
+        if ($paymentType === 'all') {
+            return $orders;
+        }
+
+        return $orders->filter(function ($order) use ($paymentType) {
+            [$cashTotal, $qrisTotal] = $this->getTempPaymentBreakdown($order);
+
+            return $paymentType === 'cash'
+                ? $cashTotal > 0
+                : $qrisTotal > 0;
+        })->values();
+    }
+
+    private function getTempPaymentBreakdown($order): array
+    {
+        $method = strtolower((string) ($order->payment_method ?? ''));
+        $cashTotal = 0;
+        $qrisTotal = 0;
+
+        if ($method === 'cash') {
+            $cashTotal = $order->total;
+        } elseif ($method === 'qris') {
+            $qrisTotal = $order->total;
+        } elseif (!empty($order->payment_reference) && str_starts_with(trim($order->payment_reference), '{')) {
+            $ref = json_decode($order->payment_reference, true);
+            $cashTotal = $ref['split_breakdown']['cash'] ?? 0;
+            $qrisTotal = $ref['split_breakdown']['qris'] ?? 0;
+        } elseif (str_contains($method, 'cash') && str_contains($method, 'qris')) {
+            $cashTotal = $order->total / 2;
+            $qrisTotal = $order->total / 2;
+        }
+
+        return [$cashTotal, $qrisTotal];
     }
 }

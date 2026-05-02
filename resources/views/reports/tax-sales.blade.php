@@ -115,7 +115,7 @@
                         @foreach($orders as $index => $order)
                         <tr class="hover:bg-gray-50">
                             <td class="px-4 py-3 whitespace-nowrap text-sm">{{ $index + 1 }}</td>
-                            <td class="px-4 py-3 whitespace-nowrap text-sm">{{ $order->created_at->format('d/m/Y') }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm">{{ $order->business_date->format('d/m/Y') }}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm">{{ $order->created_at->format('H:i') }}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">{{ $order->bill_number }}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-sm">{{ $order->order_number }}</td>

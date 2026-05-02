@@ -7,6 +7,7 @@ use App\Enums\OrderType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Services\OrderNumberAuditService;
 
 class Order extends Model
 {
@@ -61,6 +62,30 @@ class Order extends Model
     protected static function boot()
     {
         parent::boot();
+
+        static::created(function ($order) {
+            app(OrderNumberAuditService::class)->record($order, 'created');
+        });
+
+        static::updating(function ($order) {
+            if ($order->isDirty('order_number') || $order->isDirty('bill_number')) {
+                app(OrderNumberAuditService::class)->record($order, 'renumbered', [
+                    'previous_order_number' => $order->getOriginal('order_number'),
+                    'previous_bill_number' => $order->getOriginal('bill_number'),
+                    'changed_fields' => array_keys($order->getDirty()),
+                ]);
+            }
+        });
+
+        static::deleting(function ($order) {
+            app(OrderNumberAuditService::class)->record($order, 'deleted', [
+                'delete_mode' => method_exists($order, 'isForceDeleting') && $order->isForceDeleting() ? 'force' : 'soft',
+            ]);
+        });
+
+        static::restored(function ($order) {
+            app(OrderNumberAuditService::class)->record($order, 'restored');
+        });
 
         static::creating(function ($order) {
             if (!$order->business_date) {

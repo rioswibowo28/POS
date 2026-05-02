@@ -10,6 +10,7 @@ use App\Exports\DynamicDataExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class DynamicReportController extends Controller
 {
@@ -121,13 +122,26 @@ class DynamicReportController extends Controller
             }
         }
 
-        if ($sortColumn) {
-            $data = collect($data)->sortBy(function($item) use ($sortColumn) {
-                return is_array($item) ? $item[$sortColumn] : $item->{$sortColumn};
-            }, SORT_NATURAL)->values();
-        } elseif ($dynamicReport->date_column && in_array($dynamicReport->date_column, $headings)) {
-            $data = collect($data)->sortBy(function($item) use ($dynamicReport) {
-                return is_array($item) ? $item[$dynamicReport->date_column] : $item->{$dynamicReport->date_column};
+        if ($sortColumn || ($dynamicReport->date_column && in_array($dynamicReport->date_column, $headings))) {
+            $data = collect($data)->sort(function ($left, $right) use ($sortColumn, $dynamicReport, $headings) {
+                if ($dynamicReport->date_column && in_array($dynamicReport->date_column, $headings)) {
+                    $leftDateValue = $this->getReportFieldValue($left, $dynamicReport->date_column);
+                    $rightDateValue = $this->getReportFieldValue($right, $dynamicReport->date_column);
+                    $dateComparison = strcmp((string) $leftDateValue, (string) $rightDateValue);
+
+                    if ($dateComparison !== 0) {
+                        return $dateComparison;
+                    }
+                }
+
+                if ($sortColumn) {
+                    $leftSortValue = $this->getReportFieldValue($left, $sortColumn);
+                    $rightSortValue = $this->getReportFieldValue($right, $sortColumn);
+
+                    return strnatcasecmp((string) $leftSortValue, (string) $rightSortValue);
+                }
+
+                return 0;
             })->values();
         }
 
@@ -146,6 +160,15 @@ class DynamicReportController extends Controller
         if (!empty($allowedRoles) && !in_array($userRole, $allowedRoles)) {
             abort(403, 'Unauthorized action.');
         }
+    }
+
+    private function getReportFieldValue($item, string $field)
+    {
+        if (is_array($item)) {
+            return $item[$field] ?? null;
+        }
+
+        return $item->{$field} ?? null;
     }
 
     public function show(DynamicReport $dynamicReport, Request $request)
@@ -193,15 +216,26 @@ class DynamicReportController extends Controller
             $fileName = Str::slug($dynamicReport->name) . '_' . date('Ymd_His');
         }
 
-        if ($type === 'excel' && $request->has('separate_files') && $request->separate_files == 1 && $dynamicReport->date_column) {
+        if ($type === 'excel' && $request->boolean('separate_files') && $dynamicReport->date_column) {
             $zip = new \ZipArchive();
             $zipFileName = 'export_' . Str::slug($dynamicReport->name) . '_' . date('YmdHis') . '.zip';
-            $zipPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $zipFileName;
+            $tempExportDir = storage_path('app/temp_exports');
 
-            if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
-                // Group data by date
+            if (!is_dir($tempExportDir) && !mkdir($tempExportDir, 0755, true) && !is_dir($tempExportDir)) {
+                Log::error('DynamicReport export: failed to create temp export directory', ['dir' => $tempExportDir]);
+                return back()->with('error', 'Gagal mengekspor: folder sementara tidak dapat dibuat.');
+            }
+
+            $zipPath = $tempExportDir . DIRECTORY_SEPARATOR . $zipFileName;
+
+            Log::info('DynamicReport export: starting ZIP export', ['zipPath' => $zipPath]);
+            $opened = $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+            Log::info('DynamicReport export: zip->open result', ['result' => $opened]);
+
+            if ($opened === true) {
                 $groupedData = collect($data)->groupBy(function ($item) use ($dynamicReport) {
                     $dateStr = is_array($item) ? ($item[$dynamicReport->date_column] ?? null) : ($item->{$dynamicReport->date_column} ?? null);
+
                     if ($dateStr) {
                         try {
                             return \Carbon\Carbon::parse($dateStr)->format('Y-m-d');
@@ -209,37 +243,41 @@ class DynamicReportController extends Controller
                             return 'Unknown_Date';
                         }
                     }
-                    return 'Unknown_Date';
-                });
 
-                $filesToDelete = [];
+                    return 'Unknown_Date';
+                })->sortKeys();
+
+                $entriesAdded = 0;
+
                 foreach ($groupedData as $date => $items) {
-                    $export = new DynamicDataExport($items->toArray(), $headings);
-                    $excelFile = 'temp_' . Str::slug($dynamicReport->name) . '_' . date('YmdHis') . '_' . $date . '.xlsx';
-                    
-                    // Store locally inside real OS temp directory directly bypassing Laravel disks
-                    $tempExcelPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $excelFile;
-                    Excel::store($export, $tempExcelPath, config('excel.temporary_files.local_disk', 'local'));
-                    
-                    // Laravel local disk means storage_path('app/' . $tempExcelPath) wait NO
-                    // If we pass an absolute path using store, it doesn't work well.
-                    // Better to use Excel::store with 'local' disk and relative path
-                    Excel::store($export, 'temp_exports/' . $excelFile, 'local');
-                    $realPath = storage_path('app/temp_exports/' . $excelFile);
-                    
-                    if (file_exists($realPath)) {
-                        $zip->addFile($realPath, $date . '.xlsx');
-                        $filesToDelete[] = $realPath;
+                    $export = new DynamicDataExport($items->values()->toArray(), $headings);
+                    $zipEntryName = $date === 'Unknown_Date' ? 'unknown_date.xlsx' : $date . '.xlsx';
+                    $excelBinary = Excel::raw($export, \Maatwebsite\Excel\Excel::XLSX);
+
+                    if ($excelBinary === '' || $excelBinary === false) {
+                        Log::error('DynamicReport export: empty Excel binary generated', ['zipEntryName' => $zipEntryName]);
+                        continue;
                     }
+
+                    $zip->addFromString($zipEntryName, $excelBinary);
+                    $entriesAdded++;
+                    Log::info('DynamicReport export: added XLSX to ZIP', ['zipEntryName' => $zipEntryName, 'bytes' => strlen($excelBinary)]);
                 }
-                $zip->close();
-                
-                foreach ($filesToDelete as $file) {
-                    @unlink($file);
+
+                $closed = $zip->close();
+                clearstatcache(true, $zipPath);
+                Log::info('DynamicReport export: zip close result', ['closed' => $closed, 'exists' => file_exists($zipPath), 'entriesAdded' => $entriesAdded, 'zipPath' => $zipPath]);
+
+                if ($closed !== true || !file_exists($zipPath)) {
+                    Log::error('DynamicReport export: ZIP not found after creation', ['zipPath' => $zipPath, 'closed' => $closed, 'entriesAdded' => $entriesAdded]);
+                    return back()->with('error', "Gagal mengekspor: file ZIP tidak ditemukan setelah pembuatan. (EXPORT_ZIP_MISSING)\nPath: {$zipPath}");
                 }
-                
-                return response()->download($zipPath)->deleteFileAfterSend(true);
+
+                return response()->download($zipPath, $zipFileName, ['Content-Type' => 'application/zip'])->deleteFileAfterSend(true);
             }
+
+            Log::error('DynamicReport export: failed to open zip for writing', ['zipPath' => $zipPath, 'openResult' => $opened]);
+            return back()->with('error', 'Export failed: could not create ZIP file. Check server logs for details.');
         }
 
         $export = new DynamicDataExport($data, $headings);

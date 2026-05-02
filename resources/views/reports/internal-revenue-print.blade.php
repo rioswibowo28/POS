@@ -57,6 +57,7 @@
         <div style="font-size: 10px; color: #666;">{{ \App\Models\Setting::get('store_address', '') }}</div>
         <h1>LAPORAN PENJUALAN ALL</h1>
         <div class="period">Periode: {{ \Carbon\Carbon::parse($startDate)->format('d/m/Y') }} s/d {{ \Carbon\Carbon::parse($endDate)->format('d/m/Y') }}</div>
+        <div class="period">Filter Pembayaran: {{ ($paymentType ?? 'all') === 'cash' ? 'Tunai' : (($paymentType ?? 'all') === 'qris' ? 'QRIS' : 'Semua') }}</div>
     </div>
 
     <!-- Summary -->
@@ -144,7 +145,7 @@
             @foreach($allOrders as $i => $order)
             <tr>
                 <td class="text-center">{{ $i + 1 }}</td>
-                <td>{{ $order->created_at->format('d/m/Y') }}</td>
+                <td>{{ $order->business_date->format('d/m/Y') }}</td>
                 <td>{{ $order->created_at->format('H:i') }}</td>
                 <td>{{ $order->shift->masterShift->name ?? '-' }}</td>
                 <td class="font-bold">{{ $order->bill_number }}</td>
@@ -203,7 +204,7 @@
             @foreach($normalOrders as $i => $order)
             <tr>
                 <td class="text-center">{{ $i + 1 }}</td>
-                <td>{{ $order->created_at->format('d/m/Y') }}</td>
+                <td>{{ $order->business_date->format('d/m/Y') }}</td>
                 <td>{{ $order->created_at->format('H:i') }}</td>
                 <td>{{ $order->shift->masterShift->name ?? '-' }}</td>
                 <td class="font-bold">{{ $order->bill_number }}</td>
@@ -257,7 +258,7 @@
             @foreach($tempOrders as $i => $order)
             <tr>
                 <td class="text-center">{{ $i + 1 }}</td>
-                <td>{{ $order->created_at->format('d/m/Y') }}</td>
+                <td>{{ $order->business_date->format('d/m/Y') }}</td>
                 <td>{{ $order->created_at->format('H:i') }}</td>
                 <td>{{ $order->shift->masterShift->name ?? '-' }}</td>
                 <td class="font-bold">{{ $order->bill_number }}</td>
