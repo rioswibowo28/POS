@@ -69,6 +69,7 @@ class TempOrder extends Model
         'payment_received' => 'decimal:2',
         'payment_change' => 'decimal:2',
         'payment_at' => 'datetime',
+        'business_date' => 'date',
     ];
 
     protected static function booted()
